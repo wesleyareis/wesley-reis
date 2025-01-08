@@ -9,6 +9,39 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      agent_profiles: {
+        Row: {
+          bio: string | null
+          created_at: string | null
+          creci: string | null
+          full_name: string
+          id: string
+          phone: string | null
+          profile_image: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string | null
+          creci?: string | null
+          full_name: string
+          id: string
+          phone?: string | null
+          profile_image?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string | null
+          creci?: string | null
+          full_name?: string
+          id?: string
+          phone?: string | null
+          profile_image?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       carros: {
         Row: {
           ano: number | null
