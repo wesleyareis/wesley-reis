@@ -1,43 +1,51 @@
+import { useQuery } from "@tanstack/react-query";
 import { PropertyCard } from "@/components/PropertyCard";
 import { SearchFilters } from "@/components/SearchFilters";
-
-const mockProperties = [
-  {
-    id: "1",
-    title: "Apartamento Luxuoso",
-    price: 850000,
-    location: "Setor Bueno, Goiânia",
-    bedrooms: 3,
-    bathrooms: 2,
-    parkingSpaces: 2,
-    area: 120,
-    imageUrl: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=400",
-  },
-  {
-    id: "2",
-    title: "Casa Moderna",
-    price: 1200000,
-    location: "Setor Marista, Goiânia",
-    bedrooms: 4,
-    bathrooms: 3,
-    parkingSpaces: 3,
-    area: 200,
-    imageUrl: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=400",
-  },
-  {
-    id: "3",
-    title: "Cobertura Duplex",
-    price: 1500000,
-    location: "Setor Oeste, Goiânia",
-    bedrooms: 4,
-    bathrooms: 4,
-    parkingSpaces: 3,
-    area: 250,
-    imageUrl: "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=400",
-  },
-];
+import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 
 const Index = () => {
+  const [filters, setFilters] = useState({
+    location: "",
+    propertyType: "",
+    priceRange: "",
+  });
+
+  const { data: properties, isLoading } = useQuery({
+    queryKey: ["properties", filters],
+    queryFn: async () => {
+      let query = supabase
+        .from("properties")
+        .select("*")
+        .eq("status", "active");
+
+      if (filters.location) {
+        query = query.or(`city.ilike.%${filters.location}%,neighborhood.ilike.%${filters.location}%`);
+      }
+
+      if (filters.propertyType) {
+        query = query.eq("property_type", filters.propertyType);
+      }
+
+      if (filters.priceRange) {
+        const [min, max] = filters.priceRange.split("-").map(Number);
+        if (max) {
+          query = query.lte("price", max);
+        }
+        query = query.gte("price", min || 0);
+      }
+
+      const { data, error } = await query;
+      
+      if (error) {
+        console.error("Error fetching properties:", error);
+        return [];
+      }
+      
+      return data;
+    },
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-white shadow-sm">
@@ -55,15 +63,32 @@ const Index = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
-        <SearchFilters />
+        <SearchFilters onFilterChange={setFilters} />
         
         <div className="mt-12">
           <h2 className="text-2xl font-semibold mb-6">Imóveis em Destaque</h2>
-          <div className="property-grid">
-            {mockProperties.map((property) => (
-              <PropertyCard key={property.id} {...property} />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="flex justify-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+          ) : (
+            <div className="property-grid">
+              {properties?.map((property) => (
+                <PropertyCard
+                  key={property.id}
+                  id={property.id}
+                  title={property.title}
+                  price={property.price}
+                  location={`${property.neighborhood}, ${property.city}`}
+                  bedrooms={property.bedrooms || 0}
+                  bathrooms={property.bathrooms || 0}
+                  parkingSpaces={property.parking_spaces || 0}
+                  area={property.total_area || 0}
+                  imageUrl={property.images?.[0] || "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=400"}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </main>
 

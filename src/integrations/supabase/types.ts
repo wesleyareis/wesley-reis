@@ -219,6 +219,75 @@ export type Database = {
         }
         Relationships: []
       }
+      properties: {
+        Row: {
+          agent_id: string | null
+          bathrooms: number | null
+          bedrooms: number | null
+          building_name: string | null
+          city: string
+          created_at: string | null
+          description: string | null
+          features: Json | null
+          id: string
+          images: string[] | null
+          neighborhood: string
+          parking_spaces: number | null
+          price: number
+          property_code: string | null
+          property_type: string
+          status: string | null
+          street_address: string | null
+          title: string
+          total_area: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          building_name?: string | null
+          city: string
+          created_at?: string | null
+          description?: string | null
+          features?: Json | null
+          id?: string
+          images?: string[] | null
+          neighborhood: string
+          parking_spaces?: number | null
+          price: number
+          property_code?: string | null
+          property_type: string
+          status?: string | null
+          street_address?: string | null
+          title: string
+          total_area?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          building_name?: string | null
+          city?: string
+          created_at?: string | null
+          description?: string | null
+          features?: Json | null
+          id?: string
+          images?: string[] | null
+          neighborhood?: string
+          parking_spaces?: number | null
+          price?: number
+          property_code?: string | null
+          property_type?: string
+          status?: string | null
+          street_address?: string | null
+          title?: string
+          total_area?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           created_at: string
