@@ -11,16 +11,17 @@ const Login = () => {
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    // Verificar se o usuário já está logado
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         navigate("/");
       }
-    });
+    };
 
-    // Monitorar mudanças no estado de autenticação
+    checkSession();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN") {
+      if (event === "SIGNED_IN" && session) {
         navigate("/");
       }
       if (event === "SIGNED_OUT") {
