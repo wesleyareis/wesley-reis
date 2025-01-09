@@ -46,14 +46,7 @@ const App = () => (
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Index />} />
-          <Route 
-            path="/property/:id" 
-            element={
-              <ProtectedRoute>
-                <PropertyDetail />
-              </ProtectedRoute>
-            } 
-          />
+          <Route path="/property/:id" element={<PropertyDetail />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
