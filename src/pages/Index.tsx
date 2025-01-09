@@ -3,6 +3,7 @@ import { PropertyCard } from "@/components/PropertyCard";
 import { SearchFilters } from "@/components/SearchFilters";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   const [filters, setFilters] = useState({
@@ -52,12 +53,12 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-primary">ImóveisWeb</h1>
           <nav className="hidden md:flex gap-6">
-            <a href="/" className="text-sm font-medium text-gray-700 hover:text-primary">
+            <Link to="/" className="text-sm font-medium text-gray-700 hover:text-primary">
               Início
-            </a>
-            <a href="/login" className="text-sm font-medium text-gray-700 hover:text-primary">
+            </Link>
+            <Link to="/login" className="text-sm font-medium text-gray-700 hover:text-primary">
               Login Corretor
-            </a>
+            </Link>
           </nav>
         </div>
       </header>
