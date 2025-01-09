@@ -3,9 +3,10 @@ import { PropertyCard } from "@/components/PropertyCard";
 import { SearchFilters } from "@/components/SearchFilters";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [filters, setFilters] = useState({
     location: "",
     propertyType: "",
@@ -47,18 +48,25 @@ const Index = () => {
     },
   });
 
+  const handleLoginClick = () => {
+    navigate('/login');
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-primary">ImóveisWeb</h1>
+          <Link to="/" className="text-2xl font-bold text-primary">ImóveisWeb</Link>
           <nav className="hidden md:flex gap-6">
             <Link to="/" className="text-sm font-medium text-gray-700 hover:text-primary">
               Início
             </Link>
-            <Link to="/login" className="text-sm font-medium text-gray-700 hover:text-primary">
+            <button
+              onClick={handleLoginClick}
+              className="text-sm font-medium text-gray-700 hover:text-primary"
+            >
               Login Corretor
-            </Link>
+            </button>
           </nav>
         </div>
       </header>
@@ -73,7 +81,7 @@ const Index = () => {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
             </div>
           ) : (
-            <div className="property-grid">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {properties?.map((property) => (
                 <PropertyCard
                   key={property.id}
