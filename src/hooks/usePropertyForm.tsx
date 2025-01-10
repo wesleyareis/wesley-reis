@@ -14,25 +14,31 @@ export const usePropertyForm = (initialData: PropertyFormData) => {
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value, type } = e.target as HTMLInputElement;
-    let finalValue = value;
-
-    if (type === 'checkbox') {
-      // Se for um checkbox, o valor já será o objeto features atualizado
-      finalValue = value;
-    } else if (
-      name === "price" ||
-      name === "bedrooms" ||
-      name === "bathrooms" ||
-      name === "parking_spaces" ||
-      name === "total_area"
-    ) {
-      finalValue = Number(value);
+    const { name, value, type } = e.target;
+    
+    // Tratamento especial para features
+    if (name === 'features') {
+      setFormData((prev) => ({
+        ...prev,
+        features: value as Record<string, boolean>
+      }));
+      return;
     }
+
+    // Conversão para número quando necessário
+    const shouldBeNumber = [
+      "price",
+      "bedrooms",
+      "bathrooms",
+      "parking_spaces",
+      "total_area",
+      "condominium_fee",
+      "property_tax"
+    ].includes(name);
 
     setFormData((prev) => ({
       ...prev,
-      [name]: finalValue,
+      [name]: shouldBeNumber ? Number(value) : value,
     }));
   };
 
