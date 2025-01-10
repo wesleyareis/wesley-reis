@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Building2, Bath, Car, Bed, MapPin, Loader2, Wand2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 
 const PropertyDetail = () => {
