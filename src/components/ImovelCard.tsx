@@ -6,7 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-interface PropertyCardProps {
+interface ImovelCardProps {
   id: string;
   title: string;
   price: number;
@@ -19,7 +19,7 @@ interface PropertyCardProps {
   agent_id?: string;
 }
 
-export function PropertyCard({
+export function ImovelCard({
   id,
   title,
   price,
@@ -30,7 +30,7 @@ export function PropertyCard({
   area,
   imageUrl,
   agent_id,
-}: PropertyCardProps) {
+}: ImovelCardProps) {
   const [isAgent, setIsAgent] = useState(false);
   const navigate = useNavigate();
 
@@ -78,14 +78,14 @@ export function PropertyCard({
       </CardContent>
       <CardFooter className="p-4 pt-0 flex justify-between">
         <Link
-          to={`/property/${id}`}
+          to={`/imovel/${id}`}
           className="text-primary hover:text-primary/80 font-medium text-sm"
         >
           Ver detalhes →
         </Link>
         {isAgent && (
           <div className="flex gap-2">
-            <Link to={`/property/edit/${id}`}>
+            <Link to={`/imovel/editar/${id}`}>
               <Button variant="outline" size="sm">
                 <Edit className="w-4 h-4" />
               </Button>

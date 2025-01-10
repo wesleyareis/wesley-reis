@@ -3,20 +3,19 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { PropertyView } from "@/components/property/PropertyView";
-import { PropertyEdit } from "@/components/property/PropertyEdit";
-import { PropertyFormData } from "@/types/property";
+import { ImovelView } from "@/components/imovel/ImovelView";
+import { ImovelEdit } from "@/components/imovel/ImovelEdit";
+import { PropertyFormData } from "@/types/imovel";
 import { usePropertyForm } from "@/hooks/usePropertyForm";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
-const PropertyDetail = () => {
+const ImovelDetalhe = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const isNewProperty = !id || id === "new";
-  const isEditMode = isNewProperty || window.location.pathname.includes("/edit/");
+  const isNewProperty = !id || id === "novo";
+  const isEditMode = isNewProperty || window.location.pathname.includes("/editar/");
 
-  // Verificar autenticação para modo de edição
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -33,7 +32,6 @@ const PropertyDetail = () => {
     checkAuth();
   }, [navigate, toast, isEditMode]);
 
-  // Buscar dados do imóvel existente
   const { data: property, isLoading: isLoadingProperty, isError } = useQuery({
     queryKey: ["property", id],
     queryFn: async () => {
@@ -60,7 +58,6 @@ const PropertyDetail = () => {
     enabled: !isNewProperty,
   });
 
-  // Verificar permissão de edição
   const { data: currentUser } = useQuery({
     queryKey: ["currentUser"],
     queryFn: async () => {
@@ -71,7 +68,6 @@ const PropertyDetail = () => {
 
   const canEdit = isNewProperty || (property && currentUser && property.agent_id === currentUser.id);
 
-  // Inicializar formulário com dados vazios para novo imóvel ou dados existentes para edição
   const initialData: PropertyFormData = property || {
     title: "",
     price: 0,
@@ -108,14 +104,13 @@ const PropertyDetail = () => {
     return <LoadingSpinner />;
   }
 
-  // Aguardar o carregamento dos dados antes de renderizar o formulário de edição
   if (isEditMode && isLoadingProperty) {
     return <LoadingSpinner />;
   }
 
   if (isEditMode) {
     return (
-      <PropertyEdit
+      <ImovelEdit
         formData={formData}
         isLoading={isLoadingForm}
         isGeneratingDescription={isGeneratingDescription}
@@ -126,7 +121,7 @@ const PropertyDetail = () => {
     );
   }
 
-  return property ? <PropertyView property={property} canEdit={canEdit} /> : null;
+  return property ? <ImovelView property={property} canEdit={canEdit} /> : null;
 };
 
-export default PropertyDetail;
+export default ImovelDetalhe;

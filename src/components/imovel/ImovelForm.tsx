@@ -1,13 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { PropertyFormData } from "@/types/property";
+import { PropertyFormData } from "@/types/imovel";
 import { BasicInfoFields } from "./form/BasicInfoFields";
 import { LocationFields } from "./form/LocationFields";
 import { DescriptionField } from "./form/DescriptionField";
 import { FeaturesField } from "./form/FeaturesField";
 
-interface PropertyFormProps {
+interface ImovelFormProps {
   formData: PropertyFormData;
   isLoading: boolean;
   isGeneratingDescription: boolean;
@@ -16,14 +16,14 @@ interface PropertyFormProps {
   onSubmit: (e: React.FormEvent) => Promise<void>;
 }
 
-export const PropertyForm = ({
+export const ImovelForm = ({
   formData,
   isLoading,
   isGeneratingDescription,
   onInputChange,
   onGenerateDescription,
   onSubmit
-}: PropertyFormProps) => {
+}: ImovelFormProps) => {
   const navigate = useNavigate();
 
   const handleFeatureChange = (feature: string, checked: boolean) => {

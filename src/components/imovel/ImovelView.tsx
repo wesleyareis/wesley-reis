@@ -1,22 +1,22 @@
 import { useNavigate } from "react-router-dom";
-import { PropertyData } from "@/types/property";
+import { PropertyData } from "@/types/imovel";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { PropertyHeader } from "./view/PropertyHeader";
-import { PropertyImages } from "./view/PropertyImages";
-import { PropertyDetails } from "./view/PropertyDetails";
-import { PropertyFeatures } from "./view/PropertyFeatures";
-import { PropertyLocation } from "./view/PropertyLocation";
+import { ImovelHeader } from "./view/ImovelHeader";
+import { ImovelImagens } from "./view/ImovelImagens";
+import { ImovelDetalhes } from "./view/ImovelDetalhes";
+import { ImovelCaracteristicas } from "./view/ImovelCaracteristicas";
+import { ImovelLocalizacao } from "./view/ImovelLocalizacao";
 import { PropertyAgent } from "./view/PropertyAgent";
-import { PropertyPrice } from "./view/PropertyPrice";
+import { ImovelPreco } from "./view/ImovelPreco";
 import { Footer } from "../Footer";
 
-interface PropertyViewProps {
+interface ImovelViewProps {
   property: PropertyData;
   canEdit: boolean;
 }
 
-export const PropertyView = ({ property, canEdit }: PropertyViewProps) => {
+export const ImovelView = ({ property, canEdit }: ImovelViewProps) => {
   const { data: agent } = useQuery({
     queryKey: ['agent', property.agent_id],
     queryFn: async () => {
@@ -33,14 +33,14 @@ export const PropertyView = ({ property, canEdit }: PropertyViewProps) => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <PropertyHeader property={property} canEdit={canEdit} />
+      <ImovelHeader property={property} canEdit={canEdit} />
 
       <main className="max-w-7xl mx-auto px-4 py-8 flex-grow">
-        <PropertyImages property={property} />
+        <ImovelImagens property={property} />
 
         <div className="grid md:grid-cols-3 gap-8">
           <div className="md:col-span-2 space-y-6">
-            <PropertyDetails property={property} />
+            <ImovelDetalhes property={property} />
 
             <div>
               <h2 className="text-2xl font-semibold mb-4">Descrição</h2>
@@ -49,12 +49,12 @@ export const PropertyView = ({ property, canEdit }: PropertyViewProps) => {
               </p>
             </div>
 
-            <PropertyFeatures property={property} />
-            <PropertyLocation property={property} />
+            <ImovelCaracteristicas property={property} />
+            <ImovelLocalizacao property={property} />
           </div>
 
           <div className="space-y-6">
-            <PropertyPrice property={property} />
+            <ImovelPreco property={property} />
             {agent && (
               <PropertyAgent 
                 agent={agent}

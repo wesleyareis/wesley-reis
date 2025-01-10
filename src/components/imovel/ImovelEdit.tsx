@@ -1,9 +1,9 @@
-import { PropertyForm } from "./PropertyForm";
+import { ImovelForm } from "./ImovelForm";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { PropertyFormData } from "@/types/property";
+import { PropertyFormData } from "@/types/imovel";
 
-interface PropertyEditProps {
+interface ImovelEditProps {
   formData: PropertyFormData;
   isLoading: boolean;
   isGeneratingDescription: boolean;
@@ -12,14 +12,14 @@ interface PropertyEditProps {
   onSubmit: (e: React.FormEvent) => Promise<void>;
 }
 
-export const PropertyEdit = ({
+export const ImovelEdit = ({
   formData,
   isLoading,
   isGeneratingDescription,
   onInputChange,
   onGenerateDescription,
   onSubmit
-}: PropertyEditProps) => {
+}: ImovelEditProps) => {
   const navigate = useNavigate();
 
   return (
@@ -40,7 +40,7 @@ export const PropertyEdit = ({
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
-        <PropertyForm
+        <ImovelForm
           formData={formData}
           isLoading={isLoading}
           isGeneratingDescription={isGeneratingDescription}
