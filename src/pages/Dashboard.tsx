@@ -39,6 +39,10 @@ const Dashboard = () => {
     },
   });
 
+  const handleNewProperty = () => {
+    navigate("/property/new");
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-white shadow-sm">
@@ -56,7 +60,7 @@ const Dashboard = () => {
               </div>
             )}
           </div>
-          <Button onClick={() => navigate("/property/new")} className="flex items-center gap-2">
+          <Button onClick={handleNewProperty} className="flex items-center gap-2">
             <Plus className="w-4 h-4" />
             Novo Imóvel
           </Button>

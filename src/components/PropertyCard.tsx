@@ -1,8 +1,8 @@
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Building2, Bath, Car, Bed, Edit, Trash2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Building2, Bath, Car, Bed, Edit } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -32,6 +32,7 @@ export function PropertyCard({
   agent_id,
 }: PropertyCardProps) {
   const [isAgent, setIsAgent] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkIfAgent = async () => {
@@ -40,6 +41,10 @@ export function PropertyCard({
     };
     checkIfAgent();
   }, [agent_id]);
+
+  const handleEdit = () => {
+    navigate(`/property/edit/${id}`);
+  };
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
@@ -84,11 +89,9 @@ export function PropertyCard({
         </Link>
         {isAgent && (
           <div className="flex gap-2">
-            <Link to={`/property/edit/${id}`}>
-              <Button variant="outline" size="sm">
-                <Edit className="w-4 h-4" />
-              </Button>
-            </Link>
+            <Button variant="outline" size="sm" onClick={handleEdit}>
+              <Edit className="w-4 h-4" />
+            </Button>
           </div>
         )}
       </CardFooter>
