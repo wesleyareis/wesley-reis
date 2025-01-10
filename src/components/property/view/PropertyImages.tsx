@@ -1,6 +1,5 @@
 import { PropertyData } from "@/types/property";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { cn } from "@/lib/utils";
 
 interface PropertyImagesProps {
   property: PropertyData;
@@ -19,10 +18,7 @@ export const PropertyImages = ({ property }: PropertyImagesProps) => {
                 <img
                   src={image}
                   alt={`${property.title} - Imagem ${index + 1}`}
-                  className={cn(
-                    "w-full h-full object-cover",
-                    index === property.images!.length - 1 && "opacity-80"
-                  )}
+                  className="w-full h-full object-cover"
                 />
               </div>
             </CarouselItem>
