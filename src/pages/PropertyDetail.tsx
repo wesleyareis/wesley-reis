@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -54,12 +54,6 @@ const PropertyDetail = () => {
     enabled: !!id && id !== "new",
     retry: false
   });
-
-  useEffect(() => {
-    if (property) {
-      setFormData(property);
-    }
-  }, [property]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -121,6 +115,7 @@ const PropertyDetail = () => {
       const propertyData = {
         ...formData,
         agent_id: user.id,
+        features: formData.features || {},
       };
 
       let result;
@@ -158,6 +153,17 @@ const PropertyDetail = () => {
       setIsLoading(false);
     }
   };
+
+  // Update formData when property data is loaded
+  useState(() => {
+    if (property) {
+      const propertyData = {
+        ...property,
+        features: property.features || {},
+      };
+      setFormData(propertyData as PropertyFormData);
+    }
+  }, [property]);
 
   if (queryError) {
     return (
