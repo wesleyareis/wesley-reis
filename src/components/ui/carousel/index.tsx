@@ -1,6 +1,7 @@
 import { Carousel } from "./CarouselRoot";
 import { CarouselContent, CarouselItem } from "./CarouselItems";
 import { CarouselPrevious, CarouselNext } from "./CarouselControls";
+import { type CarouselApi } from "./CarouselContext";
 
 export {
   Carousel,
@@ -8,6 +9,5 @@ export {
   CarouselItem,
   CarouselPrevious,
   CarouselNext,
+  type CarouselApi,
 };
-
-export type { CarouselApi } from "./CarouselContext";
