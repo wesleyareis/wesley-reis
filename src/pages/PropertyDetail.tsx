@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { PropertyView } from "@/components/property/PropertyView";
 import { PropertyEdit } from "@/components/property/PropertyEdit";
 import type { PropertyFormData } from "@/types/property";
+import type { Json } from "@/integrations/supabase/types";
 
 const PropertyDetail = () => {
   const { id } = useParams();
@@ -62,27 +63,15 @@ const PropertyDetail = () => {
     enabled: !!id && id !== "new",
   });
 
-  const isEditMode = window.location.pathname.includes('/edit/');
-  const canEdit = id === "new" || (property && currentUser && property.agent_id === currentUser);
-
   useEffect(() => {
     if (property) {
+      const features = property.features as Record<string, any> || {};
       setFormData({
         ...property,
-        features: property.features as Record<string, any> || {},
+        features,
       });
     }
   }, [property]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: name === "price" || name === "bedrooms" || name === "bathrooms" || 
-              name === "parking_spaces" || name === "total_area" 
-              ? Number(value) : value
-    }));
-  };
 
   const generateDescription = async () => {
     setIsGeneratingDescription(true);
@@ -119,6 +108,16 @@ const PropertyDetail = () => {
     } finally {
       setIsGeneratingDescription(false);
     }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: name === "price" || name === "bedrooms" || name === "bathrooms" || 
+              name === "parking_spaces" || name === "total_area" 
+              ? Number(value) : value
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -179,27 +178,20 @@ const PropertyDetail = () => {
     );
   }
 
-  if (isEditMode && !canEdit) {
-    navigate(`/property/${id}`);
-    return null;
+  if (id !== "new" && !canEdit) {
+    return <PropertyView property={property} canEdit={canEdit} />;
   }
 
-  if (isEditMode || id === "new") {
-    return (
-      <PropertyEdit
-        formData={formData}
-        isLoading={isLoading}
-        isGeneratingDescription={isGeneratingDescription}
-        onInputChange={handleInputChange}
-        onGenerateDescription={generateDescription}
-        onSubmit={handleSubmit}
-      />
-    );
-  }
-
-  return property ? (
-    <PropertyView property={property} canEdit={canEdit} />
-  ) : null;
+  return (
+    <PropertyEdit
+      formData={formData}
+      isLoading={isLoading}
+      isGeneratingDescription={isGeneratingDescription}
+      onInputChange={handleInputChange}
+      onGenerateDescription={generateDescription}
+      onSubmit={handleSubmit}
+    />
+  );
 };
 
 export default PropertyDetail;

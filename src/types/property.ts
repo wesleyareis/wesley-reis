@@ -15,7 +15,7 @@ export interface PropertyFormData {
   property_code?: string;
   agent_id?: string;
   status?: string;
-  features?: Record<string, any>;
+  features: Record<string, any>;
   images?: string[];
 }
 
