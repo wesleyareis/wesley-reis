@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
+import { Footer } from "@/components/Footer";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -55,7 +56,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <Link to="/" className="text-2xl font-bold text-primary">ImóveisWeb</Link>
@@ -72,7 +73,7 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <main className="max-w-7xl mx-auto px-4 py-8 flex-grow">
         <SearchFilters onFilterChange={setFilters} />
         
         <div className="mt-12">
@@ -102,13 +103,7 @@ const Index = () => {
         </div>
       </main>
 
-      <footer className="bg-white border-t mt-16">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <p className="text-center text-gray-600">
-            © 2024 ImóveisWeb. Todos os direitos reservados.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
