@@ -29,10 +29,11 @@ const PropertyDetail = () => {
     features: {},
   });
 
+  // Check authentication status
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setCurrentUser(user?.id || null);
+      const { data: { session } } = await supabase.auth.getSession();
+      setCurrentUser(session?.user?.id || null);
     };
     checkUser();
 
@@ -43,7 +44,7 @@ const PropertyDetail = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const { data: property } = useQuery({
+  const { data: property, isError } = useQuery({
     queryKey: ["property", id],
     queryFn: async () => {
       if (!id || id === "new") return null;
@@ -67,18 +68,26 @@ const PropertyDetail = () => {
     enabled: !!id && id !== "new",
   });
 
-  const isEditMode = window.location.pathname.includes('/edit/');
-  const canEdit = id === "new" || (property && currentUser && property.agent_id === currentUser);
-
   useEffect(() => {
     if (property) {
-      const propertyFeatures = property.features as Record<string, any> || {};
+      const propertyFeatures = (property.features as Record<string, any>) || {};
       setFormData({
         ...property,
         features: propertyFeatures,
       });
     }
   }, [property]);
+
+  const isEditMode = window.location.pathname.includes('/edit/');
+  const canEdit = id === "new" || (property && currentUser && property.agent_id === currentUser);
+
+  if (isError) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-red-500">Erro ao carregar o imóvel</p>
+      </div>
+    );
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -183,11 +192,6 @@ const PropertyDetail = () => {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
-  }
-
-  if (isEditMode && !canEdit) {
-    navigate(`/property/${id}`);
-    return null;
   }
 
   if (isEditMode || id === "new") {

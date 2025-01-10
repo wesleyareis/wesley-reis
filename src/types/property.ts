@@ -1,3 +1,5 @@
+import type { Json } from "@/integrations/supabase/types";
+
 export interface PropertyFormData {
   id?: string;
   title: string;
