@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -155,7 +155,7 @@ const PropertyDetail = () => {
   };
 
   // Update formData when property data is loaded
-  useState(() => {
+  useEffect(() => {
     if (property) {
       const propertyData = {
         ...property,
