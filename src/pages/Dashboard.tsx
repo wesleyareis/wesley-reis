@@ -14,23 +14,48 @@ const Dashboard = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
-        navigate("/login");
-        return;
-      }
+      try {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) throw sessionError;
+        
+        if (!session) {
+          navigate("/login");
+          return;
+        }
 
-      const { data: profile } = await supabase
-        .from('agent_profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
-      
-      setAgentProfile(profile);
+        const { data: profile, error: profileError } = await supabase
+          .from('agent_profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+        
+        if (profileError) throw profileError;
+        setAgentProfile(profile);
+      } catch (error: any) {
+        console.error("Erro ao verificar autenticação:", error);
+        toast({
+          title: "Erro de autenticação",
+          description: "Por favor, faça login novamente.",
+          variant: "destructive",
+        });
+        await supabase.auth.signOut();
+        navigate("/login");
+      }
     };
-    
+
     checkAuth();
-  }, [navigate]);
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        navigate("/login");
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate, toast]);
 
   const { data: properties, isLoading } = useQuery({
     queryKey: ["agent-properties"],
