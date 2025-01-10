@@ -18,47 +18,58 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     let mounted = true;
 
-    const checkSession = async () => {
-      try {
-        // Primeiro, tenta obter a sessão atual
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) {
-          console.error("Erro na sessão:", sessionError);
-          if (mounted) {
+    const handleAuthChange = async (event: string, session: any) => {
+      if (!mounted) return;
+
+      console.log("Estado de autenticação alterado:", event, session?.user?.id);
+
+      if (event === 'SIGNED_OUT') {
+        setIsAuthenticated(false);
+        navigate('/login', { replace: true });
+      } else if (event === 'SIGNED_IN' && session) {
+        setIsAuthenticated(true);
+      } else if (event === 'TOKEN_REFRESHED') {
+        if (session) {
+          const { data: { user }, error: userError } = await supabase.auth.getUser();
+          if (userError || !user) {
             setIsAuthenticated(false);
             navigate('/login', { replace: true });
+          } else {
+            setIsAuthenticated(true);
           }
-          return;
+        } else {
+          setIsAuthenticated(false);
+          navigate('/login', { replace: true });
         }
+      }
+    };
+
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!mounted) return;
 
         if (!session) {
-          if (mounted) {
-            setIsAuthenticated(false);
-            navigate('/login', { replace: true });
-          }
+          setIsAuthenticated(false);
+          navigate('/login', { replace: true });
           return;
         }
 
-        // Se temos uma sessão, verifica se o usuário ainda é válido
         const { data: { user }, error: userError } = await supabase.auth.getUser();
         
         if (userError || !user) {
           console.error("Erro ao verificar usuário:", userError);
           if (mounted) {
             setIsAuthenticated(false);
-            // Limpa a sessão localmente
-            await supabase.auth.signOut();
             navigate('/login', { replace: true });
           }
           return;
         }
 
-        if (mounted) {
-          setIsAuthenticated(true);
-        }
+        setIsAuthenticated(true);
       } catch (error) {
-        console.error("Erro ao verificar sessão:", error);
+        console.error("Erro ao inicializar autenticação:", error);
         if (mounted) {
           setIsAuthenticated(false);
           navigate('/login', { replace: true });
@@ -70,27 +81,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    checkSession();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Estado de autenticação alterado:", event, session?.user?.id);
-      
-      if (!mounted) return;
-
-      if (event === 'SIGNED_OUT') {
-        setIsAuthenticated(false);
-        navigate('/login', { replace: true });
-      } else if (event === 'SIGNED_IN') {
-        setIsAuthenticated(true);
-      } else if (event === 'TOKEN_REFRESHED') {
-        if (session) {
-          setIsAuthenticated(true);
-        } else {
-          setIsAuthenticated(false);
-          navigate('/login', { replace: true });
-        }
-      }
-    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthChange);
+    
+    initializeAuth();
 
     return () => {
       mounted = false;
