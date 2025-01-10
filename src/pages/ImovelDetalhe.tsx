@@ -1,5 +1,4 @@
-import { useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -7,31 +6,19 @@ import { ImovelView } from "@/components/imovel/ImovelView";
 import { ImovelEdit } from "@/components/imovel/ImovelEdit";
 import { PropertyFormData } from "@/types/imovel";
 import { usePropertyForm } from "@/hooks/usePropertyForm";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { ImovelLoading } from "@/components/imovel/view/ImovelLoading";
+import { useAuthCheck } from "@/hooks/useAuthCheck";
 
 const ImovelDetalhe = () => {
   const { id, code } = useParams();
-  const navigate = useNavigate();
   const { toast } = useToast();
   const isNewProperty = !id && !code;
   const isEditMode = isNewProperty || window.location.pathname.includes("/editar/");
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user && isEditMode) {
-        toast({
-          title: "Acesso negado",
-          description: "Você precisa estar logado para acessar esta página.",
-          variant: "destructive",
-        });
-        navigate("/login", { replace: true });
-      }
-    };
+  // Verifica autenticação quando necessário
+  useAuthCheck(isEditMode);
 
-    checkAuth();
-  }, [navigate, toast, isEditMode]);
-
+  // Busca dados do imóvel
   const { data: property, isLoading: isLoadingProperty, isError } = useQuery({
     queryKey: ["property", id, code],
     queryFn: async () => {
@@ -59,22 +46,13 @@ const ImovelDetalhe = () => {
         throw error;
       }
 
-      if (!data && !isNewProperty) {
-        toast({
-          title: "Imóvel não encontrado",
-          description: "O imóvel que você está procurando não existe.",
-          variant: "destructive",
-        });
-        navigate("/");
-        return null;
-      }
-
       return data;
     },
     enabled: !isNewProperty,
     retry: false
   });
 
+  // Busca dados do usuário atual
   const { data: currentUser } = useQuery({
     queryKey: ["currentUser"],
     queryFn: async () => {
@@ -118,11 +96,11 @@ const ImovelDetalhe = () => {
   }
 
   if (!isNewProperty && !property && !isEditMode) {
-    return <LoadingSpinner />;
+    return <ImovelLoading />;
   }
 
   if (isEditMode && isLoadingProperty) {
-    return <LoadingSpinner />;
+    return <ImovelLoading />;
   }
 
   if (isEditMode) {
