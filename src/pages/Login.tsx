@@ -17,6 +17,17 @@ const Login = () => {
     const checkSession = async () => {
       try {
         // Limpa qualquer token inválido antes de verificar a sessão
+        const currentSession = localStorage.getItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
+        if (currentSession) {
+          try {
+            JSON.parse(currentSession);
+          } catch (e) {
+            console.error("Token inválido encontrado, removendo...");
+            localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
+            return;
+          }
+        }
+
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -46,21 +57,24 @@ const Login = () => {
     try {
       // Primeiro, limpa qualquer sessão existente
       await supabase.auth.signOut();
+      localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
       
       // Tenta fazer login
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
 
-      toast({
-        title: "Login realizado com sucesso!",
-        description: "Redirecionando para o dashboard...",
-      });
+      if (data?.user) {
+        toast({
+          title: "Login realizado com sucesso!",
+          description: "Redirecionando para o dashboard...",
+        });
 
-      navigate("/dashboard", { replace: true });
+        navigate("/dashboard", { replace: true });
+      }
     } catch (error: any) {
       console.error("Erro no login:", error);
       toast({
@@ -68,8 +82,6 @@ const Login = () => {
         description: error.message || "Ocorreu um erro ao tentar fazer login",
         variant: "destructive",
       });
-      // Limpa o token em caso de erro
-      localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
     } finally {
       setLoading(false);
     }
