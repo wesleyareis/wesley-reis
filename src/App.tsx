@@ -27,8 +27,28 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const checkSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) throw error;
-        setIsAuthenticated(!!session);
+        if (error) {
+          console.error("Session error:", error);
+          setIsAuthenticated(false);
+          return;
+        }
+        
+        if (!session) {
+          console.log("No session found");
+          setIsAuthenticated(false);
+          return;
+        }
+
+        // Verify the session is still valid
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) {
+          console.error("User verification failed:", userError);
+          await supabase.auth.signOut();
+          setIsAuthenticated(false);
+          return;
+        }
+
+        setIsAuthenticated(true);
       } catch (error) {
         console.error("Error checking session:", error);
         setIsAuthenticated(false);
@@ -42,8 +62,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, session?.user?.id);
       
-      if (event === 'SIGNED_OUT') {
+      if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
         try {
+          setIsAuthenticated(false);
           await supabase.auth.signOut();
           queryClient.clear();
           localStorage.clear();
@@ -51,9 +72,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         } catch (error) {
           console.error("Error during sign out:", error);
         }
+      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        setIsAuthenticated(true);
       }
       
-      setIsAuthenticated(!!session);
       setIsLoading(false);
     });
 
@@ -83,12 +105,21 @@ const App = () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) throw error;
+        
         if (!session) {
           console.log("No active session found");
+          return;
+        }
+
+        // Verify user session is valid
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) {
+          throw new Error("Invalid session");
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
         await supabase.auth.signOut();
+        queryClient.clear();
         localStorage.clear();
       }
     };
