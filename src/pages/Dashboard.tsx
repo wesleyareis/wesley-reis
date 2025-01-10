@@ -15,10 +15,23 @@ const Dashboard = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        // Primeiro, limpa qualquer token inválido
+        const currentSession = localStorage.getItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
+        if (currentSession) {
+          try {
+            JSON.parse(currentSession);
+          } catch (e) {
+            console.error("Token inválido encontrado, removendo...");
+            localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
+            navigate("/login", { replace: true });
+            return;
+          }
+        }
+
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
-          console.error("Erro na sessão:", sessionError);
+          console.error("Erro ao verificar sessão:", sessionError);
           localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
           navigate("/login", { replace: true });
           return;
@@ -36,7 +49,7 @@ const Dashboard = () => {
           .select('*')
           .eq('id', session.user.id)
           .single();
-        
+
         if (profileError) {
           console.error("Erro ao buscar perfil:", profileError);
           return;
@@ -55,6 +68,7 @@ const Dashboard = () => {
       if (event === 'SIGNED_OUT' || !session) {
         localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
         navigate("/login", { replace: true });
+        return;
       }
     });
 
@@ -63,7 +77,7 @@ const Dashboard = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate, toast]);
+  }, [navigate]);
 
   const { data: properties, isLoading } = useQuery({
     queryKey: ["agent-properties"],
@@ -82,13 +96,8 @@ const Dashboard = () => {
       return data;
     },
     retry: false,
-    onError: (error) => {
-      console.error("Erro ao buscar propriedades:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar as propriedades.",
-        variant: "destructive",
-      });
+    meta: {
+      errorMessage: "Não foi possível carregar as propriedades"
     }
   });
 
@@ -108,13 +117,13 @@ const Dashboard = () => {
         console.error("Erro ao fazer logout:", error);
         toast({
           title: "Erro ao fazer logout",
-          description: "Ocorreu um erro, mas você foi desconectado.",
+          description: "Você foi desconectado, mas ocorreu um erro.",
           variant: "destructive",
         });
       } else {
         toast({
           title: "Logout realizado com sucesso",
-          description: "Você foi desconectado da sua conta.",
+          description: "Você foi desconectado com sucesso.",
         });
       }
       
