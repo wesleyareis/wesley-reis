@@ -25,7 +25,7 @@ export const ImovelView = ({ property, canEdit }: ImovelViewProps) => {
         .from('agent_profiles')
         .select('*')
         .eq('id', property.agent_id)
-        .single();
+        .maybeSingle();
       return data;
     },
     enabled: !!property.agent_id

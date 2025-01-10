@@ -34,7 +34,7 @@ export const ImovelEdit = ({
             ← Voltar para Dashboard
           </Button>
           <h1 className="text-2xl font-bold">
-            {formData.id ? "Editar Imóvel" : "Novo Imóvel"}
+            {formData.property_code ? "Editar Imóvel" : "Novo Imóvel"}
           </h1>
         </div>
       </header>
