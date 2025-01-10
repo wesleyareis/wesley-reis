@@ -617,7 +617,7 @@ export type Database = {
       }
       secrets: {
         Args: {
-          name: string
+          secret_name: string
         }
         Returns: {
           secret: string

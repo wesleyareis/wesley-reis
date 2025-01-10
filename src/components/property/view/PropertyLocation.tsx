@@ -29,9 +29,9 @@ export const PropertyLocation = ({ property }: PropertyLocationProps) => {
 
         console.log('Buscando chave da API do Google Maps...');
         
-        // Buscar a chave da API do Google Maps
+        // Buscar a chave da API do Google Maps usando o nome correto do parâmetro
         const { data, error } = await supabase.rpc('secrets', {
-          name: 'GOOGLE_MAPS_API_KEY'
+          secret_name: 'GOOGLE_MAPS_API_KEY'
         });
 
         if (error) {
