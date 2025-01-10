@@ -16,19 +16,28 @@ export const PropertyLocation = ({ property }: PropertyLocationProps) => {
       try {
         // Se já tiver uma URL do mapa e ela for do formato embed, use-a
         if (property.map_url && property.map_url.includes('maps/embed')) {
+          console.log('Usando URL do mapa existente:', property.map_url);
           setMapUrl(property.map_url);
           return;
         }
 
         // Se não tiver endereço completo, não gere o mapa
         if (!property.street_address || !property.neighborhood || !property.city) {
+          console.log('Endereço incompleto, não gerando mapa');
           return;
         }
 
+        console.log('Buscando chave da API do Google Maps...');
+        
         // Buscar a chave da API do Google Maps
-        const { data } = await supabase.rpc('secrets', {
+        const { data, error } = await supabase.rpc('secrets', {
           name: 'GOOGLE_MAPS_API_KEY'
         });
+
+        if (error) {
+          console.error('Erro ao buscar chave da API:', error);
+          throw error;
+        }
 
         if (!data?.secret) {
           console.error('Google Maps API key não encontrada');
@@ -40,12 +49,15 @@ export const PropertyLocation = ({ property }: PropertyLocationProps) => {
           return;
         }
 
+        console.log('Chave da API encontrada, gerando URL do mapa...');
+
         // Gerar URL do mapa com o endereço completo
         const address = encodeURIComponent(
           `${property.street_address}, ${property.neighborhood}, ${property.city}`
         );
         
         const url = `https://www.google.com/maps/embed/v1/place?key=${data.secret}&q=${address}`;
+        console.log('URL do mapa gerada com sucesso');
         setMapUrl(url);
 
       } catch (error) {
