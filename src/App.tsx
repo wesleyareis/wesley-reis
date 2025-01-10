@@ -21,15 +21,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const handleAuthChange = async (event: string, session: any) => {
       if (!mounted) return;
 
-      console.log("Estado de autenticação alterado:", event, session?.user?.id);
-
-      if (event === 'SIGNED_OUT') {
-        setIsAuthenticated(false);
-        navigate('/login', { replace: true });
-        return;
-      }
-
-      if (!session) {
+      if (event === 'SIGNED_OUT' || !session) {
         setIsAuthenticated(false);
         navigate('/login', { replace: true });
         return;
@@ -41,7 +33,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         if (userError || !user) {
           console.error("Erro ao verificar usuário:", userError);
           setIsAuthenticated(false);
-          await supabase.auth.signOut({ scope: 'local' });
+          // Apenas limpa o estado local sem tentar fazer logout no servidor
+          localStorage.removeItem('supabase.auth.token');
           navigate('/login', { replace: true });
           return;
         }
@@ -51,7 +44,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         console.error("Erro ao processar mudança de autenticação:", error);
         if (mounted) {
           setIsAuthenticated(false);
-          await supabase.auth.signOut({ scope: 'local' });
+          localStorage.removeItem('supabase.auth.token');
           navigate('/login', { replace: true });
         }
       }
@@ -63,15 +56,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         
         if (!mounted) return;
 
-        if (sessionError) {
-          console.error("Erro ao obter sessão:", sessionError);
-          setIsAuthenticated(false);
-          navigate('/login', { replace: true });
-          return;
-        }
-
-        if (!session) {
-          console.log("Sem sessão ativa");
+        if (sessionError || !session) {
+          console.log("Sem sessão ativa ou erro:", sessionError);
           setIsAuthenticated(false);
           navigate('/login', { replace: true });
           return;
@@ -82,7 +68,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         if (userError || !user) {
           console.error("Erro ao verificar usuário:", userError);
           setIsAuthenticated(false);
-          await supabase.auth.signOut({ scope: 'local' });
+          localStorage.removeItem('supabase.auth.token');
           navigate('/login', { replace: true });
           return;
         }
@@ -92,7 +78,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         console.error("Erro ao inicializar autenticação:", error);
         if (mounted) {
           setIsAuthenticated(false);
-          await supabase.auth.signOut({ scope: 'local' });
+          localStorage.removeItem('supabase.auth.token');
           navigate('/login', { replace: true });
         }
       } finally {
