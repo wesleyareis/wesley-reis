@@ -1,11 +1,11 @@
 import { Building2, Bath, Car, Bed } from "lucide-react";
-import { PropertyData } from "@/types/property";
+import { PropertyData } from "@/types/imovel";
 
-interface PropertyDetailsProps {
+interface ImovelDetalhesProps {
   property: PropertyData;
 }
 
-export const PropertyDetails = ({ property }: PropertyDetailsProps) => {
+export const ImovelDetalhes = ({ property }: ImovelDetalhesProps) => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div className="bg-white p-4 rounded-lg shadow-sm">

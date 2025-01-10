@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Wand2, Loader2 } from "lucide-react";
-import { PropertyFormData } from "@/types/property";
+import { PropertyFormData } from "@/types/imovel";
 
 interface DescriptionFieldProps {
   formData: PropertyFormData;

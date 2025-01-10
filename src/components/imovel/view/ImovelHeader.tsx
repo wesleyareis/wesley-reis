@@ -1,13 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { PropertyData } from "@/types/property";
+import { PropertyData } from "@/types/imovel";
 
-interface PropertyHeaderProps {
+interface ImovelHeaderProps {
   property: PropertyData;
   canEdit: boolean;
 }
 
-export const PropertyHeader = ({ property, canEdit }: PropertyHeaderProps) => {
+export const ImovelHeader = ({ property, canEdit }: ImovelHeaderProps) => {
   const navigate = useNavigate();
 
   return (
@@ -28,7 +28,7 @@ export const PropertyHeader = ({ property, canEdit }: PropertyHeaderProps) => {
             </p>
           </div>
           {canEdit && (
-            <Button onClick={() => navigate(`/property/edit/${property.id}`)}>
+            <Button onClick={() => navigate(`/imovel/editar/${property.id}`)}>
               Editar Imóvel
             </Button>
           )}

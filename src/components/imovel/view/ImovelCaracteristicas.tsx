@@ -1,10 +1,10 @@
-import { PropertyData } from "@/types/property";
+import { PropertyData } from "@/types/imovel";
 
-interface PropertyFeaturesProps {
+interface ImovelCaracteristicasProps {
   property: PropertyData;
 }
 
-export const PropertyFeatures = ({ property }: PropertyFeaturesProps) => {
+export const ImovelCaracteristicas = ({ property }: ImovelCaracteristicasProps) => {
   if (!property.features || Object.keys(property.features).length === 0) return null;
 
   return (

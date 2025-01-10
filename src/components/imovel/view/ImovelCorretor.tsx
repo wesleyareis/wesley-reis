@@ -1,47 +1,67 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Share2, MessageSquare } from "lucide-react";
 
-interface PropertyAgentProps {
+interface ImovelCorretorProps {
   agent: {
     full_name: string;
-    creci?: string | null;
-    profile_image?: string | null;
-    whatsapp_url?: string | null;
+    creci?: string;
+    phone?: string;
+    bio?: string;
+    profile_image?: string;
+    whatsapp_url?: string;
   };
   propertyUrl: string;
   onWhatsAppClick: () => void;
 }
 
-export const PropertyAgent = ({ agent, propertyUrl, onWhatsAppClick }: PropertyAgentProps) => {
-  const handleWhatsAppClick = () => {
-    if (agent.whatsapp_url) {
-      const message = encodeURIComponent(`Olá, gostaria de mais informações sobre este imóvel: ${propertyUrl}`);
-      window.open(`${agent.whatsapp_url}?text=${message}`, '_blank');
+export const ImovelCorretor = ({ agent, propertyUrl, onWhatsAppClick }: ImovelCorretorProps) => {
+  const handleShare = async () => {
+    try {
+      await navigator.share({
+        title: "Compartilhar Imóvel",
+        url: propertyUrl
+      });
+    } catch (error) {
+      console.error("Erro ao compartilhar:", error);
     }
   };
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm">
       <div className="flex items-center gap-4 mb-4">
-        <Avatar className="h-16 w-16">
-          <AvatarImage src={agent.profile_image || undefined} alt={agent.full_name} />
-          <AvatarFallback>{agent.full_name?.charAt(0)}</AvatarFallback>
-        </Avatar>
+        <img
+          src={agent.profile_image || "https://via.placeholder.com/100"}
+          alt={agent.full_name}
+          className="w-16 h-16 rounded-full object-cover"
+        />
         <div>
-          <h3 className="font-semibold text-lg">{agent.full_name}</h3>
-          {agent.creci && (
-            <p className="text-sm text-muted-foreground">CRECI: {agent.creci}</p>
-          )}
+          <h3 className="font-semibold">{agent.full_name}</h3>
+          {agent.creci && <p className="text-sm text-muted-foreground">CRECI: {agent.creci}</p>}
         </div>
       </div>
-      {agent.whatsapp_url && (
-        <Button 
-          className="w-full bg-[#128C7E] hover:bg-[#128C7E]/90" 
-          onClick={handleWhatsAppClick}
+
+      {agent.bio && <p className="text-sm text-muted-foreground mb-4">{agent.bio}</p>}
+
+      <div className="space-y-2">
+        {agent.whatsapp_url && (
+          <Button
+            className="w-full"
+            onClick={onWhatsAppClick}
+          >
+            <MessageSquare className="w-4 h-4 mr-2" />
+            Conversar no WhatsApp
+          </Button>
+        )}
+        
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={handleShare}
         >
-          Falar no WhatsApp
+          <Share2 className="w-4 h-4 mr-2" />
+          Compartilhar
         </Button>
-      )}
+      </div>
     </div>
   );
 };

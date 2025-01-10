@@ -1,10 +1,10 @@
-import { PropertyData } from "@/types/property";
+import { PropertyData } from "@/types/imovel";
 
-interface PropertyPriceProps {
+interface ImovelPrecoProps {
   property: PropertyData;
 }
 
-export const PropertyPrice = ({ property }: PropertyPriceProps) => {
+export const ImovelPreco = ({ property }: ImovelPrecoProps) => {
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm">
       <div className="text-3xl font-bold mb-4">

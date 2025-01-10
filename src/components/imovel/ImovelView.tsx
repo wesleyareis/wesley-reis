@@ -7,7 +7,7 @@ import { ImovelImagens } from "./view/ImovelImagens";
 import { ImovelDetalhes } from "./view/ImovelDetalhes";
 import { ImovelCaracteristicas } from "./view/ImovelCaracteristicas";
 import { ImovelLocalizacao } from "./view/ImovelLocalizacao";
-import { PropertyAgent } from "./view/PropertyAgent";
+import { ImovelCorretor } from "./view/ImovelCorretor";
 import { ImovelPreco } from "./view/ImovelPreco";
 import { Footer } from "../Footer";
 
@@ -56,7 +56,7 @@ export const ImovelView = ({ property, canEdit }: ImovelViewProps) => {
           <div className="space-y-6">
             <ImovelPreco property={property} />
             {agent && (
-              <PropertyAgent 
+              <ImovelCorretor 
                 agent={agent}
                 propertyUrl={window.location.href}
                 onWhatsAppClick={() => {}}
