@@ -11,11 +11,11 @@ export const PropertyImages = ({ property }: PropertyImagesProps) => {
 
   return (
     <div className="mb-8">
-      <Carousel className="w-full">
+      <Carousel className="w-full relative group">
         <CarouselContent>
           {property.images.map((image, index) => (
             <CarouselItem key={index}>
-              <div className="aspect-video w-full rounded-lg overflow-hidden">
+              <div className="aspect-video w-full rounded-lg overflow-hidden relative">
                 <img
                   src={image}
                   alt={`${property.title} - Imagem ${index + 1}`}
@@ -28,8 +28,8 @@ export const PropertyImages = ({ property }: PropertyImagesProps) => {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
+        <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 h-12 w-12 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </Carousel>
     </div>
   );
