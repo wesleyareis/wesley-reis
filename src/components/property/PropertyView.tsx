@@ -9,7 +9,7 @@ import { PropertyFeatures } from "./view/PropertyFeatures";
 import { PropertyLocation } from "./view/PropertyLocation";
 import { PropertyAgent } from "./view/PropertyAgent";
 import { PropertyPrice } from "./view/PropertyPrice";
-import { Footer } from "@/components/Footer";
+import { Footer } from "../Footer";
 
 interface PropertyViewProps {
   property: PropertyData;
@@ -59,7 +59,7 @@ export const PropertyView = ({ property, canEdit }: PropertyViewProps) => {
               <PropertyAgent 
                 agent={agent}
                 propertyUrl={window.location.href}
-                onWhatsAppClick={() => {}} // Não é mais necessário pois o componente agora gerencia seu próprio clique
+                onWhatsAppClick={() => {}}
               />
             )}
           </div>
