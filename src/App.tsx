@@ -28,33 +28,25 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const checkSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
+        
         if (error) {
-          console.error("Session error:", error);
+          console.error("Erro na sessão:", error);
           setIsAuthenticated(false);
-          navigate('/login');
+          navigate('/login', { replace: true });
           return;
         }
         
         if (!session) {
-          console.log("No session found");
           setIsAuthenticated(false);
-          navigate('/login');
-          return;
-        }
-
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        if (userError || !user) {
-          console.error("User verification failed:", userError);
-          setIsAuthenticated(false);
-          navigate('/login');
+          navigate('/login', { replace: true });
           return;
         }
 
         setIsAuthenticated(true);
       } catch (error) {
-        console.error("Error checking session:", error);
+        console.error("Erro ao verificar sessão:", error);
         setIsAuthenticated(false);
-        navigate('/login');
+        navigate('/login', { replace: true });
       } finally {
         setIsLoading(false);
       }
@@ -62,19 +54,16 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
     checkSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event, session?.user?.id);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Estado de autenticação alterado:", event, session?.user?.id);
       
       if (event === 'SIGNED_OUT') {
         setIsAuthenticated(false);
         queryClient.clear();
-        localStorage.clear();
-        navigate('/login');
+        navigate('/login', { replace: true });
       } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         setIsAuthenticated(true);
       }
-      
-      setIsLoading(false);
     });
 
     return () => {
@@ -98,50 +87,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => {
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) {
-          console.error("Session initialization error:", error);
-          return;
-        }
-        
-        if (!session) {
-          console.log("No active session found during initialization");
-          return;
-        }
-
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        if (userError || !user) {
-          console.error("User verification failed during initialization:", userError);
-          await supabase.auth.signOut();
-          queryClient.clear();
-          localStorage.clear();
-        }
-      } catch (error) {
-        console.error("Error initializing auth:", error);
-        await supabase.auth.signOut();
-        queryClient.clear();
-        localStorage.clear();
-      } finally {
-        setIsInitialized(true);
-      }
-    };
-
-    initializeAuth();
-  }, []);
-
-  if (!isInitialized) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

@@ -11,15 +11,22 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
 
-  // Check if user is already logged in
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate("/dashboard");
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          navigate("/dashboard", { replace: true });
+        }
+      } catch (error) {
+        console.error("Erro ao verificar sessão:", error);
+      } finally {
+        setIsCheckingSession(false);
       }
     };
+    
     checkSession();
   }, [navigate]);
 
@@ -40,11 +47,7 @@ const Login = () => {
         description: "Redirecionando para o dashboard...",
       });
 
-      // Pequeno delay para garantir que o estado da autenticação foi atualizado
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 500);
-
+      navigate("/dashboard", { replace: true });
     } catch (error: any) {
       toast({
         title: "Erro ao fazer login",
@@ -55,6 +58,14 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+  if (isCheckingSession) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
