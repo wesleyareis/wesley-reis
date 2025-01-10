@@ -9,6 +9,7 @@ import { PropertyFeatures } from "./view/PropertyFeatures";
 import { PropertyLocation } from "./view/PropertyLocation";
 import { PropertyAgent } from "./view/PropertyAgent";
 import { PropertyPrice } from "./view/PropertyPrice";
+import { Footer } from "@/components/Footer";
 
 interface PropertyViewProps {
   property: PropertyData;
@@ -31,10 +32,10 @@ export const PropertyView = ({ property, canEdit }: PropertyViewProps) => {
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <PropertyHeader property={property} canEdit={canEdit} />
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <main className="max-w-7xl mx-auto px-4 py-8 flex-grow">
         <PropertyImages property={property} />
 
         <div className="grid md:grid-cols-3 gap-8">
@@ -64,6 +65,8 @@ export const PropertyView = ({ property, canEdit }: PropertyViewProps) => {
           </div>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 };
