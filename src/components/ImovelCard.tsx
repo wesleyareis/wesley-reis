@@ -80,7 +80,7 @@ export function ImovelCard({
       </CardContent>
       <CardFooter className="p-4 pt-0 flex justify-between">
         <Link
-          to={`/imovel/codigo/${property_code}`}
+          to={`/imovel/${property_code}`}
           className="text-primary hover:text-primary/80 font-medium text-sm"
         >
           Ver detalhes →

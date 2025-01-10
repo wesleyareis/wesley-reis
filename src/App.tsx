@@ -107,7 +107,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/imovel/codigo/:code" element={<ImovelDetalhe />} />
+            <Route path="/imovel/:code" element={<ImovelDetalhe />} />
             <Route 
               path="/dashboard" 
               element={
