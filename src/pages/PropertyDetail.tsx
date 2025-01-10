@@ -1,80 +1,322 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Bath, Car, Bed, MapPin } from "lucide-react";
-
-const mockProperty = {
-  id: "1",
-  title: "Apartamento Luxuoso",
-  price: 850000,
-  location: "Setor Bueno, Goiânia",
-  bedrooms: 3,
-  bathrooms: 2,
-  parkingSpaces: 2,
-  area: 120,
-  description: "Luxuoso apartamento com acabamento de alto padrão, localizado em área nobre. Possui ampla sala de estar, varanda gourmet, cozinha planejada e área de serviço.",
-  imageUrl: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200",
-};
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Building2, Bath, Car, Bed, MapPin, Loader2, Wand2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { useQuery } from "@tanstack/react-query";
 
 const PropertyDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
+  const [formData, setFormData] = useState({
+    title: "",
+    price: 0,
+    description: "",
+    property_type: "",
+    bedrooms: 0,
+    bathrooms: 0,
+    parking_spaces: 0,
+    total_area: 0,
+    city: "",
+    neighborhood: "",
+    street_address: "",
+    images: [] as string[],
+  });
+
+  const { data: property } = useQuery({
+    queryKey: ["property", id],
+    queryFn: async () => {
+      if (id === "new") return null;
+      const { data, error } = await supabase
+        .from("properties")
+        .select("*")
+        .eq("id", id)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!id && id !== "new",
+  });
+
+  useEffect(() => {
+    if (property) {
+      setFormData(property);
+    }
+  }, [property]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: name === "price" || name === "bedrooms" || name === "bathrooms" || 
+              name === "parking_spaces" || name === "total_area" 
+              ? Number(value) : value
+    }));
+  };
+
+  const generateDescription = async () => {
+    setIsGeneratingDescription(true);
+    try {
+      const response = await fetch(
+        "https://kjlipbbrbwdzqiwvrnpw.supabase.co/functions/v1/generate-property-description",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({
+            propertyDetails: {
+              type: formData.property_type,
+              bedrooms: formData.bedrooms,
+              bathrooms: formData.bathrooms,
+              parkingSpaces: formData.parking_spaces,
+              area: formData.total_area,
+              location: `${formData.neighborhood}, ${formData.city}`,
+            },
+          }),
+        }
+      );
+
+      const data = await response.json();
+      if (data.description) {
+        setFormData(prev => ({ ...prev, description: data.description }));
+        toast({
+          title: "Descrição gerada com sucesso!",
+          description: "A descrição do imóvel foi atualizada.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro ao gerar descrição",
+        description: "Não foi possível gerar a descrição do imóvel.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingDescription(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const propertyData = {
+        ...formData,
+        agent_id: user.id,
+      };
+
+      let result;
+      if (id === "new") {
+        result = await supabase
+          .from("properties")
+          .insert([propertyData])
+          .select()
+          .single();
+      } else {
+        result = await supabase
+          .from("properties")
+          .update(propertyData)
+          .eq("id", id)
+          .select()
+          .single();
+      }
+
+      if (result.error) throw result.error;
+
+      toast({
+        title: "Sucesso!",
+        description: id === "new" ? "Imóvel criado com sucesso!" : "Imóvel atualizado com sucesso!",
+      });
+
+      navigate("/dashboard");
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao salvar o imóvel.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <a href="/" className="text-primary hover:text-primary/80">← Voltar para listagem</a>
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/dashboard")}
+            className="text-primary hover:text-primary/80"
+          >
+            ← Voltar para dashboard
+          </Button>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="relative">
-            <img
-              src={mockProperty.imageUrl}
-              alt={mockProperty.title}
-              className="w-full h-[400px] object-cover rounded-lg"
-            />
-            <Badge className="absolute top-4 right-4 text-lg bg-primary text-white">
-              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(mockProperty.price)}
-            </Badge>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Título</label>
+                <Input
+                  name="title"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Preço</label>
+                <Input
+                  type="number"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Tipo do Imóvel</label>
+                <Input
+                  name="property_type"
+                  value={formData.property_type}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Quartos</label>
+                  <Input
+                    type="number"
+                    name="bedrooms"
+                    value={formData.bedrooms}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Banheiros</label>
+                  <Input
+                    type="number"
+                    name="bathrooms"
+                    value={formData.bathrooms}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Vagas</label>
+                  <Input
+                    type="number"
+                    name="parking_spaces"
+                    value={formData.parking_spaces}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Área Total (m²)</label>
+                  <Input
+                    type="number"
+                    name="total_area"
+                    value={formData.total_area}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Cidade</label>
+                <Input
+                  name="city"
+                  value={formData.city}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Bairro</label>
+                <Input
+                  name="neighborhood"
+                  value={formData.neighborhood}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Endereço</label>
+                <Input
+                  name="street_address"
+                  value={formData.street_address || ""}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="block text-sm font-medium">Descrição</label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={generateDescription}
+                    disabled={isGeneratingDescription}
+                  >
+                    {isGeneratingDescription ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Wand2 className="w-4 h-4 mr-2" />
+                    )}
+                    Gerar com IA
+                  </Button>
+                </div>
+                <Textarea
+                  name="description"
+                  value={formData.description || ""}
+                  onChange={handleInputChange}
+                  className="h-32"
+                />
+              </div>
+            </div>
           </div>
 
-          <div>
-            <h1 className="text-3xl font-bold mb-4">{mockProperty.title}</h1>
-            <div className="flex items-center gap-2 text-muted-foreground mb-6">
-              <MapPin className="w-5 h-5" />
-              <span>{mockProperty.location}</span>
-            </div>
-
-            <div className="grid grid-cols-4 gap-4 mb-8">
-              <div className="flex flex-col items-center gap-2 p-4 bg-secondary rounded-lg">
-                <Bed className="w-6 h-6" />
-                <span className="font-medium">{mockProperty.bedrooms}</span>
-                <span className="text-sm text-muted-foreground">Quartos</span>
-              </div>
-              <div className="flex flex-col items-center gap-2 p-4 bg-secondary rounded-lg">
-                <Bath className="w-6 h-6" />
-                <span className="font-medium">{mockProperty.bathrooms}</span>
-                <span className="text-sm text-muted-foreground">Banheiros</span>
-              </div>
-              <div className="flex flex-col items-center gap-2 p-4 bg-secondary rounded-lg">
-                <Car className="w-6 h-6" />
-                <span className="font-medium">{mockProperty.parkingSpaces}</span>
-                <span className="text-sm text-muted-foreground">Vagas</span>
-              </div>
-              <div className="flex flex-col items-center gap-2 p-4 bg-secondary rounded-lg">
-                <Building2 className="w-6 h-6" />
-                <span className="font-medium">{mockProperty.area}</span>
-                <span className="text-sm text-muted-foreground">m²</span>
-              </div>
-            </div>
-
-            <div className="prose max-w-none">
-              <h2 className="text-xl font-semibold mb-4">Descrição</h2>
-              <p className="text-muted-foreground">{mockProperty.description}</p>
-            </div>
+          <div className="flex justify-end gap-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate("/dashboard")}
+            >
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {id === "new" ? "Criar Imóvel" : "Salvar Alterações"}
+            </Button>
           </div>
-        </div>
+        </form>
       </main>
     </div>
   );
