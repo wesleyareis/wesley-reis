@@ -1,4 +1,3 @@
-import { Building2, Bath, Car, Bed } from "lucide-react";
 import { PropertyData } from "@/types/imovel";
 
 interface ImovelDetalhesProps {
@@ -7,34 +6,44 @@ interface ImovelDetalhesProps {
 
 export const ImovelDetalhes = ({ property }: ImovelDetalhesProps) => {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div className="bg-white p-4 rounded-lg shadow-sm">
-        <div className="flex items-center gap-2 mb-2">
-          <Building2 className="w-5 h-5" />
-          <span className="font-medium">Área</span>
-        </div>
-        <div>{property.total_area}m²</div>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-semibold">Detalhes do Imóvel</h2>
+        {property.property_code && (
+          <span className="text-sm text-muted-foreground">
+            Código: {property.property_code}
+          </span>
+        )}
       </div>
-      <div className="bg-white p-4 rounded-lg shadow-sm">
-        <div className="flex items-center gap-2 mb-2">
-          <Bed className="w-5 h-5" />
-          <span className="font-medium">Quartos</span>
-        </div>
-        <div>{property.bedrooms}</div>
-      </div>
-      <div className="bg-white p-4 rounded-lg shadow-sm">
-        <div className="flex items-center gap-2 mb-2">
-          <Bath className="w-5 h-5" />
-          <span className="font-medium">Banheiros</span>
-        </div>
-        <div>{property.bathrooms}</div>
-      </div>
-      <div className="bg-white p-4 rounded-lg shadow-sm">
-        <div className="flex items-center gap-2 mb-2">
-          <Car className="w-5 h-5" />
-          <span className="font-medium">Vagas</span>
-        </div>
-        <div>{property.parking_spaces}</div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {property.bedrooms && (
+          <div>
+            <p className="text-sm text-muted-foreground">Quartos</p>
+            <p className="font-medium">{property.bedrooms}</p>
+          </div>
+        )}
+
+        {property.bathrooms && (
+          <div>
+            <p className="text-sm text-muted-foreground">Banheiros</p>
+            <p className="font-medium">{property.bathrooms}</p>
+          </div>
+        )}
+
+        {property.parking_spaces && (
+          <div>
+            <p className="text-sm text-muted-foreground">Vagas</p>
+            <p className="font-medium">{property.parking_spaces}</p>
+          </div>
+        )}
+
+        {property.total_area && (
+          <div>
+            <p className="text-sm text-muted-foreground">Área Total</p>
+            <p className="font-medium">{property.total_area} m²</p>
+          </div>
+        )}
       </div>
     </div>
   );
