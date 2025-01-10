@@ -1,12 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Wand2, Loader2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
+import { PropertyForm } from "@/components/property/PropertyForm";
+import type { PropertyFormData } from "@/types/property";
 
 const PropertyDetail = () => {
   const { id } = useParams();
@@ -14,7 +12,7 @@ const PropertyDetail = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<PropertyFormData>({
     title: "",
     price: 0,
     description: "",
@@ -26,7 +24,7 @@ const PropertyDetail = () => {
     city: "",
     neighborhood: "",
     street_address: "",
-    images: [] as string[],
+    images: [],
   });
 
   const { data: property, error: queryError } = useQuery({
@@ -34,7 +32,7 @@ const PropertyDetail = () => {
     queryFn: async () => {
       if (!id || id === "new") return null;
       
-      console.log("Fetching property with ID:", id); // Debug log
+      console.log("Fetching property with ID:", id);
       
       const { data, error } = await supabase
         .from("properties")
@@ -167,7 +165,7 @@ const PropertyDetail = () => {
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-2xl font-bold text-red-600 mb-4">Erro ao carregar imóvel</h2>
           <p className="text-gray-600 mb-4">Não foi possível carregar os dados do imóvel.</p>
-          <Button onClick={() => navigate("/dashboard")}>Voltar para dashboard</Button>
+          <button onClick={() => navigate("/dashboard")}>Voltar para dashboard</button>
         </div>
       </div>
     );
@@ -177,166 +175,21 @@ const PropertyDetail = () => {
     <div className="min-h-screen bg-background">
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/dashboard")}
-            className="text-primary hover:text-primary/80"
-          >
-            ← Voltar para dashboard
-          </Button>
+          <h1 className="text-2xl font-bold">
+            {id === "new" ? "Novo Imóvel" : "Editar Imóvel"}
+          </h1>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Título</label>
-                <Input
-                  name="title"
-                  value={formData.title}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Preço</label>
-                <Input
-                  type="number"
-                  name="price"
-                  value={formData.price}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Tipo do Imóvel</label>
-                <Input
-                  name="property_type"
-                  value={formData.property_type}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Quartos</label>
-                  <Input
-                    type="number"
-                    name="bedrooms"
-                    value={formData.bedrooms}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Banheiros</label>
-                  <Input
-                    type="number"
-                    name="bathrooms"
-                    value={formData.bathrooms}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Vagas</label>
-                  <Input
-                    type="number"
-                    name="parking_spaces"
-                    value={formData.parking_spaces}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Área Total (m²)</label>
-                  <Input
-                    type="number"
-                    name="total_area"
-                    value={formData.total_area}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Cidade</label>
-                <Input
-                  name="city"
-                  value={formData.city}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Bairro</label>
-                <Input
-                  name="neighborhood"
-                  value={formData.neighborhood}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Endereço</label>
-                <Input
-                  name="street_address"
-                  value={formData.street_address || ""}
-                  onChange={handleInputChange}
-                />
-              </div>
-
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <label className="block text-sm font-medium">Descrição</label>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={generateDescription}
-                    disabled={isGeneratingDescription}
-                  >
-                    {isGeneratingDescription ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : (
-                      <Wand2 className="w-4 h-4 mr-2" />
-                    )}
-                    Gerar com IA
-                  </Button>
-                </div>
-                <Textarea
-                  name="description"
-                  value={formData.description || ""}
-                  onChange={handleInputChange}
-                  className="h-32"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate("/dashboard")}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              {id === "new" ? "Criar Imóvel" : "Salvar Alterações"}
-            </Button>
-          </div>
-        </form>
+        <PropertyForm
+          formData={formData}
+          isLoading={isLoading}
+          isGeneratingDescription={isGeneratingDescription}
+          onInputChange={handleInputChange}
+          onGenerateDescription={generateDescription}
+          onSubmit={handleSubmit}
+        />
       </main>
     </div>
   );
