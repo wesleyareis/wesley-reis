@@ -24,32 +24,33 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const initSession = async () => {
+    const checkSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) {
-          console.error("Session error:", error);
-          setIsAuthenticated(false);
-          return;
-        }
+        if (error) throw error;
         setIsAuthenticated(!!session);
       } catch (error) {
-        console.error("Error checking auth status:", error);
+        console.error("Error checking session:", error);
         setIsAuthenticated(false);
       } finally {
         setIsLoading(false);
       }
     };
 
-    initSession();
+    checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, session?.user?.id);
       
       if (event === 'SIGNED_OUT') {
-        await supabase.auth.signOut();
-        queryClient.clear();
-        localStorage.clear(); // Clear all local storage
+        try {
+          await supabase.auth.signOut();
+          queryClient.clear();
+          localStorage.clear();
+          window.location.href = '/login';
+        } catch (error) {
+          console.error("Error during sign out:", error);
+        }
       }
       
       setIsAuthenticated(!!session);
@@ -79,14 +80,16 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const App = () => {
   useEffect(() => {
     const initializeAuth = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        if (!session) {
+          console.log("No active session found");
+        }
+      } catch (error) {
         console.error("Error initializing auth:", error);
         await supabase.auth.signOut();
         localStorage.clear();
-      }
-      if (!session) {
-        console.log("No active session found");
       }
     };
 
