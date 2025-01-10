@@ -34,7 +34,7 @@ const PropertyDetail = () => {
   }, [navigate, toast, isEditMode]);
 
   // Buscar dados do imóvel existente
-  const { data: property, isError } = useQuery({
+  const { data: property, isLoading: isLoadingProperty, isError } = useQuery({
     queryKey: ["property", id],
     queryFn: async () => {
       if (isNewProperty) return null;
@@ -43,7 +43,7 @@ const PropertyDetail = () => {
         .from("properties")
         .select("*")
         .eq("id", id)
-        .maybeSingle();
+        .single();
 
       if (error) {
         console.error("Erro ao carregar imóvel:", error);
@@ -89,7 +89,7 @@ const PropertyDetail = () => {
 
   const {
     formData,
-    isLoading,
+    isLoading: isLoadingForm,
     isGeneratingDescription,
     handleInputChange,
     generateDescription,
@@ -108,11 +108,16 @@ const PropertyDetail = () => {
     return <LoadingSpinner />;
   }
 
+  // Aguardar o carregamento dos dados antes de renderizar o formulário de edição
+  if (isEditMode && isLoadingProperty) {
+    return <LoadingSpinner />;
+  }
+
   if (isEditMode) {
     return (
       <PropertyEdit
         formData={formData}
-        isLoading={isLoading}
+        isLoading={isLoadingForm}
         isGeneratingDescription={isGeneratingDescription}
         onInputChange={handleInputChange}
         onGenerateDescription={generateDescription}

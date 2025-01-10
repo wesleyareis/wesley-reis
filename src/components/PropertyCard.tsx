@@ -42,10 +42,6 @@ export function PropertyCard({
     checkIfAgent();
   }, [agent_id]);
 
-  const handleEdit = () => {
-    navigate(`/property/edit/${id}`);
-  };
-
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
       <div className="relative h-48 overflow-hidden">
@@ -89,9 +85,11 @@ export function PropertyCard({
         </Link>
         {isAgent && (
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={handleEdit}>
-              <Edit className="w-4 h-4" />
-            </Button>
+            <Link to={`/property/edit/${id}`}>
+              <Button variant="outline" size="sm">
+                <Edit className="w-4 h-4" />
+              </Button>
+            </Link>
           </div>
         )}
       </CardFooter>
