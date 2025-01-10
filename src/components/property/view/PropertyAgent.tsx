@@ -35,7 +35,10 @@ export const PropertyAgent = ({ agent, propertyUrl, onWhatsAppClick }: PropertyA
         </div>
       </div>
       {agent.whatsapp_url && (
-        <Button className="w-full" onClick={handleWhatsAppClick}>
+        <Button 
+          className="w-full bg-[#128C7E] hover:bg-[#128C7E]/90" 
+          onClick={handleWhatsAppClick}
+        >
           Falar no WhatsApp
         </Button>
       )}
