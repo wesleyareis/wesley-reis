@@ -1,13 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { PropertyCard } from "@/components/PropertyCard";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [agentProfile, setAgentProfile] = useState<any>(null);
 
   useEffect(() => {
@@ -43,6 +45,23 @@ const Dashboard = () => {
     navigate("/property/new");
   };
 
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Logout realizado com sucesso",
+        description: "Você foi desconectado da sua conta.",
+      });
+      navigate("/");
+    } catch (error) {
+      toast({
+        title: "Erro ao fazer logout",
+        description: "Ocorreu um erro ao tentar desconectar.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-white shadow-sm">
@@ -60,10 +79,16 @@ const Dashboard = () => {
               </div>
             )}
           </div>
-          <Button onClick={handleNewProperty} className="flex items-center gap-2">
-            <Plus className="w-4 h-4" />
-            Novo Imóvel
-          </Button>
+          <div className="flex gap-4">
+            <Button onClick={handleNewProperty} className="flex items-center gap-2">
+              <Plus className="w-4 h-4" />
+              Novo Imóvel
+            </Button>
+            <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
+              <LogOut className="w-4 h-4" />
+              Logout
+            </Button>
+          </div>
         </div>
       </header>
 

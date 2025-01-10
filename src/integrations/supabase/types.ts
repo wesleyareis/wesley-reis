@@ -19,6 +19,7 @@ export type Database = {
           phone: string | null
           profile_image: string | null
           updated_at: string | null
+          whatsapp_url: string | null
         }
         Insert: {
           bio?: string | null
@@ -29,6 +30,7 @@ export type Database = {
           phone?: string | null
           profile_image?: string | null
           updated_at?: string | null
+          whatsapp_url?: string | null
         }
         Update: {
           bio?: string | null
@@ -39,6 +41,7 @@ export type Database = {
           phone?: string | null
           profile_image?: string | null
           updated_at?: string | null
+          whatsapp_url?: string | null
         }
         Relationships: []
       }
@@ -191,6 +194,54 @@ export type Database = {
           subject?: string | null
         }
         Relationships: []
+      }
+      leads: {
+        Row: {
+          agent_id: string | null
+          created_at: string | null
+          email: string | null
+          id: string
+          message: string | null
+          name: string | null
+          phone: string | null
+          property_id: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          message?: string | null
+          name?: string | null
+          phone?: string | null
+          property_id?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          message?: string | null
+          name?: string | null
+          phone?: string | null
+          property_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       login_corretores: {
         Row: {

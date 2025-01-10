@@ -4,6 +4,8 @@ import { SearchFilters } from "@/components/SearchFilters";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { LogIn } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -57,16 +59,15 @@ const Index = () => {
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <Link to="/" className="text-2xl font-bold text-primary">ImóveisWeb</Link>
-          <nav className="hidden md:flex gap-6">
-            <Link to="/" className="text-sm font-medium text-gray-700 hover:text-primary">
-              Início
-            </Link>
-            <button
+          <nav className="flex gap-4 items-center">
+            <Button
+              variant="outline"
               onClick={handleLoginClick}
-              className="text-sm font-medium text-gray-700 hover:text-primary"
+              className="flex items-center gap-2"
             >
+              <LogIn className="w-4 h-4" />
               Login Corretor
-            </button>
+            </Button>
           </nav>
         </div>
       </header>
