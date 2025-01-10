@@ -2,6 +2,16 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BVou ajudar a resolver esses erros de autenticação. O problema principal parece ser relacionado ao gerenciamento de sessão e tentativas de fazer logout quando não há uma sessão válida. Vamos implementar uma solução mais robusta:
+
+<lov-code>
+Vamos atualizar o arquivo App.tsx para melhorar o gerenciamento de sessão:
+
+<lov-write file_path="src/App.tsx">
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,20 +34,38 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       console.log("Estado de autenticação alterado:", event, session?.user?.id);
 
       try {
-        if (event === 'SIGNED_OUT' || !session) {
+        if (event === 'SIGNED_OUT') {
           setIsAuthenticated(false);
           navigate('/login', { replace: true });
-        } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          const { data: { user }, error: userError } = await supabase.auth.getUser();
-          if (userError || !user) {
-            console.error("Erro ao verificar usuário:", userError);
-            setIsAuthenticated(false);
-            await supabase.auth.signOut({ scope: 'local' });
-            navigate('/login', { replace: true });
-          } else {
-            setIsAuthenticated(true);
-          }
+          return;
         }
+
+        if (!session) {
+          setIsAuthenticated(false);
+          navigate('/login', { replace: true });
+          return;
+        }
+
+        // Verifica se o usuário ainda é válido
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
+        if (userError) {
+          console.error("Erro ao verificar usuário:", userError);
+          setIsAuthenticated(false);
+          // Limpa a sessão local sem tentar fazer logout no servidor
+          await supabase.auth.signOut({ scope: 'local' });
+          navigate('/login', { replace: true });
+          return;
+        }
+
+        if (!user) {
+          setIsAuthenticated(false);
+          await supabase.auth.signOut({ scope: 'local' });
+          navigate('/login', { replace: true });
+          return;
+        }
+
+        setIsAuthenticated(true);
       } catch (error) {
         console.error("Erro ao processar mudança de autenticação:", error);
         if (mounted) {
@@ -54,7 +82,14 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         
         if (!mounted) return;
 
-        if (sessionError || !session) {
+        if (sessionError) {
+          console.error("Erro ao obter sessão:", sessionError);
+          setIsAuthenticated(false);
+          navigate('/login', { replace: true });
+          return;
+        }
+
+        if (!session) {
           console.log("Sem sessão ativa");
           setIsAuthenticated(false);
           navigate('/login', { replace: true });
