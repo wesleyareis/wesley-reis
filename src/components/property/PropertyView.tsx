@@ -2,6 +2,7 @@ import { Building2, Bath, Car, Bed } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { PropertyData } from "@/types/property";
+import { ContactForm } from "./ContactForm";
 
 interface PropertyViewProps {
   property: PropertyData;
@@ -51,46 +52,89 @@ export const PropertyView = ({ property, canEdit }: PropertyViewProps) => {
 
         <div className="grid md:grid-cols-3 gap-8">
           <div className="md:col-span-2 space-y-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-white p-4 rounded-lg shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <Building2 className="w-5 h-5" />
+                  <span className="font-medium">Área</span>
+                </div>
+                <div>{property.total_area}m²</div>
+              </div>
+              <div className="bg-white p-4 rounded-lg shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <Bed className="w-5 h-5" />
+                  <span className="font-medium">Quartos</span>
+                </div>
+                <div>{property.bedrooms}</div>
+              </div>
+              <div className="bg-white p-4 rounded-lg shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <Bath className="w-5 h-5" />
+                  <span className="font-medium">Banheiros</span>
+                </div>
+                <div>{property.bathrooms}</div>
+              </div>
+              <div className="bg-white p-4 rounded-lg shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <Car className="w-5 h-5" />
+                  <span className="font-medium">Vagas</span>
+                </div>
+                <div>{property.parking_spaces}</div>
+              </div>
+            </div>
+
             <div>
-              <h2 className="text-2xl font-semibold mb-2">Descrição</h2>
+              <h2 className="text-2xl font-semibold mb-4">Descrição</h2>
               <p className="text-muted-foreground whitespace-pre-line">
                 {property.description}
               </p>
             </div>
 
-            <div>
-              <h2 className="text-2xl font-semibold mb-4">Características</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="flex items-center gap-2">
-                  <Bed className="w-5 h-5" />
-                  <span>{property.bedrooms} Quartos</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Bath className="w-5 h-5" />
-                  <span>{property.bathrooms} Banheiros</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Car className="w-5 h-5" />
-                  <span>{property.parking_spaces} Vagas</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Building2 className="w-5 h-5" />
-                  <span>{property.total_area}m²</span>
+            {property.features && Object.keys(property.features).length > 0 && (
+              <div>
+                <h2 className="text-2xl font-semibold mb-4">Características</h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {Object.entries(property.features).map(([key, value]) => (
+                    value && (
+                      <div key={key} className="flex items-center gap-2">
+                        <span>✓</span>
+                        <span className="capitalize">{key.replace(/_/g, " ")}</span>
+                      </div>
+                    )
+                  ))}
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-sm h-fit">
-            <div className="text-3xl font-bold mb-4">
-              {new Intl.NumberFormat('pt-BR', { 
-                style: 'currency', 
-                currency: 'BRL' 
-              }).format(property.price || 0)}
+          <div className="space-y-6">
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <div className="text-3xl font-bold mb-4">
+                {new Intl.NumberFormat('pt-BR', { 
+                  style: 'currency', 
+                  currency: 'BRL' 
+                }).format(property.price || 0)}
+              </div>
+              {property.features?.condominio && (
+                <div className="mb-2">
+                  <span className="text-muted-foreground">Condomínio:</span>
+                  <span className="ml-2">R$ 670/mês</span>
+                </div>
+              )}
+              {property.features?.iptu && (
+                <div className="mb-4">
+                  <span className="text-muted-foreground">IPTU:</span>
+                  <span className="ml-2">R$ 78,00/mês</span>
+                </div>
+              )}
             </div>
-            <Button className="w-full" size="lg">
-              Entrar em contato
-            </Button>
+
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <ContactForm 
+                propertyId={property.id || ''} 
+                agentId={property.agent_id || ''}
+              />
+            </div>
           </div>
         </div>
       </main>
