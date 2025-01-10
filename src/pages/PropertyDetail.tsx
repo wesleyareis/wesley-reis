@@ -12,6 +12,7 @@ const PropertyDetail = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
+  const [currentUser, setCurrentUser] = useState<string | null>(null);
   const [formData, setFormData] = useState<PropertyFormData>({
     title: "",
     price: 0,
@@ -26,6 +27,15 @@ const PropertyDetail = () => {
     street_address: "",
     images: [],
   });
+
+  // Fetch current user
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUser(user?.id || null);
+    };
+    checkUser();
+  }, []);
 
   const { data: property, error: queryError } = useQuery({
     queryKey: ["property", id],
@@ -54,6 +64,21 @@ const PropertyDetail = () => {
     enabled: !!id && id !== "new",
     retry: false
   });
+
+  // Check if user has permission to edit
+  const canEdit = id === "new" || (property && currentUser && property.agent_id === currentUser);
+
+  // Redirect if not authorized
+  useEffect(() => {
+    if (property && !canEdit) {
+      navigate(`/property/${id}`);
+      toast({
+        title: "Acesso negado",
+        description: "Você não tem permissão para editar este imóvel.",
+        variant: "destructive",
+      });
+    }
+  }, [property, canEdit, id, navigate]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -175,6 +200,10 @@ const PropertyDetail = () => {
         </div>
       </div>
     );
+  }
+
+  if (!canEdit) {
+    return null; // Return null while redirecting
   }
 
   return (
