@@ -103,7 +103,7 @@ export const usePropertyForm = (initialData: PropertyFormData) => {
           .insert(propertyData);
       }
 
-      const { error, data } = await operation;
+      const { error } = await operation;
 
       if (error) throw error;
 
