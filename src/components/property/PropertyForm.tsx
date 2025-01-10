@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Wand2, Loader2, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { PropertyFormData } from "@/types/property";
@@ -24,6 +25,37 @@ export const PropertyForm = ({
 }: PropertyFormProps) => {
   const navigate = useNavigate();
 
+  const handleFeatureChange = (feature: string, checked: boolean) => {
+    const newFeatures = {
+      ...formData.features,
+      [feature]: checked
+    };
+    
+    const event = {
+      target: {
+        name: 'features',
+        value: newFeatures
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    
+    onInputChange(event);
+  };
+
+  const features = [
+    { id: "air_conditioning", label: "Ar Condicionado" },
+    { id: "balcony", label: "Varanda" },
+    { id: "barbecue_grill", label: "Churrasqueira" },
+    { id: "elevator", label: "Elevador" },
+    { id: "garage", label: "Garagem" },
+    { id: "garden", label: "Jardim" },
+    { id: "gym", label: "Academia" },
+    { id: "laundry", label: "Lavanderia" },
+    { id: "pets_allowed", label: "Aceita Pets" },
+    { id: "playground", label: "Playground" },
+    { id: "pool", label: "Piscina" },
+    { id: "security_24h", label: "Segurança 24h" }
+  ];
+
   return (
     <form onSubmit={onSubmit} className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -46,6 +78,26 @@ export const PropertyForm = ({
               value={formData.price}
               onChange={onInputChange}
               required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Condomínio (mensal)</label>
+            <Input
+              type="number"
+              name="condominium_fee"
+              value={formData.condominium_fee || ''}
+              onChange={onInputChange}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">IPTU (mensal)</label>
+            <Input
+              type="number"
+              name="property_tax"
+              value={formData.property_tax || ''}
+              onChange={onInputChange}
             />
           </div>
 
@@ -133,6 +185,16 @@ export const PropertyForm = ({
           </div>
 
           <div>
+            <label className="block text-sm font-medium mb-1">URL do Google Maps</label>
+            <Input
+              name="map_url"
+              value={formData.map_url || ""}
+              onChange={onInputChange}
+              placeholder="Cole aqui o link de incorporação do Google Maps"
+            />
+          </div>
+
+          <div>
             <div className="flex justify-between items-center mb-1">
               <label className="block text-sm font-medium">Descrição</label>
               <Button
@@ -156,6 +218,27 @@ export const PropertyForm = ({
               onChange={onInputChange}
               className="h-32"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-3">Características</label>
+            <div className="grid grid-cols-2 gap-4">
+              {features.map(({ id, label }) => (
+                <div key={id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={id}
+                    checked={formData.features?.[id] || false}
+                    onCheckedChange={(checked) => handleFeatureChange(id, checked as boolean)}
+                  />
+                  <label
+                    htmlFor={id}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    {label}
+                  </label>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
