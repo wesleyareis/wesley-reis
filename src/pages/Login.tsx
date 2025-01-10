@@ -16,12 +16,21 @@ const Login = () => {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        // Limpa qualquer token inválido antes de verificar a sessão
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Erro ao verificar sessão:", error);
+          localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
+          return;
+        }
+
         if (session?.user) {
           navigate("/dashboard", { replace: true });
         }
       } catch (error) {
         console.error("Erro ao verificar sessão:", error);
+        localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
       } finally {
         setIsCheckingSession(false);
       }
@@ -35,6 +44,10 @@ const Login = () => {
     setLoading(true);
 
     try {
+      // Primeiro, limpa qualquer sessão existente
+      await supabase.auth.signOut();
+      
+      // Tenta fazer login
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -49,11 +62,14 @@ const Login = () => {
 
       navigate("/dashboard", { replace: true });
     } catch (error: any) {
+      console.error("Erro no login:", error);
       toast({
         title: "Erro ao fazer login",
-        description: error.message,
+        description: error.message || "Ocorreu um erro ao tentar fazer login",
         variant: "destructive",
       });
+      // Limpa o token em caso de erro
+      localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
     } finally {
       setLoading(false);
     }
