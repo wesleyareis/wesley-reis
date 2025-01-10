@@ -59,7 +59,7 @@ const Index = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link to="/" className="text-2xl font-bold text-primary">ImóveisWeb</Link>
+          <Link to="/" className="text-2xl font-bold text-primary">Wesley Reis</Link>
           <nav className="flex gap-4 items-center">
             <Button
               variant="outline"
