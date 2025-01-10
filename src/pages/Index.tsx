@@ -88,6 +88,7 @@ const Index = () => {
                 <ImovelCard
                   key={property.id}
                   id={property.id}
+                  property_code={property.property_code || ''}
                   title={property.title}
                   price={property.price}
                   location={`${property.neighborhood}, ${property.city}`}

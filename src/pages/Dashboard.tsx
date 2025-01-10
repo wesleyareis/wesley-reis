@@ -107,10 +107,8 @@ const Dashboard = () => {
 
   const handleLogout = async () => {
     try {
-      // Primeiro limpa o token local
       localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
       
-      // Depois tenta fazer o logout no Supabase
       const { error } = await supabase.auth.signOut();
       
       if (error) {
@@ -130,7 +128,6 @@ const Dashboard = () => {
       navigate("/login", { replace: true });
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
-      // Mesmo com erro, força o redirecionamento
       navigate("/login", { replace: true });
     }
   };
@@ -178,6 +175,7 @@ const Dashboard = () => {
                 <ImovelCard
                   key={property.id}
                   id={property.id}
+                  property_code={property.property_code || ''}
                   title={property.title}
                   price={property.price}
                   location={`${property.neighborhood}, ${property.city}`}
