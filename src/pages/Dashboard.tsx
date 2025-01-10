@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { PropertyCard } from "@/components/PropertyCard";
+import { ImovelCard } from "@/components/ImovelCard";
 import { Button } from "@/components/ui/button";
 import { Plus, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -74,7 +74,7 @@ const Dashboard = () => {
   });
 
   const handleNewProperty = () => {
-    navigate("/property/new");
+    navigate("/imovel/novo");
   };
 
   const handleLogout = async () => {
@@ -136,7 +136,7 @@ const Dashboard = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {properties?.map((property) => (
-                <PropertyCard
+                <ImovelCard
                   key={property.id}
                   id={property.id}
                   title={property.title}

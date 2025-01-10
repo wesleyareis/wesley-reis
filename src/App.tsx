@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-route
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Index from "./pages/Index";
-import PropertyDetail from "./pages/PropertyDetail";
+import ImovelDetalhe from "./pages/ImovelDetalhe";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 
@@ -94,7 +94,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/property/:id" element={<PropertyDetail />} />
+            <Route path="/imovel/:id" element={<ImovelDetalhe />} />
             <Route 
               path="/dashboard" 
               element={
@@ -104,18 +104,18 @@ const App = () => {
               } 
             />
             <Route 
-              path="/property/new" 
+              path="/imovel/novo" 
               element={
                 <ProtectedRoute>
-                  <PropertyDetail />
+                  <ImovelDetalhe />
                 </ProtectedRoute>
               } 
             />
             <Route 
-              path="/property/edit/:id" 
+              path="/imovel/editar/:id" 
               element={
                 <ProtectedRoute>
-                  <PropertyDetail />
+                  <ImovelDetalhe />
                 </ProtectedRoute>
               } 
             />

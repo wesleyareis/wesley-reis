@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { PropertyCard } from "@/components/PropertyCard";
+import { ImovelCard } from "@/components/ImovelCard";
 import { SearchFilters } from "@/components/SearchFilters";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
@@ -85,7 +85,7 @@ const Index = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {properties?.map((property) => (
-                <PropertyCard
+                <ImovelCard
                   key={property.id}
                   id={property.id}
                   title={property.title}
