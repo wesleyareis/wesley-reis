@@ -29,7 +29,7 @@ export const PropertyLocation = ({ property }: PropertyLocationProps) => {
 
         console.log('Buscando chave da API do Google Maps...');
         
-        // Buscar a chave da API do Google Maps usando o nome correto do parâmetro
+        // Buscar a chave da API do Google Maps
         const { data, error } = await supabase.rpc('secrets', {
           secret_name: 'GOOGLE_MAPS_API_KEY'
         });
@@ -39,11 +39,12 @@ export const PropertyLocation = ({ property }: PropertyLocationProps) => {
           throw error;
         }
 
-        if (!data?.secret) {
-          console.error('Google Maps API key não encontrada');
+        // Verificar se a chave foi retornada corretamente
+        if (!data || !data.secret) {
+          console.error('Chave da API do Google Maps não encontrada no Supabase');
           toast({
-            title: "Erro ao carregar mapa",
-            description: "Chave da API do Google Maps não configurada.",
+            title: "Configuração necessária",
+            description: "A chave da API do Google Maps precisa ser configurada no Supabase.",
             variant: "destructive",
           });
           return;
