@@ -30,21 +30,20 @@ export const PropertyLocation = ({ property }: PropertyLocationProps) => {
         console.log('Buscando chave da API do Google Maps...');
         
         // Buscar a chave da API do Google Maps
-        const { data, error } = await supabase.rpc('secrets', {
+        const { data: secretData, error: secretError } = await supabase.rpc('secrets', {
           secret_name: 'GOOGLE_MAPS_API_KEY'
         });
 
-        if (error) {
-          console.error('Erro ao buscar chave da API:', error);
-          throw error;
+        if (secretError) {
+          console.error('Erro ao buscar chave da API:', secretError);
+          throw secretError;
         }
 
-        // Verificar se a chave foi retornada corretamente
-        if (!data || !data.secret) {
-          console.error('Chave da API do Google Maps não encontrada no Supabase');
+        if (!secretData?.secret) {
+          console.error('Chave da API do Google Maps não encontrada');
           toast({
-            title: "Configuração necessária",
-            description: "A chave da API do Google Maps precisa ser configurada no Supabase.",
+            title: "Erro ao carregar mapa",
+            description: "Chave da API do Google Maps não configurada.",
             variant: "destructive",
           });
           return;
@@ -57,7 +56,7 @@ export const PropertyLocation = ({ property }: PropertyLocationProps) => {
           `${property.street_address}, ${property.neighborhood}, ${property.city}`
         );
         
-        const url = `https://www.google.com/maps/embed/v1/place?key=${data.secret}&q=${address}`;
+        const url = `https://www.google.com/maps/embed/v1/place?key=${secretData.secret}&q=${address}`;
         console.log('URL do mapa gerada com sucesso');
         setMapUrl(url);
 
