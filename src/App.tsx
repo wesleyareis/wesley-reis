@@ -23,32 +23,23 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
       console.log("Estado de autenticação alterado:", event, session?.user?.id);
 
+      if (event === 'SIGNED_OUT') {
+        setIsAuthenticated(false);
+        navigate('/login', { replace: true });
+        return;
+      }
+
+      if (!session) {
+        setIsAuthenticated(false);
+        navigate('/login', { replace: true });
+        return;
+      }
+
       try {
-        if (event === 'SIGNED_OUT') {
-          setIsAuthenticated(false);
-          navigate('/login', { replace: true });
-          return;
-        }
-
-        if (!session) {
-          setIsAuthenticated(false);
-          navigate('/login', { replace: true });
-          return;
-        }
-
-        // Verifica se o usuário ainda é válido
         const { data: { user }, error: userError } = await supabase.auth.getUser();
         
-        if (userError) {
+        if (userError || !user) {
           console.error("Erro ao verificar usuário:", userError);
-          setIsAuthenticated(false);
-          // Limpa a sessão local sem tentar fazer logout no servidor
-          await supabase.auth.signOut({ scope: 'local' });
-          navigate('/login', { replace: true });
-          return;
-        }
-
-        if (!user) {
           setIsAuthenticated(false);
           await supabase.auth.signOut({ scope: 'local' });
           navigate('/login', { replace: true });
