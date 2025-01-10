@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface ImovelCardProps {
   id: string;
+  property_code: string;
   title: string;
   price: number;
   location: string;
@@ -21,6 +22,7 @@ interface ImovelCardProps {
 
 export function ImovelCard({
   id,
+  property_code,
   title,
   price,
   location,
@@ -78,7 +80,7 @@ export function ImovelCard({
       </CardContent>
       <CardFooter className="p-4 pt-0 flex justify-between">
         <Link
-          to={`/imovel/${id}`}
+          to={`/imovel/codigo/${property_code}`}
           className="text-primary hover:text-primary/80 font-medium text-sm"
         >
           Ver detalhes →

@@ -10,10 +10,10 @@ import { usePropertyForm } from "@/hooks/usePropertyForm";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 const ImovelDetalhe = () => {
-  const { id } = useParams();
+  const { id, code } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const isNewProperty = !id || id === "novo";
+  const isNewProperty = !id && !code;
   const isEditMode = isNewProperty || window.location.pathname.includes("/editar/");
 
   useEffect(() => {
@@ -33,15 +33,21 @@ const ImovelDetalhe = () => {
   }, [navigate, toast, isEditMode]);
 
   const { data: property, isLoading: isLoadingProperty, isError } = useQuery({
-    queryKey: ["property", id],
+    queryKey: ["property", id, code],
     queryFn: async () => {
       if (isNewProperty) return null;
 
-      const { data, error } = await supabase
+      const query = supabase
         .from("properties")
-        .select("*")
-        .eq("id", id)
-        .maybeSingle();
+        .select("*");
+
+      if (id) {
+        query.eq("id", id);
+      } else if (code) {
+        query.eq("property_code", code);
+      }
+
+      const { data, error } = await query.maybeSingle();
 
       if (error) {
         console.error("Erro ao carregar imóvel:", error);
@@ -51,6 +57,16 @@ const ImovelDetalhe = () => {
           variant: "destructive",
         });
         throw error;
+      }
+
+      if (!data && !isNewProperty) {
+        toast({
+          title: "Imóvel não encontrado",
+          description: "O imóvel que você está procurando não existe.",
+          variant: "destructive",
+        });
+        navigate("/");
+        return null;
       }
 
       return data;

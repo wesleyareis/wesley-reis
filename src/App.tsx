@@ -18,7 +18,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        // Primeiro, limpa qualquer token inválido
         const currentSession = localStorage.getItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
         if (currentSession) {
           try {
@@ -56,7 +55,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    // Configura o listener de mudança de estado de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
         localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
@@ -109,7 +107,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/imovel/:id" element={<ImovelDetalhe />} />
+            <Route path="/imovel/codigo/:code" element={<ImovelDetalhe />} />
             <Route 
               path="/dashboard" 
               element={
