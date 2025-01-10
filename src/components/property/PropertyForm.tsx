@@ -36,7 +36,7 @@ export const PropertyForm = ({
     onInputChange({
       target: {
         name: 'features',
-        value: newFeatures,
+        value: newFeatures
       }
     } as unknown as React.ChangeEvent<HTMLInputElement>);
   };

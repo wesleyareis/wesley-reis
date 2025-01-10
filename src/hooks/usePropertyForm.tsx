@@ -14,13 +14,13 @@ export const usePropertyForm = (initialData: PropertyFormData) => {
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
     
     // Tratamento especial para features
     if (name === 'features') {
       setFormData((prev) => ({
         ...prev,
-        features: value as Record<string, boolean>
+        features: value as unknown as Record<string, boolean>
       }));
       return;
     }
