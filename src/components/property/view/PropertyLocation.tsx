@@ -1,6 +1,5 @@
 import { PropertyData } from "@/types/property";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 interface PropertyLocationProps {
@@ -14,13 +13,6 @@ export const PropertyLocation = ({ property }: PropertyLocationProps) => {
   useEffect(() => {
     const generateMapUrl = async () => {
       try {
-        // Se já tiver uma URL do mapa e ela for do formato embed, use-a
-        if (property.map_url && property.map_url.includes('maps/embed')) {
-          console.log('Usando URL do mapa existente:', property.map_url);
-          setMapUrl(property.map_url);
-          return;
-        }
-
         // Se não tiver endereço completo, não gere o mapa
         if (!property.street_address || !property.neighborhood || !property.city) {
           console.log('Endereço incompleto, não gerando mapa');

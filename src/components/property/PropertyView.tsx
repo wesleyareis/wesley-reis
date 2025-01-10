@@ -30,15 +30,6 @@ export const PropertyView = ({ property, canEdit }: PropertyViewProps) => {
     enabled: !!property.agent_id
   });
 
-  const handleWhatsAppClick = () => {
-    if (!agent?.whatsapp_url) return;
-    
-    const propertyUrl = window.location.href;
-    const message = `Olá, gostaria de mais informações deste imóvel à venda que vi em seu site: ${propertyUrl}`;
-    const whatsappUrl = `${agent.whatsapp_url}&text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <PropertyHeader property={property} canEdit={canEdit} />
@@ -65,8 +56,9 @@ export const PropertyView = ({ property, canEdit }: PropertyViewProps) => {
             <PropertyPrice property={property} />
             {agent && (
               <PropertyAgent 
-                agent={agent} 
-                onWhatsAppClick={handleWhatsAppClick}
+                agent={agent}
+                propertyUrl={window.location.href}
+                onWhatsAppClick={() => {}} // Não é mais necessário pois o componente agora gerencia seu próprio clique
               />
             )}
           </div>
