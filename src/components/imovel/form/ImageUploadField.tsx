@@ -69,6 +69,7 @@ export const ImageUploadField = ({ images, onChange }: ImageUploadFieldProps) =>
               className="w-full h-full object-cover rounded-lg"
             />
             <button
+              type="button"
               onClick={() => handleRemoveImage(index)}
               className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
             >
@@ -77,7 +78,10 @@ export const ImageUploadField = ({ images, onChange }: ImageUploadFieldProps) =>
           </div>
         ))}
         
-        <div className="aspect-video flex items-center justify-center border-2 border-dashed rounded-lg p-4">
+        <Label 
+          htmlFor="images" 
+          className="cursor-pointer aspect-video flex items-center justify-center border-2 border-dashed rounded-lg p-4 hover:bg-gray-50 transition-colors"
+        >
           <div className="text-center">
             <input
               type="file"
@@ -88,28 +92,21 @@ export const ImageUploadField = ({ images, onChange }: ImageUploadFieldProps) =>
               onChange={handleFileUpload}
               disabled={isUploading}
             />
-            <Label htmlFor="images" className="cursor-pointer">
-              <Button
-                type="button"
-                variant="outline"
-                disabled={isUploading}
-                className="w-full"
-              >
-                {isUploading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Carregando...
-                  </>
-                ) : (
-                  <>
-                    <ImagePlus className="w-4 h-4 mr-2" />
-                    Adicionar Imagens
-                  </>
-                )}
-              </Button>
-            </Label>
+            <div className="flex flex-col items-center gap-2">
+              {isUploading ? (
+                <>
+                  <Loader2 className="w-6 h-6 animate-spin" />
+                  <span className="text-sm text-gray-600">Carregando...</span>
+                </>
+              ) : (
+                <>
+                  <ImagePlus className="w-6 h-6 text-gray-400" />
+                  <span className="text-sm text-gray-600">Adicionar Imagens</span>
+                </>
+              )}
+            </div>
           </div>
-        </div>
+        </Label>
       </div>
     </div>
   );
