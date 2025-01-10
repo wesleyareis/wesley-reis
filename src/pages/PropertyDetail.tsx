@@ -30,7 +30,7 @@ const PropertyDetail = () => {
     images: [] as string[],
   });
 
-  const { data: property } = useQuery({
+  const { data: property, isError } = useQuery({
     queryKey: ["property", id],
     queryFn: async () => {
       if (id === "new") return null;
