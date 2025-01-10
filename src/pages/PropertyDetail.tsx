@@ -27,6 +27,7 @@ const PropertyDetail = () => {
     neighborhood: "",
     street_address: "",
     images: [],
+    features: {},
   });
 
   useEffect(() => {
@@ -68,7 +69,7 @@ const PropertyDetail = () => {
     if (property) {
       setFormData({
         ...property,
-        features: property.features || {},
+        features: property.features as Record<string, any> || {},
       });
     }
   }, [property]);
