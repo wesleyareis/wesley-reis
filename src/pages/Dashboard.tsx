@@ -15,12 +15,12 @@ const Dashboard = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) throw sessionError;
+        const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
-          navigate("/login");
+          // Se não houver sessão, limpa o localStorage e redireciona
+          localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
+          navigate("/login", { replace: true });
           return;
         }
 
@@ -30,25 +30,26 @@ const Dashboard = () => {
           .eq('id', session.user.id)
           .single();
         
-        if (profileError) throw profileError;
+        if (profileError) {
+          console.error("Erro ao buscar perfil:", profileError);
+          return;
+        }
+
         setAgentProfile(profile);
-      } catch (error: any) {
+      } catch (error) {
         console.error("Erro ao verificar autenticação:", error);
-        toast({
-          title: "Erro de autenticação",
-          description: "Por favor, faça login novamente.",
-          variant: "destructive",
-        });
-        await supabase.auth.signOut();
-        navigate("/login");
+        // Em caso de erro, limpa o token e redireciona
+        localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
+        navigate("/login", { replace: true });
       }
     };
 
     checkAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_OUT' || !session) {
-        navigate("/login");
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event) => {
+      if (event === 'SIGNED_OUT') {
+        localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
+        navigate("/login", { replace: true });
       }
     });
 
@@ -60,13 +61,15 @@ const Dashboard = () => {
   const { data: properties, isLoading } = useQuery({
     queryKey: ["agent-properties"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Usuário não autenticado");
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error("Usuário não autenticado");
+      }
 
       const { data, error } = await supabase
         .from("properties")
         .select("*")
-        .eq("agent_id", user.id);
+        .eq("agent_id", session.user.id);
 
       if (error) throw error;
       return data;
@@ -79,18 +82,26 @@ const Dashboard = () => {
 
   const handleLogout = async () => {
     try {
+      // Primeiro limpa o token local
+      localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
+      
+      // Depois tenta fazer o logout no Supabase
       await supabase.auth.signOut();
-      localStorage.clear();
+      
       toast({
         title: "Logout realizado com sucesso",
         description: "Você foi desconectado da sua conta.",
       });
+      
       navigate("/");
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
+      // Mesmo com erro, força o redirecionamento
+      navigate("/login", { replace: true });
+      
       toast({
         title: "Erro ao fazer logout",
-        description: "Ocorreu um erro ao tentar desconectar.",
+        description: "Ocorreu um erro ao tentar desconectar, mas você foi redirecionado.",
         variant: "destructive",
       });
     }
