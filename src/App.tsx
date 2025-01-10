@@ -2,16 +2,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BVou ajudar a resolver esses erros de autenticação. O problema principal parece ser relacionado ao gerenciamento de sessão e tentativas de fazer logout quando não há uma sessão válida. Vamos implementar uma solução mais robusta:
-
-<lov-code>
-Vamos atualizar o arquivo App.tsx para melhorar o gerenciamento de sessão:
-
-<lov-write file_path="src/App.tsx">
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
