@@ -1,8 +1,8 @@
-import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
 import { PropertyView } from "@/components/property/PropertyView";
 import { PropertyEdit } from "@/components/property/PropertyEdit";
 import type { PropertyFormData } from "@/types/property";
@@ -70,7 +70,11 @@ const PropertyDetail = () => {
 
   useEffect(() => {
     if (property) {
-      const propertyFeatures = (property.features as Record<string, any>) || {};
+      // Ensure features is treated as Record<string, any>
+      const propertyFeatures = (typeof property.features === 'object' && property.features !== null)
+        ? property.features as Record<string, any>
+        : {};
+        
       setFormData({
         ...property,
         features: propertyFeatures,
