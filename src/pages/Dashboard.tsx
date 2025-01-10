@@ -15,15 +15,22 @@ const Dashboard = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
-        if (!session) {
-          // Se não houver sessão, limpa o localStorage e redireciona
+        if (sessionError) {
+          console.error("Erro na sessão:", sessionError);
           localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
           navigate("/login", { replace: true });
           return;
         }
 
+        if (!session) {
+          localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
+          navigate("/login", { replace: true });
+          return;
+        }
+
+        // Busca o perfil do agente apenas se houver uma sessão válida
         const { data: profile, error: profileError } = await supabase
           .from('agent_profiles')
           .select('*')
@@ -38,20 +45,20 @@ const Dashboard = () => {
         setAgentProfile(profile);
       } catch (error) {
         console.error("Erro ao verificar autenticação:", error);
-        // Em caso de erro, limpa o token e redireciona
         localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
         navigate("/login", { replace: true });
       }
     };
 
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event) => {
-      if (event === 'SIGNED_OUT') {
+    // Configura o listener de mudança de estado de autenticação
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
         localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
         navigate("/login", { replace: true });
       }
     });
+
+    checkAuth();
 
     return () => {
       subscription.unsubscribe();
@@ -74,6 +81,15 @@ const Dashboard = () => {
       if (error) throw error;
       return data;
     },
+    retry: false,
+    onError: (error) => {
+      console.error("Erro ao buscar propriedades:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar as propriedades.",
+        variant: "destructive",
+      });
+    }
   });
 
   const handleNewProperty = () => {
@@ -86,24 +102,27 @@ const Dashboard = () => {
       localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
       
       // Depois tenta fazer o logout no Supabase
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
       
-      toast({
-        title: "Logout realizado com sucesso",
-        description: "Você foi desconectado da sua conta.",
-      });
+      if (error) {
+        console.error("Erro ao fazer logout:", error);
+        toast({
+          title: "Erro ao fazer logout",
+          description: "Ocorreu um erro, mas você foi desconectado.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Logout realizado com sucesso",
+          description: "Você foi desconectado da sua conta.",
+        });
+      }
       
-      navigate("/");
+      navigate("/login", { replace: true });
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
       // Mesmo com erro, força o redirecionamento
       navigate("/login", { replace: true });
-      
-      toast({
-        title: "Erro ao fazer logout",
-        description: "Ocorreu um erro ao tentar desconectar, mas você foi redirecionado.",
-        variant: "destructive",
-      });
     }
   };
 
