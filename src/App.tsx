@@ -23,6 +23,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         if (error) {
           console.error("Erro na sessão:", error);
           setIsAuthenticated(false);
+          await supabase.auth.signOut();
           navigate('/login', { replace: true });
           return;
         }
@@ -33,10 +34,22 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
           return;
         }
 
+        // Verifica se o token ainda é válido
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
+        if (userError || !user) {
+          console.error("Erro ao verificar usuário:", userError);
+          setIsAuthenticated(false);
+          await supabase.auth.signOut();
+          navigate('/login', { replace: true });
+          return;
+        }
+
         setIsAuthenticated(true);
       } catch (error) {
         console.error("Erro ao verificar sessão:", error);
         setIsAuthenticated(false);
+        await supabase.auth.signOut();
         navigate('/login', { replace: true });
       } finally {
         setIsLoading(false);
@@ -45,11 +58,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
     checkSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Estado de autenticação alterado:", event, session?.user?.id);
       
-      if (event === 'SIGNED_OUT') {
+      if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED' && !session) {
         setIsAuthenticated(false);
+        await supabase.auth.signOut(); // Garante que a sessão seja limpa
         navigate('/login', { replace: true });
       } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         setIsAuthenticated(true);
