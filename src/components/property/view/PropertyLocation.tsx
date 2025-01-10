@@ -12,8 +12,8 @@ export const PropertyLocation = ({ property }: PropertyLocationProps) => {
   useEffect(() => {
     const generateMapUrl = async () => {
       try {
-        // Se já tiver uma URL do mapa, use-a
-        if (property.map_url) {
+        // Se já tiver uma URL do mapa e ela for do formato embed, use-a
+        if (property.map_url && property.map_url.includes('maps/embed')) {
           setMapUrl(property.map_url);
           return;
         }
