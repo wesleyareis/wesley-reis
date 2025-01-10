@@ -2,7 +2,9 @@ import { Building2, Bath, Car, Bed } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { PropertyData } from "@/types/property";
-import { ContactForm } from "./ContactForm";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PropertyViewProps {
   property: PropertyData;
@@ -11,6 +13,20 @@ interface PropertyViewProps {
 
 export const PropertyView = ({ property, canEdit }: PropertyViewProps) => {
   const navigate = useNavigate();
+
+  const { data: agent } = useQuery({
+    queryKey: ['agent', property.agent_id],
+    queryFn: async () => {
+      if (!property.agent_id) return null;
+      const { data } = await supabase
+        .from('agent_profiles')
+        .select('*')
+        .eq('id', property.agent_id)
+        .single();
+      return data;
+    },
+    enabled: !!property.agent_id
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -115,13 +131,13 @@ export const PropertyView = ({ property, canEdit }: PropertyViewProps) => {
                   currency: 'BRL' 
                 }).format(property.price || 0)}
               </div>
-              {property.features?.condominio && (
+              {typeof property.features === 'object' && property.features && 'condominio' in property.features && property.features.condominio && (
                 <div className="mb-2">
                   <span className="text-muted-foreground">Condomínio:</span>
                   <span className="ml-2">R$ 670/mês</span>
                 </div>
               )}
-              {property.features?.iptu && (
+              {typeof property.features === 'object' && property.features && 'iptu' in property.features && property.features.iptu && (
                 <div className="mb-4">
                   <span className="text-muted-foreground">IPTU:</span>
                   <span className="ml-2">R$ 78,00/mês</span>
@@ -129,12 +145,29 @@ export const PropertyView = ({ property, canEdit }: PropertyViewProps) => {
               )}
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <ContactForm 
-                propertyId={property.id || ''} 
-                agentId={property.agent_id || ''}
-              />
-            </div>
+            {agent && (
+              <div className="bg-white p-6 rounded-lg shadow-sm">
+                <div className="flex items-center gap-4 mb-4">
+                  <Avatar className="h-16 w-16">
+                    <AvatarImage src={agent.profile_image} alt={agent.full_name} />
+                    <AvatarFallback>{agent.full_name?.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="font-semibold text-lg">{agent.full_name}</h3>
+                    {agent.creci && (
+                      <p className="text-sm text-muted-foreground">CRECI: {agent.creci}</p>
+                    )}
+                  </div>
+                </div>
+                {agent.whatsapp_url && (
+                  <Button className="w-full" asChild>
+                    <a href={agent.whatsapp_url} target="_blank" rel="noopener noreferrer">
+                      Falar no WhatsApp
+                    </a>
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </main>
