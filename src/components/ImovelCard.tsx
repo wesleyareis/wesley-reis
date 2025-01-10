@@ -87,7 +87,7 @@ export function ImovelCard({
         </Link>
         {isAgent && (
           <div className="flex gap-2">
-            <Link to={`/imovel/editar/${id}`}>
+            <Link to={`/imovel/editar/${property_code}`}>
               <Button variant="outline" size="sm">
                 <Edit className="w-4 h-4" />
               </Button>

@@ -25,9 +25,12 @@ const App = () => {
       <TooltipProvider>
         <BrowserRouter>
           <Routes>
+            {/* Rotas públicas */}
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/imovel/:property_code" element={<ImovelDetalhe />} />
+            
+            {/* Rotas protegidas */}
             <Route 
               path="/dashboard" 
               element={
