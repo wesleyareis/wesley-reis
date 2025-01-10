@@ -24,10 +24,14 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Initialize session state
     const initSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error("Session error:", error);
+          setIsAuthenticated(false);
+          return;
+        }
         setIsAuthenticated(!!session);
       } catch (error) {
         console.error("Error checking auth status:", error);
@@ -39,17 +43,17 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
     initSession();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, session?.user?.id);
       
       if (event === 'SIGNED_OUT') {
-        // Clear any stored session data
         await supabase.auth.signOut();
         queryClient.clear();
+        localStorage.clear(); // Clear all local storage
       }
       
       setIsAuthenticated(!!session);
+      setIsLoading(false);
     });
 
     return () => {
@@ -73,13 +77,13 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => {
-  // Initialize session on app load
   useEffect(() => {
     const initializeAuth = async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
       if (error) {
         console.error("Error initializing auth:", error);
         await supabase.auth.signOut();
+        localStorage.clear();
       }
       if (!session) {
         console.log("No active session found");
