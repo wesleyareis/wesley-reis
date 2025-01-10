@@ -16,31 +16,28 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    let mounted = true;
-
-    const handleAuthChange = async (event: string, session: any) => {
-      if (!mounted) return;
-
-      if (event === 'SIGNED_OUT') {
-        setIsAuthenticated(false);
-        navigate('/login', { replace: true });
-        return;
-      }
-
-      if (!session) {
-        setIsAuthenticated(false);
-        navigate('/login', { replace: true });
-        return;
-      }
-
-      setIsAuthenticated(true);
-    };
-
     const initializeAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        // Primeiro, limpa qualquer token inválido
+        const currentSession = localStorage.getItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
+        if (currentSession) {
+          try {
+            JSON.parse(currentSession);
+          } catch (e) {
+            console.error("Token inválido encontrado, removendo...");
+            localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
+          }
+        }
+
+        const { data: { session }, error } = await supabase.auth.getSession();
         
-        if (!mounted) return;
+        if (error) {
+          console.error("Erro ao obter sessão:", error);
+          localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
+          setIsAuthenticated(false);
+          navigate('/login', { replace: true });
+          return;
+        }
 
         if (!session) {
           setIsAuthenticated(false);
@@ -51,23 +48,31 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         setIsAuthenticated(true);
       } catch (error) {
         console.error("Erro ao inicializar autenticação:", error);
-        if (mounted) {
-          setIsAuthenticated(false);
-          navigate('/login', { replace: true });
-        }
+        localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
+        setIsAuthenticated(false);
+        navigate('/login', { replace: true });
       } finally {
-        if (mounted) {
-          setIsLoading(false);
-        }
+        setIsLoading(false);
       }
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthChange);
-    
+    // Configura o listener de mudança de estado de autenticação
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
+        setIsAuthenticated(false);
+        navigate('/login', { replace: true });
+        return;
+      }
+
+      if (session) {
+        setIsAuthenticated(true);
+      }
+    });
+
     initializeAuth();
 
     return () => {
-      mounted = false;
       subscription.unsubscribe();
     };
   }, [navigate]);
