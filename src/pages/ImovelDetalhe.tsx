@@ -2,11 +2,10 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { PropertyFormData } from "@/types/imovel";
 import { ImovelView } from "@/components/imovel/ImovelView";
 import { ImovelEdit } from "@/components/imovel/ImovelEdit";
-import { PropertyFormData } from "@/types/imovel";
 import { usePropertyForm } from "@/hooks/usePropertyForm";
-import { ImovelLoading } from "@/components/imovel/view/ImovelLoading";
 import { useAuthCheck } from "@/hooks/useAuthCheck";
 
 const ImovelDetalhe = () => {
@@ -91,11 +90,11 @@ const ImovelDetalhe = () => {
   }
 
   if (!isNewProperty && !property && !isEditMode) {
-    return <ImovelLoading />;
+    return <div>Carregando...</div>;
   }
 
   if (isEditMode && isLoadingProperty) {
-    return <ImovelLoading />;
+    return <div>Carregando...</div>;
   }
 
   if (isEditMode) {
