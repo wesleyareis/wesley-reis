@@ -26,7 +26,7 @@ export const PropertyForm = ({
   const navigate = useNavigate();
 
   const handleFeatureChange = (feature: string, checked: boolean) => {
-    const features = formData.features || {};
+    const features = formData.features as Record<string, boolean> || {};
     const newFeatures = {
       ...features,
       [feature]: checked
