@@ -16,43 +16,57 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    let mounted = true;
+
     const checkSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        // Primeiro, tenta obter a sessão atual
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
-        if (error) {
-          console.error("Erro na sessão:", error);
-          setIsAuthenticated(false);
-          await supabase.auth.signOut();
-          navigate('/login', { replace: true });
-          return;
-        }
-        
-        if (!session) {
-          setIsAuthenticated(false);
-          navigate('/login', { replace: true });
+        if (sessionError) {
+          console.error("Erro na sessão:", sessionError);
+          if (mounted) {
+            setIsAuthenticated(false);
+            navigate('/login', { replace: true });
+          }
           return;
         }
 
-        // Verifica se o token ainda é válido
+        if (!session) {
+          if (mounted) {
+            setIsAuthenticated(false);
+            navigate('/login', { replace: true });
+          }
+          return;
+        }
+
+        // Se temos uma sessão, verifica se o usuário ainda é válido
         const { data: { user }, error: userError } = await supabase.auth.getUser();
         
         if (userError || !user) {
           console.error("Erro ao verificar usuário:", userError);
-          setIsAuthenticated(false);
-          await supabase.auth.signOut();
-          navigate('/login', { replace: true });
+          if (mounted) {
+            setIsAuthenticated(false);
+            // Limpa a sessão localmente
+            await supabase.auth.signOut();
+            navigate('/login', { replace: true });
+          }
           return;
         }
 
-        setIsAuthenticated(true);
+        if (mounted) {
+          setIsAuthenticated(true);
+        }
       } catch (error) {
         console.error("Erro ao verificar sessão:", error);
-        setIsAuthenticated(false);
-        await supabase.auth.signOut();
-        navigate('/login', { replace: true });
+        if (mounted) {
+          setIsAuthenticated(false);
+          navigate('/login', { replace: true });
+        }
       } finally {
-        setIsLoading(false);
+        if (mounted) {
+          setIsLoading(false);
+        }
       }
     };
 
@@ -61,16 +75,25 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Estado de autenticação alterado:", event, session?.user?.id);
       
-      if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED' && !session) {
+      if (!mounted) return;
+
+      if (event === 'SIGNED_OUT') {
         setIsAuthenticated(false);
-        await supabase.auth.signOut(); // Garante que a sessão seja limpa
         navigate('/login', { replace: true });
-      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+      } else if (event === 'SIGNED_IN') {
         setIsAuthenticated(true);
+      } else if (event === 'TOKEN_REFRESHED') {
+        if (session) {
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+          navigate('/login', { replace: true });
+        }
       }
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, [navigate]);
