@@ -26,8 +26,9 @@ export const PropertyForm = ({
   const navigate = useNavigate();
 
   const handleFeatureChange = (feature: string, checked: boolean) => {
+    const features = formData.features || {};
     const newFeatures = {
-      ...formData.features,
+      ...features,
       [feature]: checked
     };
     
