@@ -1,10 +1,9 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Building2, Bath, Car, Bed, MapPin, Loader2, Wand2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Wand2, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -65,36 +64,32 @@ const PropertyDetail = () => {
   const generateDescription = async () => {
     setIsGeneratingDescription(true);
     try {
-      const response = await fetch(
-        "https://kjlipbbrbwdzqiwvrnpw.supabase.co/functions/v1/generate-property-description",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+      const { data, error } = await supabase.functions.invoke("generate-property-description", {
+        body: {
+          propertyDetails: {
+            type: formData.property_type,
+            bedrooms: formData.bedrooms,
+            bathrooms: formData.bathrooms,
+            parkingSpaces: formData.parking_spaces,
+            area: formData.total_area,
+            location: `${formData.neighborhood}, ${formData.city}`,
           },
-          body: JSON.stringify({
-            propertyDetails: {
-              type: formData.property_type,
-              bedrooms: formData.bedrooms,
-              bathrooms: formData.bathrooms,
-              parkingSpaces: formData.parking_spaces,
-              area: formData.total_area,
-              location: `${formData.neighborhood}, ${formData.city}`,
-            },
-          }),
-        }
-      );
+        },
+      });
 
-      const data = await response.json();
-      if (data.description) {
+      if (error) throw error;
+
+      if (data?.description) {
         setFormData(prev => ({ ...prev, description: data.description }));
         toast({
           title: "Descrição gerada com sucesso!",
           description: "A descrição do imóvel foi atualizada.",
         });
+      } else {
+        throw new Error("Não foi possível gerar a descrição");
       }
     } catch (error) {
+      console.error("Erro ao gerar descrição:", error);
       toast({
         title: "Erro ao gerar descrição",
         description: "Não foi possível gerar a descrição do imóvel.",
@@ -320,6 +315,3 @@ const PropertyDetail = () => {
       </main>
     </div>
   );
-};
-
-export default PropertyDetail;

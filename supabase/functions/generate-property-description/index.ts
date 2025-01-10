@@ -46,6 +46,11 @@ serve(async (req) => {
     })
 
     const data = await response.json()
+    
+    if (!response.ok) {
+      throw new Error(data.error?.message || 'Erro ao gerar descrição')
+    }
+
     const description = data.choices[0].message.content
 
     return new Response(
@@ -53,6 +58,7 @@ serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
+    console.error('Erro na função generate-property-description:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
