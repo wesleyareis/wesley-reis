@@ -10,9 +10,9 @@ import { ImovelLoading } from "@/components/imovel/view/ImovelLoading";
 import { useAuthCheck } from "@/hooks/useAuthCheck";
 
 const ImovelDetalhe = () => {
-  const { id, code } = useParams();
+  const { code } = useParams();
   const { toast } = useToast();
-  const isNewProperty = !id && !code;
+  const isNewProperty = !code;
   const isEditMode = isNewProperty || window.location.pathname.includes("/editar/");
 
   // Verifica autenticação quando necessário
@@ -20,21 +20,15 @@ const ImovelDetalhe = () => {
 
   // Busca dados do imóvel
   const { data: property, isLoading: isLoadingProperty, isError } = useQuery({
-    queryKey: ["property", id, code],
+    queryKey: ["property", code],
     queryFn: async () => {
       if (isNewProperty) return null;
 
-      const query = supabase
+      const { data, error } = await supabase
         .from("properties")
-        .select("*");
-
-      if (id) {
-        query.eq("id", id);
-      } else if (code) {
-        query.eq("property_code", code);
-      }
-
-      const { data, error } = await query.maybeSingle();
+        .select("*")
+        .eq("property_code", code)
+        .maybeSingle();
 
       if (error) {
         console.error("Erro ao carregar imóvel:", error);

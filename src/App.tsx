@@ -45,7 +45,7 @@ const App = () => {
               } 
             />
             <Route 
-              path="/imovel/editar/:id" 
+              path="/imovel/editar/:code" 
               element={
                 <ProtectedRoute>
                   <ImovelDetalhe />
