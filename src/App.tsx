@@ -27,7 +27,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/imovel/:code" element={<ImovelDetalhe />} />
+            <Route path="/imovel/:property_code" element={<ImovelDetalhe />} />
             <Route 
               path="/dashboard" 
               element={
@@ -45,7 +45,7 @@ const App = () => {
               } 
             />
             <Route 
-              path="/imovel/editar/:code" 
+              path="/imovel/editar/:property_code" 
               element={
                 <ProtectedRoute>
                   <ImovelDetalhe />
