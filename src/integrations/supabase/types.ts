@@ -310,18 +310,15 @@ export type Database = {
           bedrooms: number | null
           building_name: string | null
           city: string
-          condominium_fee: number | null
           created_at: string | null
           description: string | null
           features: Json | null
           id: string
           images: string[] | null
-          map_url: string | null
           neighborhood: string
           parking_spaces: number | null
           price: number
           property_code: string | null
-          property_tax: number | null
           property_type: string
           status: string | null
           street_address: string | null
@@ -335,18 +332,15 @@ export type Database = {
           bedrooms?: number | null
           building_name?: string | null
           city: string
-          condominium_fee?: number | null
           created_at?: string | null
           description?: string | null
           features?: Json | null
           id?: string
           images?: string[] | null
-          map_url?: string | null
           neighborhood: string
           parking_spaces?: number | null
           price: number
           property_code?: string | null
-          property_tax?: number | null
           property_type: string
           status?: string | null
           street_address?: string | null
@@ -360,18 +354,15 @@ export type Database = {
           bedrooms?: number | null
           building_name?: string | null
           city?: string
-          condominium_fee?: number | null
           created_at?: string | null
           description?: string | null
           features?: Json | null
           id?: string
           images?: string[] | null
-          map_url?: string | null
           neighborhood?: string
           parking_spaces?: number | null
           price?: number
           property_code?: string | null
-          property_tax?: number | null
           property_type?: string
           status?: string | null
           street_address?: string | null

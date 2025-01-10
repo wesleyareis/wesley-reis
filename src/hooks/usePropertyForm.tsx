@@ -14,31 +14,17 @@ export const usePropertyForm = (initialData: PropertyFormData) => {
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value, type } = e.target;
-    
-    // Tratamento especial para features
-    if (name === 'features') {
-      setFormData((prev) => ({
-        ...prev,
-        features: value as Record<string, boolean>
-      }));
-      return;
-    }
-
-    // Conversão para número quando necessário
-    const shouldBeNumber = [
-      "price",
-      "bedrooms",
-      "bathrooms",
-      "parking_spaces",
-      "total_area",
-      "condominium_fee",
-      "property_tax"
-    ].includes(name);
-
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: shouldBeNumber ? Number(value) : value,
+      [name]:
+        name === "price" ||
+        name === "bedrooms" ||
+        name === "bathrooms" ||
+        name === "parking_spaces" ||
+        name === "total_area"
+          ? Number(value)
+          : value,
     }));
   };
 
@@ -94,7 +80,7 @@ export const usePropertyForm = (initialData: PropertyFormData) => {
           description: "Você precisa estar logado para realizar esta operação.",
           variant: "destructive",
         });
-        navigate("/login", { replace: true });
+        navigate("/login");
         return;
       }
 
@@ -104,20 +90,25 @@ export const usePropertyForm = (initialData: PropertyFormData) => {
         features: formData.features || {},
       };
 
-      const { error } = !formData.id
-        ? await supabase
-            .from("properties")
-            .insert([propertyData])
-            .select()
-            .single()
-        : await supabase
-            .from("properties")
-            .update(propertyData)
-            .eq("id", formData.id)
-            .select()
-            .single();
+      let result;
+      if (!formData.id) {
+        // Criar novo imóvel
+        result = await supabase
+          .from("properties")
+          .insert([propertyData])
+          .select()
+          .single();
+      } else {
+        // Atualizar imóvel existente
+        result = await supabase
+          .from("properties")
+          .update(propertyData)
+          .eq("id", formData.id)
+          .select()
+          .single();
+      }
 
-      if (error) throw error;
+      if (result.error) throw result.error;
 
       toast({
         title: "Sucesso!",
@@ -126,9 +117,9 @@ export const usePropertyForm = (initialData: PropertyFormData) => {
           : "Imóvel criado com sucesso!",
       });
 
-      navigate("/dashboard", { replace: true });
+      navigate("/dashboard");
     } catch (error) {
-      console.error("Erro ao salvar imóvel:", error);
+      console.error("Error saving property:", error);
       toast({
         title: "Erro",
         description: "Ocorreu um erro ao salvar o imóvel.",

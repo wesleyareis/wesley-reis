@@ -5,8 +5,6 @@ import { PropertyData } from "@/types/property";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { cn } from "@/lib/utils";
 
 interface PropertyViewProps {
   property: PropertyData;
@@ -29,15 +27,6 @@ export const PropertyView = ({ property, canEdit }: PropertyViewProps) => {
     },
     enabled: !!property.agent_id
   });
-
-  const handleWhatsAppClick = () => {
-    if (!agent?.whatsapp_url) return;
-    
-    const propertyUrl = window.location.href;
-    const message = `Olá, gostaria de mais informações deste imóvel à venda que vi em seu site: ${propertyUrl}`;
-    const whatsappUrl = `${agent.whatsapp_url}&text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -68,27 +57,12 @@ export const PropertyView = ({ property, canEdit }: PropertyViewProps) => {
 
       <main className="max-w-7xl mx-auto px-4 py-8">
         {property.images && property.images.length > 0 && (
-          <div className="mb-8">
-            <Carousel className="w-full">
-              <CarouselContent>
-                {property.images.map((image, index) => (
-                  <CarouselItem key={index}>
-                    <div className="aspect-video w-full rounded-lg overflow-hidden">
-                      <img
-                        src={image}
-                        alt={`${property.title} - Imagem ${index + 1}`}
-                        className={cn(
-                          "w-full h-full object-cover",
-                          index === property.images!.length - 1 && "opacity-80"
-                        )}
-                      />
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <CarouselPrevious />
-              <CarouselNext />
-            </Carousel>
+          <div className="aspect-video w-full mb-8 rounded-lg overflow-hidden">
+            <img
+              src={property.images[0]}
+              alt={property.title}
+              className="w-full h-full object-cover"
+            />
           </div>
         )}
 
@@ -147,24 +121,6 @@ export const PropertyView = ({ property, canEdit }: PropertyViewProps) => {
                 </div>
               </div>
             )}
-
-            {property.map_url && (
-              <div>
-                <h2 className="text-2xl font-semibold mb-4">Localização</h2>
-                <div className="aspect-video w-full rounded-lg overflow-hidden">
-                  <iframe
-                    src={property.map_url}
-                    width="100%"
-                    height="100%"
-                    style={{ border: 0 }}
-                    allowFullScreen
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    title="Localização do imóvel"
-                  />
-                </div>
-              </div>
-            )}
           </div>
 
           <div className="space-y-6">
@@ -175,28 +131,16 @@ export const PropertyView = ({ property, canEdit }: PropertyViewProps) => {
                   currency: 'BRL' 
                 }).format(property.price || 0)}
               </div>
-              {property.condominium_fee && (
+              {typeof property.features === 'object' && property.features && 'condominio' in property.features && property.features.condominio && (
                 <div className="mb-2">
                   <span className="text-muted-foreground">Condomínio:</span>
-                  <span className="ml-2">
-                    {new Intl.NumberFormat('pt-BR', { 
-                      style: 'currency', 
-                      currency: 'BRL' 
-                    }).format(property.condominium_fee)}
-                    /mês
-                  </span>
+                  <span className="ml-2">R$ 670/mês</span>
                 </div>
               )}
-              {property.property_tax && (
+              {typeof property.features === 'object' && property.features && 'iptu' in property.features && property.features.iptu && (
                 <div className="mb-4">
                   <span className="text-muted-foreground">IPTU:</span>
-                  <span className="ml-2">
-                    {new Intl.NumberFormat('pt-BR', { 
-                      style: 'currency', 
-                      currency: 'BRL' 
-                    }).format(property.property_tax)}
-                    /mês
-                  </span>
+                  <span className="ml-2">R$ 78,00/mês</span>
                 </div>
               )}
             </div>
@@ -216,8 +160,10 @@ export const PropertyView = ({ property, canEdit }: PropertyViewProps) => {
                   </div>
                 </div>
                 {agent.whatsapp_url && (
-                  <Button className="w-full" onClick={handleWhatsAppClick}>
-                    Falar no WhatsApp
+                  <Button className="w-full" asChild>
+                    <a href={agent.whatsapp_url} target="_blank" rel="noopener noreferrer">
+                      Falar no WhatsApp
+                    </a>
                   </Button>
                 )}
               </div>
