@@ -29,17 +29,25 @@ const PropertyDetail = () => {
     images: [] as string[],
   });
 
-  const { data: property, isError } = useQuery({
+  const { data: property } = useQuery({
     queryKey: ["property", id],
     queryFn: async () => {
-      if (id === "new") return null;
+      if (!id || id === "new") return null;
+      
       const { data, error } = await supabase
         .from("properties")
         .select("*")
         .eq("id", id)
-        .single();
+        .maybeSingle();
       
-      if (error) throw error;
+      if (error) {
+        toast({
+          title: "Erro ao carregar imóvel",
+          description: "Não foi possível carregar os dados do imóvel.",
+          variant: "destructive",
+        });
+        throw error;
+      }
       return data;
     },
     enabled: !!id && id !== "new",
