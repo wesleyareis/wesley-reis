@@ -39,7 +39,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
           return;
         }
 
-        // Verify the session is still valid
         const { data: { user }, error: userError } = await supabase.auth.getUser();
         if (userError || !user) {
           console.error("User verification failed:", userError);
@@ -63,15 +62,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       console.log("Auth state changed:", event, session?.user?.id);
       
       if (event === 'SIGNED_OUT') {
-        try {
-          setIsAuthenticated(false);
-          await supabase.auth.signOut();
-          queryClient.clear();
-          localStorage.clear();
-          window.location.href = '/login';
-        } catch (error) {
-          console.error("Error during sign out:", error);
-        }
+        setIsAuthenticated(false);
+        queryClient.clear();
+        localStorage.clear();
+        window.location.href = '/login';
       } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         setIsAuthenticated(true);
       }
@@ -104,17 +98,22 @@ const App = () => {
     const initializeAuth = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) throw error;
+        if (error) {
+          console.error("Session initialization error:", error);
+          return;
+        }
         
         if (!session) {
-          console.log("No active session found");
+          console.log("No active session found during initialization");
           return;
         }
 
-        // Verify user session is valid
         const { data: { user }, error: userError } = await supabase.auth.getUser();
         if (userError || !user) {
-          throw new Error("Invalid session");
+          console.error("User verification failed during initialization:", userError);
+          await supabase.auth.signOut();
+          queryClient.clear();
+          localStorage.clear();
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
