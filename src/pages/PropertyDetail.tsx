@@ -34,10 +34,12 @@ const PropertyDetail = () => {
     queryFn: async () => {
       if (!id || id === "new") return null;
       
+      console.log("Fetching property with ID:", id); // Debug log
+      
       const { data, error } = await supabase
         .from("properties")
         .select("*")
-        .eq("id", id)
+        .eq('id', id)
         .maybeSingle();
       
       if (error) {
