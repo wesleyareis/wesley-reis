@@ -33,14 +33,15 @@ export const PropertyForm = ({
       [feature]: checked
     };
     
-    const event = {
+    // Em vez de simular um evento, vamos criar uma função auxiliar no hook
+    onInputChange({
       target: {
         name: 'features',
-        value: newFeatures
+        value: newFeatures,
+        type: 'checkbox',
+        checked: checked
       }
-    } as React.ChangeEvent<HTMLInputElement>;
-    
-    onInputChange(event);
+    } as React.ChangeEvent<HTMLInputElement>);
   };
 
   return (
