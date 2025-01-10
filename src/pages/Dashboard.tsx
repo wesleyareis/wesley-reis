@@ -75,9 +75,16 @@ const Dashboard = () => {
               {properties?.map((property) => (
                 <PropertyCard
                   key={property.id}
-                  {...property}
-                  imageUrl={property.images?.[0] || "https://via.placeholder.com/400"}
+                  id={property.id}
+                  title={property.title}
+                  price={property.price}
                   location={`${property.neighborhood}, ${property.city}`}
+                  bedrooms={property.bedrooms}
+                  bathrooms={property.bathrooms}
+                  parkingSpaces={property.parking_spaces}
+                  area={property.total_area}
+                  imageUrl={property.images?.[0] || "https://via.placeholder.com/400"}
+                  agent_id={property.agent_id}
                 />
               ))}
             </div>
