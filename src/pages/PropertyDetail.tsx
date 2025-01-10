@@ -56,6 +56,7 @@ const PropertyDetail = () => {
         .maybeSingle();
       
       if (error) {
+        console.error("Error fetching property:", error);
         toast({
           title: "Erro ao carregar imóvel",
           description: "Não foi possível carregar os dados do imóvel.",
@@ -70,7 +71,6 @@ const PropertyDetail = () => {
 
   useEffect(() => {
     if (property) {
-      // Ensure features is treated as Record<string, any>
       const propertyFeatures = (typeof property.features === 'object' && property.features !== null)
         ? property.features as Record<string, any>
         : {};
@@ -82,7 +82,7 @@ const PropertyDetail = () => {
     }
   }, [property]);
 
-  const isEditMode = window.location.pathname.includes('/edit/');
+  const isEditMode = id === "new" || window.location.pathname.includes('/edit/');
   const canEdit = id === "new" || (property && currentUser && property.agent_id === currentUser);
 
   if (isError) {
@@ -146,7 +146,15 @@ const PropertyDetail = () => {
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Usuário não autenticado");
+      if (!user) {
+        toast({
+          title: "Erro de autenticação",
+          description: "Você precisa estar logado para realizar esta operação.",
+          variant: "destructive",
+        });
+        navigate("/login");
+        return;
+      }
 
       const propertyData = {
         ...formData,
@@ -190,7 +198,7 @@ const PropertyDetail = () => {
     }
   };
 
-  if (!property && id !== "new") {
+  if (!property && id !== "new" && !isEditMode) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
