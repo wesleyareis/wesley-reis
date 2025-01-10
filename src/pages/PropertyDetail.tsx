@@ -29,7 +29,7 @@ const PropertyDetail = () => {
     images: [] as string[],
   });
 
-  const { data: property } = useQuery({
+  const { data: property, error: queryError } = useQuery({
     queryKey: ["property", id],
     queryFn: async () => {
       if (!id || id === "new") return null;
@@ -41,6 +41,7 @@ const PropertyDetail = () => {
         .maybeSingle();
       
       if (error) {
+        console.error("Error fetching property:", error);
         toast({
           title: "Erro ao carregar imóvel",
           description: "Não foi possível carregar os dados do imóvel.",
@@ -51,6 +52,7 @@ const PropertyDetail = () => {
       return data;
     },
     enabled: !!id && id !== "new",
+    retry: false
   });
 
   useEffect(() => {
@@ -146,6 +148,7 @@ const PropertyDetail = () => {
 
       navigate("/dashboard");
     } catch (error) {
+      console.error("Error saving property:", error);
       toast({
         title: "Erro",
         description: "Ocorreu um erro ao salvar o imóvel.",
@@ -155,6 +158,18 @@ const PropertyDetail = () => {
       setIsLoading(false);
     }
   };
+
+  if (queryError) {
+    return (
+      <div className="min-h-screen bg-background p-8">
+        <div className="max-w-2xl mx-auto text-center">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Erro ao carregar imóvel</h2>
+          <p className="text-gray-600 mb-4">Não foi possível carregar os dados do imóvel.</p>
+          <Button onClick={() => navigate("/dashboard")}>Voltar para dashboard</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
