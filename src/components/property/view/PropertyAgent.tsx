@@ -8,10 +8,18 @@ interface PropertyAgentProps {
     profile_image?: string | null;
     whatsapp_url?: string | null;
   };
+  propertyUrl: string;
   onWhatsAppClick: () => void;
 }
 
-export const PropertyAgent = ({ agent, onWhatsAppClick }: PropertyAgentProps) => {
+export const PropertyAgent = ({ agent, propertyUrl, onWhatsAppClick }: PropertyAgentProps) => {
+  const handleWhatsAppClick = () => {
+    if (agent.whatsapp_url) {
+      const message = encodeURIComponent(`Olá, gostaria de mais informações sobre este imóvel: ${propertyUrl}`);
+      window.open(`${agent.whatsapp_url}?text=${message}`, '_blank');
+    }
+  };
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm">
       <div className="flex items-center gap-4 mb-4">
@@ -27,7 +35,7 @@ export const PropertyAgent = ({ agent, onWhatsAppClick }: PropertyAgentProps) =>
         </div>
       </div>
       {agent.whatsapp_url && (
-        <Button className="w-full" onClick={onWhatsAppClick}>
+        <Button className="w-full" onClick={handleWhatsAppClick}>
           Falar no WhatsApp
         </Button>
       )}

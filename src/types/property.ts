@@ -21,7 +21,6 @@ export interface PropertyFormData {
   images?: string[];
   condominium_fee?: number;
   property_tax?: number;
-  map_url?: string;
 }
 
 export interface PropertyData extends PropertyFormData {

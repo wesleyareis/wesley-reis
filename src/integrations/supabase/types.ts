@@ -316,7 +316,6 @@ export type Database = {
           features: Json | null
           id: string
           images: string[] | null
-          map_url: string | null
           neighborhood: string
           parking_spaces: number | null
           price: number
@@ -341,7 +340,6 @@ export type Database = {
           features?: Json | null
           id?: string
           images?: string[] | null
-          map_url?: string | null
           neighborhood: string
           parking_spaces?: number | null
           price: number
@@ -366,7 +364,6 @@ export type Database = {
           features?: Json | null
           id?: string
           images?: string[] | null
-          map_url?: string | null
           neighborhood?: string
           parking_spaces?: number | null
           price?: number
