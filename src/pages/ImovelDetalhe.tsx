@@ -41,7 +41,7 @@ const ImovelDetalhe = () => {
         .from("properties")
         .select("*")
         .eq("id", id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error("Erro ao carregar imóvel:", error);
@@ -56,6 +56,7 @@ const ImovelDetalhe = () => {
       return data;
     },
     enabled: !isNewProperty,
+    retry: false
   });
 
   const { data: currentUser } = useQuery({
