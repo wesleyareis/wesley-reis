@@ -18,3 +18,8 @@ export interface PropertyFormData {
   features?: Record<string, any>;
   images?: string[];
 }
+
+export interface PropertyData extends PropertyFormData {
+  created_at?: string;
+  updated_at?: string;
+}
