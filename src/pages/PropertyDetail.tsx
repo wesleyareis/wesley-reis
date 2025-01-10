@@ -72,10 +72,10 @@ const PropertyDetail = () => {
 
   useEffect(() => {
     if (property) {
-      const features = property.features as Record<string, any> || {};
+      const propertyFeatures = property.features as Record<string, any> || {};
       setFormData({
         ...property,
-        features,
+        features: propertyFeatures,
       });
     }
   }, [property]);
