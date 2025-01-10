@@ -1,19 +1,21 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { PropertyView } from "@/components/property/PropertyView";
 import { PropertyEdit } from "@/components/property/PropertyEdit";
+import { PropertyFormData } from "@/types/property";
 import { usePropertyForm } from "@/hooks/usePropertyForm";
 
 const PropertyDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const isEditMode = id === "new" || window.location.pathname.includes("/edit/");
+  const isNewProperty = !id || id === "new";
+  const isEditMode = isNewProperty || window.location.pathname.includes("/edit/");
 
-  // Verificar autenticação
+  // Verificar autenticação para modo de edição
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -29,11 +31,11 @@ const PropertyDetail = () => {
     checkAuth();
   }, [navigate, toast, isEditMode]);
 
-  // Buscar dados do imóvel
+  // Buscar dados do imóvel existente
   const { data: property, isError } = useQuery({
     queryKey: ["property", id],
     queryFn: async () => {
-      if (!id || id === "new") return null;
+      if (isNewProperty) return null;
 
       const { data, error } = await supabase
         .from("properties")
@@ -52,7 +54,7 @@ const PropertyDetail = () => {
       }
       return data;
     },
-    enabled: !!id && id !== "new",
+    enabled: !isNewProperty,
   });
 
   // Verificar permissão de edição
@@ -64,9 +66,24 @@ const PropertyDetail = () => {
     },
   });
 
-  const canEdit = id === "new" || (property && currentUser && property.agent_id === currentUser.id);
+  const canEdit = isNewProperty || (property && currentUser && property.agent_id === currentUser.id);
 
-  // Usar o hook do formulário
+  // Inicializar formulário com dados vazios para novo imóvel ou dados existentes para edição
+  const initialData: PropertyFormData = property || {
+    title: "",
+    price: 0,
+    description: "",
+    property_type: "",
+    bedrooms: 0,
+    bathrooms: 0,
+    parking_spaces: 0,
+    total_area: 0,
+    city: "",
+    neighborhood: "",
+    street_address: "",
+    features: {},
+  };
+
   const {
     formData,
     isLoading,
@@ -74,7 +91,7 @@ const PropertyDetail = () => {
     handleInputChange,
     generateDescription,
     handleSubmit,
-  } = usePropertyForm(property);
+  } = usePropertyForm(initialData);
 
   if (isError) {
     return (
@@ -84,7 +101,7 @@ const PropertyDetail = () => {
     );
   }
 
-  if (!property && id !== "new" && !isEditMode) {
+  if (!isNewProperty && !property && !isEditMode) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>

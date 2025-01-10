@@ -4,27 +4,12 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyFormData } from "@/types/property";
 
-export const usePropertyForm = (initialData?: PropertyFormData) => {
+export const usePropertyForm = (initialData: PropertyFormData) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
-  const [formData, setFormData] = useState<PropertyFormData>(
-    initialData || {
-      title: "",
-      price: 0,
-      description: "",
-      property_type: "",
-      bedrooms: 0,
-      bathrooms: 0,
-      parking_spaces: 0,
-      total_area: 0,
-      city: "",
-      neighborhood: "",
-      street_address: "",
-      features: {},
-    }
-  );
+  const [formData, setFormData] = useState<PropertyFormData>(initialData);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -107,12 +92,14 @@ export const usePropertyForm = (initialData?: PropertyFormData) => {
 
       let result;
       if (!formData.id) {
+        // Criar novo imóvel
         result = await supabase
           .from("properties")
           .insert([propertyData])
           .select()
           .single();
       } else {
+        // Atualizar imóvel existente
         result = await supabase
           .from("properties")
           .update(propertyData)
