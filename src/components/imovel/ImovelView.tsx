@@ -31,6 +31,17 @@ export const ImovelView = ({ property, canEdit }: ImovelViewProps) => {
     enabled: !!property.agent_id
   });
 
+  const handleWhatsAppClick = () => {
+    if (agent?.whatsapp_url) {
+      // Adiciona a mensagem padrão com informações do imóvel
+      const message = encodeURIComponent(
+        `Olá! Vi o imóvel ${property.title} (código: ${property.property_code}) e gostaria de mais informações.`
+      );
+      const whatsappUrl = `${agent.whatsapp_url}${agent.whatsapp_url.includes('?') ? '&' : '?'}text=${message}`;
+      window.open(whatsappUrl, '_blank');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <ImovelHeader property={property} canEdit={canEdit} />
@@ -59,7 +70,7 @@ export const ImovelView = ({ property, canEdit }: ImovelViewProps) => {
               <ImovelCorretor 
                 agent={agent}
                 propertyUrl={window.location.href}
-                onWhatsAppClick={() => {}}
+                onWhatsAppClick={handleWhatsAppClick}
               />
             )}
           </div>
