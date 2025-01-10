@@ -10,24 +10,24 @@ import { ImovelLoading } from "@/components/imovel/view/ImovelLoading";
 import { useAuthCheck } from "@/hooks/useAuthCheck";
 
 const ImovelDetalhe = () => {
-  const { code } = useParams();
+  const { property_code } = useParams();
   const { toast } = useToast();
-  const isNewProperty = !code;
+  const isNewProperty = !property_code;
   const isEditMode = isNewProperty || window.location.pathname.includes("/editar/");
 
-  // Verifica autenticação quando necessário
+  // Verifica autenticação apenas quando estiver em modo de edição
   useAuthCheck(isEditMode);
 
   // Busca dados do imóvel
   const { data: property, isLoading: isLoadingProperty, isError } = useQuery({
-    queryKey: ["property", code],
+    queryKey: ["property", property_code],
     queryFn: async () => {
       if (isNewProperty) return null;
 
       const { data, error } = await supabase
         .from("properties")
         .select("*")
-        .eq("property_code", code)
+        .eq("property_code", property_code)
         .maybeSingle();
 
       if (error) {
@@ -53,6 +53,7 @@ const ImovelDetalhe = () => {
       const { data: { user } } = await supabase.auth.getUser();
       return user;
     },
+    enabled: isEditMode, // Busca usuário apenas em modo de edição
   });
 
   const canEdit = isNewProperty || (property && currentUser && property.agent_id === currentUser.id);
