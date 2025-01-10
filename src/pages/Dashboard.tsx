@@ -55,7 +55,7 @@ const Dashboard = () => {
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      localStorage.clear(); // Limpa todo o localStorage
+      localStorage.clear();
       toast({
         title: "Logout realizado com sucesso",
         description: "Você foi desconectado da sua conta.",
@@ -84,18 +84,18 @@ const Dashboard = () => {
                   alt={agentProfile.full_name}
                   className="w-10 h-10 rounded-full"
                 />
-                <span className="text-sm font-medium">{agentProfile.full_name}</span>
+                <span className="text-sm font-medium hidden sm:inline">{agentProfile.full_name}</span>
               </div>
             )}
           </div>
           <div className="flex gap-4">
             <Button onClick={handleNewProperty} className="flex items-center gap-2">
               <Plus className="w-4 h-4" />
-              Novo Imóvel
+              <span className="hidden sm:inline">Novo Imóvel</span>
             </Button>
             <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
               <LogOut className="w-4 h-4" />
-              Logout
+              <span className="hidden sm:inline">Logout</span>
             </Button>
           </div>
         </div>
