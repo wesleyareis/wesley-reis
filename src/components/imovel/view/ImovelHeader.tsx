@@ -30,7 +30,7 @@ export const ImovelHeader = ({ property, canEdit }: ImovelHeaderProps) => {
             )}
           </div>
           {canEdit && (
-            <Button onClick={() => navigate(`/imovel/editar/${property.id}`)}>
+            <Button onClick={() => navigate(`/imovel/editar/${property.property_code}`)}>
               Editar Imóvel
             </Button>
           )}
