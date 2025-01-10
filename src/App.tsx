@@ -21,54 +21,29 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const handleAuthChange = async (event: string, session: any) => {
       if (!mounted) return;
 
-      if (event === 'SIGNED_OUT' || !session) {
+      if (event === 'SIGNED_OUT') {
         setIsAuthenticated(false);
         navigate('/login', { replace: true });
         return;
       }
 
-      try {
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        
-        if (userError || !user) {
-          console.error("Erro ao verificar usuário:", userError);
-          setIsAuthenticated(false);
-          // Apenas limpa o estado local sem tentar fazer logout no servidor
-          localStorage.removeItem('supabase.auth.token');
-          navigate('/login', { replace: true });
-          return;
-        }
-
-        setIsAuthenticated(true);
-      } catch (error) {
-        console.error("Erro ao processar mudança de autenticação:", error);
-        if (mounted) {
-          setIsAuthenticated(false);
-          localStorage.removeItem('supabase.auth.token');
-          navigate('/login', { replace: true });
-        }
+      if (!session) {
+        setIsAuthenticated(false);
+        navigate('/login', { replace: true });
+        return;
       }
+
+      setIsAuthenticated(true);
     };
 
     const initializeAuth = async () => {
       try {
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        const { data: { session } } = await supabase.auth.getSession();
         
         if (!mounted) return;
 
-        if (sessionError || !session) {
-          console.log("Sem sessão ativa ou erro:", sessionError);
+        if (!session) {
           setIsAuthenticated(false);
-          navigate('/login', { replace: true });
-          return;
-        }
-
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        
-        if (userError || !user) {
-          console.error("Erro ao verificar usuário:", userError);
-          setIsAuthenticated(false);
-          localStorage.removeItem('supabase.auth.token');
           navigate('/login', { replace: true });
           return;
         }
@@ -78,7 +53,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         console.error("Erro ao inicializar autenticação:", error);
         if (mounted) {
           setIsAuthenticated(false);
-          localStorage.removeItem('supabase.auth.token');
           navigate('/login', { replace: true });
         }
       } finally {
