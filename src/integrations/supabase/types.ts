@@ -615,6 +615,14 @@ export type Database = {
           similarity: number
         }[]
       }
+      secrets: {
+        Args: {
+          name: string
+        }
+        Returns: {
+          secret: string
+        }[]
+      }
       sparsevec_out: {
         Args: {
           "": unknown

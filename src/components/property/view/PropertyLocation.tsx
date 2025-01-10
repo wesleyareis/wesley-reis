@@ -1,6 +1,7 @@
 import { PropertyData } from "@/types/property";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface PropertyLocationProps {
   property: PropertyData;
@@ -8,6 +9,7 @@ interface PropertyLocationProps {
 
 export const PropertyLocation = ({ property }: PropertyLocationProps) => {
   const [mapUrl, setMapUrl] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const generateMapUrl = async () => {
@@ -24,12 +26,17 @@ export const PropertyLocation = ({ property }: PropertyLocationProps) => {
         }
 
         // Buscar a chave da API do Google Maps
-        const { data: { secret } } = await supabase.rpc('secrets', {
+        const { data } = await supabase.rpc('secrets', {
           name: 'GOOGLE_MAPS_API_KEY'
         });
 
-        if (!secret) {
+        if (!data?.secret) {
           console.error('Google Maps API key não encontrada');
+          toast({
+            title: "Erro ao carregar mapa",
+            description: "Chave da API do Google Maps não configurada.",
+            variant: "destructive",
+          });
           return;
         }
 
@@ -38,16 +45,21 @@ export const PropertyLocation = ({ property }: PropertyLocationProps) => {
           `${property.street_address}, ${property.neighborhood}, ${property.city}`
         );
         
-        const url = `https://www.google.com/maps/embed/v1/place?key=${secret}&q=${address}`;
+        const url = `https://www.google.com/maps/embed/v1/place?key=${data.secret}&q=${address}`;
         setMapUrl(url);
 
       } catch (error) {
         console.error('Erro ao gerar URL do mapa:', error);
+        toast({
+          title: "Erro ao carregar mapa",
+          description: "Não foi possível gerar o mapa do endereço.",
+          variant: "destructive",
+        });
       }
     };
 
     generateMapUrl();
-  }, [property]);
+  }, [property, toast]);
 
   // Se não houver endereço, não exiba nada
   if (!property.street_address && !property.neighborhood && !property.city) {
