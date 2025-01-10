@@ -13,28 +13,35 @@ const Dashboard = () => {
   const [agentProfile, setAgentProfile] = useState<any>(null);
 
   useEffect(() => {
-    const fetchAgentProfile = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profile } = await supabase
-          .from('agent_profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-        setAgentProfile(profile);
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        navigate("/login");
+        return;
       }
+
+      const { data: profile } = await supabase
+        .from('agent_profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+      
+      setAgentProfile(profile);
     };
-    fetchAgentProfile();
-  }, []);
+    
+    checkAuth();
+  }, [navigate]);
 
   const { data: properties, isLoading } = useQuery({
     queryKey: ["agent-properties"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+
       const { data, error } = await supabase
         .from("properties")
         .select("*")
-        .eq("agent_id", user?.id);
+        .eq("agent_id", user.id);
 
       if (error) throw error;
       return data;
@@ -48,12 +55,14 @@ const Dashboard = () => {
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
+      localStorage.clear(); // Limpa todo o localStorage
       toast({
         title: "Logout realizado com sucesso",
         description: "Você foi desconectado da sua conta.",
       });
       navigate("/");
     } catch (error) {
+      console.error("Erro ao fazer logout:", error);
       toast({
         title: "Erro ao fazer logout",
         description: "Ocorreu um erro ao tentar desconectar.",

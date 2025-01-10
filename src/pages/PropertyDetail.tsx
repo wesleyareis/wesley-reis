@@ -31,18 +31,21 @@ const PropertyDetail = () => {
 
   // Check authentication status
   useEffect(() => {
-    const checkUser = async () => {
+    const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      setCurrentUser(session?.user?.id || null);
+      if (!session?.user) {
+        toast({
+          title: "Acesso negado",
+          description: "Você precisa estar logado para acessar esta página.",
+          variant: "destructive",
+        });
+        navigate("/login");
+        return;
+      }
+      setCurrentUser(session.user.id);
     };
-    checkUser();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setCurrentUser(session?.user?.id || null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+    checkAuth();
+  }, [navigate, toast]);
 
   const { data: property, isError } = useQuery({
     queryKey: ["property", id],
@@ -206,7 +209,7 @@ const PropertyDetail = () => {
     );
   }
 
-  if (isEditMode || id === "new") {
+  if (isEditMode) {
     return (
       <PropertyEdit
         formData={formData}
