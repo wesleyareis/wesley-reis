@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Index from "./pages/Index";
 import PropertyDetail from "./pages/PropertyDetail";
 import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +61,14 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/property/:id" element={<PropertyDetail />} />
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } 
+          />
           <Route 
             path="/property/new" 
             element={

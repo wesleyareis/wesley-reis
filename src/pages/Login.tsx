@@ -1,82 +1,88 @@
-import { Auth } from "@supabase/auth-ui-react";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AuthError } from "@supabase/supabase-js";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [errorMessage, setErrorMessage] = useState("");
+  const { toast } = useToast();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate("/");
-      }
-    };
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
 
-    checkSession();
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session) {
-        navigate("/");
-      }
-      if (event === "SIGNED_OUT") {
-        setErrorMessage("");
-      }
-    });
+      if (error) throw error;
 
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+      toast({
+        title: "Login realizado com sucesso!",
+        description: "Redirecionando para o dashboard...",
+      });
+
+      navigate("/dashboard");
+    } catch (error: any) {
+      toast({
+        title: "Erro ao fazer login",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-4">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-primary">Portal do Corretor</h1>
-          <p className="text-muted-foreground">Faça login ou crie sua conta</p>
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-lg">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold">Login Corretor</h1>
+          <p className="text-sm text-muted-foreground mt-2">
+            Entre com suas credenciais para acessar o painel
+          </p>
         </div>
 
-        {errorMessage && (
-          <Alert variant="destructive">
-            <AlertDescription>{errorMessage}</AlertDescription>
-          </Alert>
-        )}
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div className="space-y-2">
+            <label htmlFor="email" className="text-sm font-medium">
+              Email
+            </label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="seu@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
 
-        <div className="bg-card p-6 rounded-lg shadow-sm border">
-          <Auth
-            supabaseClient={supabase}
-            appearance={{
-              theme: ThemeSupa,
-              variables: {
-                default: {
-                  colors: {
-                    brand: '#2563eb',
-                    brandAccent: '#1d4ed8',
-                  },
-                },
-              },
-            }}
-            providers={[]}
-            localization={{
-              variables: {
-                sign_in: {
-                  email_label: 'Email',
-                  password_label: 'Senha',
-                  button_label: 'Entrar',
-                },
-                sign_up: {
-                  email_label: 'Email',
-                  password_label: 'Senha',
-                  button_label: 'Criar conta',
-                },
-              },
-            }}
-          />
-        </div>
+          <div className="space-y-2">
+            <label htmlFor="password" className="text-sm font-medium">
+              Senha
+            </label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "Entrando..." : "Entrar"}
+          </Button>
+        </form>
       </div>
     </div>
   );

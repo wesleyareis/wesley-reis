@@ -1,6 +1,10 @@
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Bath, Car, Bed } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Building2, Bath, Car, Bed, Edit, Trash2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PropertyCardProps {
   id: string;
@@ -12,6 +16,7 @@ interface PropertyCardProps {
   parkingSpaces: number;
   area: number;
   imageUrl: string;
+  agent_id?: string;
 }
 
 export function PropertyCard({
@@ -24,7 +29,18 @@ export function PropertyCard({
   parkingSpaces,
   area,
   imageUrl,
+  agent_id,
 }: PropertyCardProps) {
+  const [isAgent, setIsAgent] = useState(false);
+
+  useEffect(() => {
+    const checkIfAgent = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAgent(!!user && user.id === agent_id);
+    };
+    checkIfAgent();
+  }, [agent_id]);
+
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
       <div className="relative h-48 overflow-hidden">
@@ -59,13 +75,22 @@ export function PropertyCard({
           </div>
         </div>
       </CardContent>
-      <CardFooter className="p-4 pt-0">
-        <a
-          href={`/property/${id}`}
+      <CardFooter className="p-4 pt-0 flex justify-between">
+        <Link
+          to={`/property/${id}`}
           className="text-primary hover:text-primary/80 font-medium text-sm"
         >
           Ver detalhes →
-        </a>
+        </Link>
+        {isAgent && (
+          <div className="flex gap-2">
+            <Link to={`/property/edit/${id}`}>
+              <Button variant="outline" size="sm">
+                <Edit className="w-4 h-4" />
+              </Button>
+            </Link>
+          </div>
+        )}
       </CardFooter>
     </Card>
   );
