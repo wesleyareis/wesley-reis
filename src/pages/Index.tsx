@@ -27,7 +27,7 @@ const Index = () => {
         query = query.or(`city.ilike.%${location}%,neighborhood.ilike.%${location}%`);
       }
 
-      if (propertyType) {
+      if (propertyType && propertyType !== "") {
         query = query.eq("property_type", propertyType);
       }
 
@@ -36,13 +36,15 @@ const Index = () => {
         if (max) {
           query = query.lte("price", max);
         }
-        query = query.gte("price", min || 0);
+        if (min) {
+          query = query.gte("price", min);
+        }
       }
 
       const { data, error } = await query;
       
       if (error) {
-        console.error("Error fetching properties:", error);
+        console.error("Erro ao buscar propriedades:", error);
         return [];
       }
       
