@@ -1,13 +1,10 @@
 'use client'
 
 import { Card, CardContent } from "@/components/ui/card"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
-import { supabase } from "@/integrations/supabase/client"
 import { ImovelCardImage } from "./imovel/card/ImovelCardImage"
 import { ImovelCardFeatures } from "./imovel/card/ImovelCardFeatures"
 import { ImovelCardActions } from "./imovel/card/ImovelCardActions"
-import { toast } from "sonner"
+import { useImovelCard } from "@/hooks/useImovelCard"
 
 interface ImovelCardProps {
   id: string
@@ -36,54 +33,11 @@ export function ImovelCard({
   imageUrl,
   agent_id,
 }: ImovelCardProps) {
-  const [isAgent, setIsAgent] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
-
-  useEffect(() => {
-    const checkIfAgent = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      setIsAgent(!!user && user.id === agent_id)
-    }
-    checkIfAgent()
-  }, [agent_id])
-
-  const handleEditClick = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-
-    if (isLoading) return
-    
-    setIsLoading(true)
-    
-    try {
-      const { data: property, error } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('id', id)
-        .maybeSingle()
-
-      if (error) {
-        throw error
-      }
-
-      if (!property) {
-        toast.error("Imóvel não encontrado")
-        return
-      }
-
-      router.push(`/imovel/editar/${property_code}`)
-    } catch (error) {
-      console.error('Erro ao buscar dados do imóvel:', error)
-      toast.error("Erro ao carregar dados do imóvel")
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleCardClick = () => {
-    router.push(`/imovel/${property_code}`)
-  }
+  const { isAgent, isLoading, handleEditClick, handleCardClick } = useImovelCard({
+    id,
+    property_code,
+    agent_id,
+  })
 
   return (
     <Card 
