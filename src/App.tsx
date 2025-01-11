@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import Index from "@/pages/Index";
 
 const App = () => {
   const [queryClient] = useState(() => new QueryClient({
@@ -22,7 +23,7 @@ const App = () => {
         <TooltipProvider>
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<div>Página Inicial</div>} />
+              <Route path="/" element={<Index />} />
             </Routes>
           </BrowserRouter>
           <Toaster />
