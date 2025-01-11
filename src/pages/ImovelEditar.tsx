@@ -1,79 +1,79 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { ImovelEdit } from "@/components/imovel/ImovelEdit";
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { PropertyFormData } from '@/types/imovel';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { toast } from "sonner";
-import { useState } from 'react';
+import type { PropertyFormData } from "@/types/imovel";
 
 const EditarImovel = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [formState, setFormState] = useState<PropertyFormData | null>(null);
 
   const { data: property, isLoading } = useQuery({
-    queryKey: ['property', id],
+    queryKey: ["property", id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('id', id)
+        .from("properties")
+        .select("*")
+        .eq("id", id)
         .single();
 
       if (error) throw error;
       return data;
-    }
+    },
   });
 
+  useEffect(() => {
+    if (property) {
+      setFormState({
+        title: property.title,
+        description: property.description || "",
+        price: property.price,
+        property_type: property.property_type,
+        bedrooms: property.bedrooms || 0,
+        bathrooms: property.bathrooms || 0,
+        parking_spaces: property.parking_spaces || 0,
+        total_area: property.total_area || 0,
+        city: property.city,
+        neighborhood: property.neighborhood,
+        street_address: property.street_address || "",
+        building_name: property.building_name || "",
+        features: property.features || {},
+        images: property.images || [],
+        condominium_fee: property.condominium_fee || 0,
+        property_tax: property.property_tax || 0,
+      });
+    }
+  }, [property]);
+
   const mutation = useMutation({
-    mutationFn: async (formData: PropertyFormData) => {
+    mutationFn: async (data: PropertyFormData) => {
       const { error } = await supabase
-        .from('properties')
+        .from("properties")
         .update({
-          ...formData,
+          ...data,
           updated_at: new Date().toISOString(),
         })
-        .eq('id', id);
+        .eq("id", id);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['property', id] });
-      toast.success('Imóvel atualizado com sucesso!');
-      navigate('/dashboard');
+      toast.success("Imóvel atualizado com sucesso!");
+      navigate("/dashboard");
     },
     onError: (error) => {
-      console.error('Erro ao atualizar imóvel:', error);
-      toast.error('Erro ao atualizar imóvel. Tente novamente.');
+      console.error("Error updating property:", error);
+      toast.error("Erro ao atualizar imóvel. Tente novamente.");
     },
   });
 
-  const handleGenerateDescription = async () => {
-    try {
-      const response = await fetch(`/api/generate-property-description`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(property),
-      });
-      
-      if (!response.ok) throw new Error('Falha ao gerar descrição');
-      
-      const data = await response.json();
-      return data.description;
-    } catch (error) {
-      console.error('Erro ao gerar descrição:', error);
-      toast.error('Erro ao gerar descrição. Tente novamente.');
-      return '';
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormState(prev => prev ? {
+  const handleInputChange = (field: keyof PropertyFormData, value: any) => {
+    setFormState((prev) => prev ? {
       ...prev,
-      [name]: value
+      [field]: value,
     } : null);
   };
 
@@ -84,44 +84,40 @@ const EditarImovel = () => {
     }
   };
 
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
+  const handleGenerateDescription = async () => {
+    if (!formState) return;
 
-  if (!property) {
-    return <div>Imóvel não encontrado</div>;
-  }
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-property-description', {
+        body: {
+          property: formState,
+        },
+      });
 
-  const formData: PropertyFormData = formState || {
-    title: property.title,
-    description: property.description,
-    price: property.price,
-    property_type: property.property_type,
-    bedrooms: property.bedrooms,
-    bathrooms: property.bathrooms,
-    parking_spaces: property.parking_spaces,
-    total_area: property.total_area,
-    city: property.city,
-    neighborhood: property.neighborhood,
-    street_address: property.street_address,
-    building_name: property.building_name,
-    features: property.features || {},
-    condominium_fee: property.condominium_fee,
-    property_tax: property.property_tax,
-    images: property.images || [],
+      if (error) throw error;
+
+      if (data?.description) {
+        handleInputChange('description', data.description);
+        toast.success('Descrição gerada com sucesso!');
+      }
+    } catch (error) {
+      console.error('Error generating description:', error);
+      toast.error('Erro ao gerar descrição. Tente novamente.');
+    }
   };
 
+  if (isLoading) {
+    return <div>Carregando...</div>;
+  }
+
   return (
-    <div className="min-h-screen bg-background">
-      <ImovelEdit 
-        formData={formData}
-        isLoading={mutation.isPending}
-        isGeneratingDescription={false}
-        onInputChange={handleInputChange}
-        onGenerateDescription={handleGenerateDescription}
-        onSubmit={handleSubmit}
-      />
-    </div>
+    <ImovelEdit
+      initialData={formState}
+      onInputChange={handleInputChange}
+      onSubmit={handleSubmit}
+      onGenerateDescription={handleGenerateDescription}
+      isLoading={mutation.isPending}
+    />
   );
 };
 
