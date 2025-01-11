@@ -46,7 +46,7 @@ const Index = () => {
       
       if (error) {
         console.error("Erro ao buscar propriedades:", error);
-        return [];
+        return [] as PropertyData[];
       }
       
       return (data || []) as PropertyData[];
