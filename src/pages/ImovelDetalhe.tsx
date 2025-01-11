@@ -1,123 +1,68 @@
-import { useParams, useLocation } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { PropertyFormData } from "@/types/imovel";
-import { ImovelView } from "@/components/imovel/ImovelView";
 import { ImovelEdit } from "@/components/imovel/ImovelEdit";
-import { usePropertyForm } from "@/hooks/usePropertyForm";
-import { useAuthCheck } from "@/hooks/useAuthCheck";
+import { ImovelView } from "@/components/imovel/ImovelView";
+import { PropertyFormData } from "@/types/imovel";
 
-const ImovelDetalhe = () => {
+export default function ImovelDetalhe() {
   const { property_code } = useParams();
-  const { toast } = useToast();
-  const location = useLocation();
-  const isNewProperty = !property_code;
-  const isEditMode = isNewProperty || window.location.pathname.includes("/editar/");
+  const [searchParams] = useSearchParams();
+  const [property, setProperty] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
 
-  // Verifica autenticação apenas quando estiver em modo de edição
-  useAuthCheck(isEditMode);
-
-  // Busca dados do imóvel
-  const { data: property, isLoading: isLoadingProperty, isError } = useQuery({
-    queryKey: ["property", property_code],
-    queryFn: async () => {
-      if (isNewProperty) return null;
-
-      // Se os dados foram passados via state na navegação, use-os
-      if (location.state?.property) {
-        return location.state.property;
-      }
-
-      const { data, error } = await supabase
+  useEffect(() => {
+    const getProperty = async () => {
+      const { data: property } = await supabase
         .from("properties")
         .select("*")
         .eq("property_code", property_code)
-        .maybeSingle();
+        .single();
 
-      if (error) {
-        console.error("Erro ao carregar imóvel:", error);
-        toast({
-          title: "Erro ao carregar imóvel",
-          description: "Não foi possível carregar os dados do imóvel.",
-          variant: "destructive",
-        });
-        throw error;
-      }
-
-      return data;
-    },
-    enabled: !isNewProperty,
-    retry: false,
-    initialData: location.state?.property // Usa os dados do state como valor inicial
-  });
-
-  // Busca dados do usuário atual
-  const { data: currentUser } = useQuery({
-    queryKey: ["currentUser"],
-    queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      return user;
-    },
-    enabled: isEditMode, // Busca usuário apenas em modo de edição
-  });
 
-  const canEdit = isNewProperty || (property && currentUser && property.agent_id === currentUser.id);
+      setProperty(property);
+      setUser(user);
+      setIsLoading(false);
+    };
 
-  const initialData: PropertyFormData = property || {
-    title: "",
-    price: 0,
-    description: "",
-    property_type: "",
-    bedrooms: 0,
-    bathrooms: 0,
-    parking_spaces: 0,
-    total_area: 0,
-    city: "",
-    neighborhood: "",
-    street_address: "",
-    features: {},
-  };
+    getProperty();
+  }, [property_code]);
 
-  const {
-    formData,
-    isLoading: isLoadingForm,
-    isGeneratingDescription,
-    handleInputChange,
-    generateDescription,
-    handleSubmit,
-  } = usePropertyForm(initialData);
-
-  if (isError) {
+  if (isLoading || !property) {
     return (
-      <div className="text-center py-8">
-        <p className="text-red-500">Erro ao carregar o imóvel</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
 
-  if (!isNewProperty && !property && !isEditMode) {
-    return <div>Carregando...</div>;
-  }
+  const isAgent = user?.id === property.agent_id;
+  const isEditMode = searchParams.get('mode') === 'edit' && isAgent;
 
-  if (isEditMode && isLoadingProperty) {
-    return <div>Carregando...</div>;
-  }
+  const initialFormData: PropertyFormData = {
+    ...property,
+    features: property.features || {},
+  };
 
-  if (isEditMode) {
-    return (
-      <ImovelEdit
-        formData={formData}
-        isLoading={isLoadingForm}
-        isGeneratingDescription={isGeneratingDescription}
-        onInputChange={handleInputChange}
-        onGenerateDescription={generateDescription}
-        onSubmit={handleSubmit}
-      />
-    );
-  }
-
-  return property ? <ImovelView property={property} canEdit={canEdit} /> : null;
-};
-
-export default ImovelDetalhe;
+  return (
+    <div className="min-h-screen bg-background">
+      {isEditMode ? (
+        <ImovelEdit 
+          formData={initialFormData}
+          isLoading={false}
+          isGeneratingDescription={false}
+          onInputChange={() => {}}
+          onGenerateDescription={async () => {}}
+          onSubmit={async () => {}}
+        />
+      ) : (
+        <ImovelView 
+          property={property}
+          canEdit={isAgent}
+        />
+      )}
+    </div>
+  );
+}

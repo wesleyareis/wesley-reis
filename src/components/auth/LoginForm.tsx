@@ -1,8 +1,6 @@
-'use client';
-
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -11,8 +9,7 @@ export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
-  const supabase = createClientComponentClient();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,8 +26,7 @@ export function LoginForm() {
       }
 
       toast.success("Login realizado com sucesso!");
-      router.push("/dashboard");
-      router.refresh();
+      navigate("/dashboard");
     } catch (error) {
       toast.error("Erro ao fazer login. Verifique suas credenciais.");
     } finally {
