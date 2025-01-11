@@ -3,11 +3,11 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams, useNavigate } from "react-router-dom"
 
 export function SearchFilters() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
 
   const createQueryString = (name: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -20,15 +20,15 @@ export function SearchFilters() {
   }
 
   const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    router.push(`/?${createQueryString('location', e.target.value)}`)
+    navigate(`/?${createQueryString('location', e.target.value)}`)
   }
 
   const handleTypeChange = (value: string) => {
-    router.push(`/?${createQueryString('type', value)}`)
+    navigate(`/?${createQueryString('type', value)}`)
   }
 
   const handlePriceChange = (value: string) => {
-    router.push(`/?${createQueryString('price', value)}`)
+    navigate(`/?${createQueryString('price', value)}`)
   }
 
   return (
