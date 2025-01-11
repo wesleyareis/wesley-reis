@@ -73,11 +73,15 @@ const Dashboard = () => {
 
   const handleLogout = async () => {
     try {
-      // Primeiro remove o token local
-      localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
+      // Primeiro remove o token local e a sessão
+      localStorage.clear(); // Remove todos os itens do localStorage
+      sessionStorage.clear(); // Remove todos os itens do sessionStorage
       
       // Depois tenta fazer o signOut no Supabase
-      const { error } = await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut({
+        scope: 'global' // Força logout global
+      });
+      
       if (error) {
         console.error("Erro ao fazer logout:", error);
         toast({
@@ -88,11 +92,14 @@ const Dashboard = () => {
         return;
       }
 
+      // Se chegou aqui, o logout foi bem sucedido
       toast({
         title: "Logout realizado com sucesso",
         description: "Você foi desconectado com sucesso.",
       });
-      navigate("/login", { replace: true });
+
+      // Força a navegação para a página de login
+      window.location.href = '/login';
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
       toast({
@@ -100,6 +107,9 @@ const Dashboard = () => {
         description: "Ocorreu um erro ao tentar desconectar.",
         variant: "destructive",
       });
+      
+      // Mesmo com erro, tenta redirecionar para o login
+      window.location.href = '/login';
     }
   };
 
