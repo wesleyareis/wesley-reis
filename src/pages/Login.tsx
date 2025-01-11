@@ -16,32 +16,13 @@ const Login = () => {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        // Limpa qualquer token inválido antes de verificar a sessão
-        const currentSession = localStorage.getItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
-        if (currentSession) {
-          try {
-            JSON.parse(currentSession);
-          } catch (e) {
-            console.error("Token inválido encontrado, removendo...");
-            localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
-            return;
-          }
-        }
-
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const { data: { session } } = await supabase.auth.getSession();
         
-        if (error) {
-          console.error("Erro ao verificar sessão:", error);
-          localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
-          return;
-        }
-
         if (session?.user) {
           navigate("/dashboard", { replace: true });
         }
       } catch (error) {
         console.error("Erro ao verificar sessão:", error);
-        localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
       } finally {
         setIsCheckingSession(false);
       }
@@ -55,11 +36,6 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // Primeiro, limpa qualquer sessão existente
-      await supabase.auth.signOut();
-      localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
-      
-      // Tenta fazer login
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,

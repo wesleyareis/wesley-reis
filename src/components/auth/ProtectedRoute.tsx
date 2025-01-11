@@ -26,7 +26,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
         if (!session) {
           setIsAuthenticated(false);
-          navigate('/login', { replace: true });
+          setIsLoading(false);
           return;
         }
 
@@ -39,17 +39,17 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         }
 
         setIsAuthenticated(true);
+        setIsLoading(false);
       } catch (error) {
         console.error("Erro de autenticação:", error);
         await handleLogout();
-      } finally {
-        setIsLoading(false);
       }
     };
 
     const handleLogout = async () => {
       try {
         setIsAuthenticated(false);
+        setIsLoading(false);
         
         // Primeiro faz o signOut no Supabase
         await supabase.auth.signOut();
@@ -69,24 +69,24 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         sessionStorage.clear();
         
         toast.error("Sua sessão expirou. Por favor, faça login novamente.");
-        
-        // Força um reload completo da página
-        window.location.href = '/login';
+        navigate('/login', { replace: true });
       } catch (error) {
         console.error("Erro ao fazer logout:", error);
-        window.location.href = '/login';
+        navigate('/login', { replace: true });
       }
     };
 
     // Configura o listener de mudança de estado de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
-        await handleLogout();
+        setIsAuthenticated(false);
+        setIsLoading(false);
         return;
       }
 
       if (session) {
         setIsAuthenticated(true);
+        setIsLoading(false);
       }
     });
 
