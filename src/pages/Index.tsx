@@ -13,7 +13,7 @@ const Index = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const { data: properties, isLoading } = useQuery<PropertyData[]>({
+  const { data: properties = [], isLoading } = useQuery<PropertyData[]>({
     queryKey: ["properties", Object.fromEntries(searchParams)],
     queryFn: async () => {
       let query = supabase
@@ -51,7 +51,7 @@ const Index = () => {
         return [];
       }
       
-      return data || [];
+      return data as PropertyData[];
     },
   });
 
@@ -90,7 +90,7 @@ const Index = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {(properties || []).map((property) => (
+              {properties.map((property) => (
                 <ImovelCard
                   key={property.id}
                   id={property.id}
