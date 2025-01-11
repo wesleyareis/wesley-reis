@@ -43,6 +43,44 @@ export const ImovelView = ({ property, canEdit }: ImovelViewProps) => {
   };
 
   const mainImage = property.images?.[0] || "https://kjlipbbrbwdzqiwvrnpw.supabase.co/storage/v1/object/public/property-images/og-image.png";
+  const canonicalUrl = `https://wesleyreis.imb.br/imovel/${property.property_code}/${property.city.toLowerCase()}/${property.neighborhood.toLowerCase()}/${property.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+
+  // Schema.org data
+  const schemaData = {
+    "@context": "https://schema.org",
+    "@type": "RealEstateListing",
+    "name": property.title,
+    "description": property.description,
+    "url": canonicalUrl,
+    "datePosted": property.created_at,
+    "dateModified": property.updated_at,
+    "image": property.images,
+    "price": {
+      "@type": "MonetaryAmount",
+      "currency": "BRL",
+      "value": property.price
+    },
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": property.city,
+      "addressRegion": "GO",
+      "streetAddress": property.street_address,
+      "addressCountry": "BR"
+    },
+    "floorSize": {
+      "@type": "QuantitativeValue",
+      "value": property.total_area,
+      "unitCode": "MTK"
+    },
+    "numberOfRooms": property.bedrooms,
+    "numberOfBathrooms": property.bathrooms,
+    "broker": agent ? {
+      "@type": "RealEstateAgent",
+      "name": agent.full_name,
+      "telephone": agent.phone,
+      "image": agent.profile_image
+    } : undefined
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -52,7 +90,14 @@ export const ImovelView = ({ property, canEdit }: ImovelViewProps) => {
         <meta property="og:title" content={`${property.title} - Wesley Reis Imóveis`} />
         <meta property="og:description" content={property.description?.slice(0, 155) || `${property.title} - Imóvel à venda em ${property.neighborhood}, ${property.city}`} />
         <meta property="og:image" content={mainImage} />
-        <meta property="og:url" content={window.location.href} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={canonicalUrl} />
+        <script type="application/ld+json">
+          {JSON.stringify(schemaData)}
+        </script>
       </Helmet>
 
       <ImovelHeader property={property} canEdit={canEdit} />
@@ -80,7 +125,7 @@ export const ImovelView = ({ property, canEdit }: ImovelViewProps) => {
             {agent && (
               <ImovelCorretor 
                 agent={agent}
-                propertyUrl={window.location.href}
+                propertyUrl={canonicalUrl}
                 onWhatsAppClick={handleWhatsAppClick}
               />
             )}
