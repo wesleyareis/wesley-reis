@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useNavigate } from "react-router-dom"
 import { supabase } from "@/integrations/supabase/client"
 import { toast } from "sonner"
 
@@ -12,7 +12,7 @@ interface UseImovelCardProps {
 export function useImovelCard({ id, property_code, agent_id }: UseImovelCardProps) {
   const [isAgent, setIsAgent] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+  const navigate = useNavigate()
 
   useEffect(() => {
     const checkIfAgent = async () => {
@@ -46,7 +46,7 @@ export function useImovelCard({ id, property_code, agent_id }: UseImovelCardProp
         return
       }
 
-      router.push(`/imovel/editar/${property_code}`)
+      navigate(`/imovel/editar/${property_code}`)
     } catch (error) {
       console.error('Erro ao buscar dados do imóvel:', error)
       toast.error("Erro ao carregar dados do imóvel")
@@ -56,7 +56,7 @@ export function useImovelCard({ id, property_code, agent_id }: UseImovelCardProp
   }
 
   const handleCardClick = () => {
-    router.push(`/imovel/${property_code}`)
+    navigate(`/imovel/${property_code}`)
   }
 
   return {
