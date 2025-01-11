@@ -24,9 +24,9 @@ export const usePropertyForm = (initialData: PropertyFormData) => {
   const generateDescription = async () => {
     try {
       setIsGeneratingDescription(true);
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
       
-      if (!user) {
+      if (!session) {
         throw new Error("Usuário não autenticado");
       }
 
@@ -36,12 +36,12 @@ export const usePropertyForm = (initialData: PropertyFormData) => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${supabase.auth.session()?.access_token}`,
+            Authorization: `Bearer ${session.access_token}`,
           },
           body: JSON.stringify({
             property: {
               ...formData,
-              agent_id: user.id,
+              agent_id: session.user.id,
             },
           }),
         }
@@ -78,15 +78,15 @@ export const usePropertyForm = (initialData: PropertyFormData) => {
     setIsLoading(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
       
-      if (!user) {
+      if (!session) {
         throw new Error("Usuário não autenticado");
       }
 
       const propertyData = {
         ...formData,
-        agent_id: user.id,
+        agent_id: session.user.id,
       };
 
       let operation;
