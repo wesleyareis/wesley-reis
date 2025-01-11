@@ -26,31 +26,28 @@ const Index = () => {
       const priceRange = searchParams.get("price");
 
       if (location) {
-        query = query.or(`city.ilike.%${location}%,neighborhood.ilike.%${location}%`);
+        query = query.or(`neighborhood.ilike.%${location}%,city.ilike.%${location}%`);
       }
 
       if (propertyType && propertyType !== "") {
-        query = query.eq("property_type", propertyType.toLowerCase());
+        query = query.eq("property_type", propertyType);
       }
 
-      if (priceRange) {
+      if (priceRange && priceRange !== "") {
         const [min, max] = priceRange.split("-").map(Number);
-        if (max) {
-          query = query.lte("price", max);
-        }
-        if (min) {
-          query = query.gte("price", min);
+        if (min !== undefined && max !== undefined) {
+          query = query.gte("price", min).lte("price", max);
         }
       }
 
       const { data, error } = await query;
-      
+
       if (error) {
         console.error("Erro ao buscar propriedades:", error);
         toast.error("Erro ao carregar imóveis");
         return [];
       }
-      
+
       return data as PropertyData[];
     },
   });
