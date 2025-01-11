@@ -74,3 +74,13 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .property-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+  }
+
+  .search-container {
+    @apply bg-gradient-to-r from-primary to-primary/80;
+  }
+}
