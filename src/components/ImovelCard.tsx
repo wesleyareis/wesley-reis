@@ -1,10 +1,10 @@
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Building2, Bath, Car, Bed, Edit } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { ImovelCardImage } from "./imovel/card/ImovelCardImage";
+import { ImovelCardFeatures } from "./imovel/card/ImovelCardFeatures";
+import { ImovelCardActions } from "./imovel/card/ImovelCardActions";
 
 interface ImovelCardProps {
   id: string;
@@ -59,57 +59,22 @@ export function ImovelCard({
       className="overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
       onClick={handleCardClick}
     >
-      <div className="relative h-48 overflow-hidden">
-        <img
-          src={imageUrl}
-          alt={title}
-          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-        />
-        <Badge className="absolute top-2 right-2 bg-primary text-white">
-          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price)}
-        </Badge>
-      </div>
+      <ImovelCardImage imageUrl={imageUrl} title={title} price={price} />
       <CardContent className="p-4">
         <h3 className="font-semibold text-lg mb-2 truncate">{title}</h3>
         <p className="text-muted-foreground text-sm mb-4">{location}</p>
-        <div className="grid grid-cols-4 gap-2 text-sm">
-          <div className="flex items-center gap-1">
-            <Bed className="w-4 h-4" />
-            <span>{bedrooms}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Bath className="w-4 h-4" />
-            <span>{bathrooms}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Car className="w-4 h-4" />
-            <span>{parkingSpaces}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Building2 className="w-4 h-4" />
-            <span>{area}m²</span>
-          </div>
-        </div>
+        <ImovelCardFeatures
+          bedrooms={bedrooms}
+          bathrooms={bathrooms}
+          parkingSpaces={parkingSpaces}
+          area={area}
+        />
       </CardContent>
-      <CardFooter className="p-4 pt-0 flex justify-between">
-        <Link
-          to={`/imovel/${property_code}`}
-          className="text-primary hover:text-primary/80 font-medium text-sm"
-          onClick={(e) => e.stopPropagation()}
-        >
-          Ver detalhes →
-        </Link>
-        {isAgent && (
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={handleEditClick}
-            className="z-10"
-          >
-            <Edit className="w-4 h-4" />
-          </Button>
-        )}
-      </CardFooter>
+      <ImovelCardActions
+        propertyCode={property_code}
+        isAgent={isAgent}
+        onEditClick={handleEditClick}
+      />
     </Card>
   );
 }
