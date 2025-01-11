@@ -2,38 +2,37 @@ import { useQuery } from "@tanstack/react-query";
 import { ImovelCard } from "@/components/ImovelCard";
 import { SearchFilters } from "@/components/SearchFilters";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
 import { Footer } from "@/components/Footer";
 
 const Index = () => {
   const navigate = useNavigate();
-  const [filters, setFilters] = useState({
-    location: "",
-    propertyType: "",
-    priceRange: "",
-  });
+  const [searchParams] = useSearchParams();
 
   const { data: properties, isLoading } = useQuery({
-    queryKey: ["properties", filters],
+    queryKey: ["properties", Object.fromEntries(searchParams)],
     queryFn: async () => {
       let query = supabase
         .from("properties")
         .select("*")
         .eq("status", "active");
 
-      if (filters.location) {
-        query = query.or(`city.ilike.%${filters.location}%,neighborhood.ilike.%${filters.location}%`);
+      const location = searchParams.get("location");
+      const propertyType = searchParams.get("type");
+      const priceRange = searchParams.get("price");
+
+      if (location) {
+        query = query.or(`city.ilike.%${location}%,neighborhood.ilike.%${location}%`);
       }
 
-      if (filters.propertyType) {
-        query = query.eq("property_type", filters.propertyType);
+      if (propertyType) {
+        query = query.eq("property_type", propertyType);
       }
 
-      if (filters.priceRange) {
-        const [min, max] = filters.priceRange.split("-").map(Number);
+      if (priceRange) {
+        const [min, max] = priceRange.split("-").map(Number);
         if (max) {
           query = query.lte("price", max);
         }
@@ -74,7 +73,7 @@ const Index = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8 flex-grow">
-        <SearchFilters onFilterChange={setFilters} />
+        <SearchFilters />
         
         <div className="mt-12">
           <h2 className="text-2xl font-semibold mb-6">Imóveis em Destaque</h2>

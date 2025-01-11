@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
@@ -11,11 +11,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export function SearchFilters() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   
   const [location, setLocation] = useState(searchParams.get("location") || "");
   const [propertyType, setPropertyType] = useState(searchParams.get("type") || "");
@@ -27,7 +27,7 @@ export function SearchFilters() {
     if (propertyType) params.set("type", propertyType);
     if (priceRange) params.set("price", priceRange);
     
-    router.push(`/?${params.toString()}`);
+    navigate(`/?${params.toString()}`);
   };
 
   return (
