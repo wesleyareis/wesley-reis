@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import type { PropertyData } from "@/types/imovel";
+import { toast } from "sonner";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -46,10 +47,11 @@ const Index = () => {
       
       if (error) {
         console.error("Erro ao buscar propriedades:", error);
-        throw error;
+        toast.error("Erro ao carregar imóveis");
+        return [];
       }
       
-      return (data || []) as PropertyData[];
+      return data as PropertyData[];
     },
   });
 
