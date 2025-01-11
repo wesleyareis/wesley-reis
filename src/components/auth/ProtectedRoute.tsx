@@ -16,7 +16,6 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        // Primeiro, verifica se há uma sessão válida
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -25,37 +24,51 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         }
 
         if (!session) {
-          throw new Error("Sessão não encontrada");
+          setIsAuthenticated(false);
+          navigate('/login', { replace: true });
+          return;
         }
 
-        // Verifica se o token ainda é válido
         const { data: { user }, error: userError } = await supabase.auth.getUser();
         
         if (userError || !user) {
           console.error("Erro ao verificar usuário:", userError);
-          throw userError || new Error("Usuário não encontrado");
+          await handleLogout();
+          return;
         }
 
         setIsAuthenticated(true);
       } catch (error) {
         console.error("Erro de autenticação:", error);
-        // Limpa a sessão local em caso de erro
-        await supabase.auth.signOut();
+        await handleLogout();
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const handleLogout = async () => {
+      try {
+        // Primeiro remove o token local
         localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
+        
+        // Depois tenta fazer o signOut no Supabase
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+          console.error("Erro ao fazer logout:", error);
+        }
+      } catch (error) {
+        console.error("Erro ao fazer logout:", error);
+      } finally {
         setIsAuthenticated(false);
         toast.error("Sua sessão expirou. Por favor, faça login novamente.");
         navigate('/login', { replace: true });
-      } finally {
-        setIsLoading(false);
       }
     };
 
     // Configura o listener de mudança de estado de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
-        setIsAuthenticated(false);
-        localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
-        navigate('/login', { replace: true });
+        await handleLogout();
         return;
       }
 
