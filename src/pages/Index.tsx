@@ -42,14 +42,14 @@ const Index = () => {
         }
       }
 
-      const { data: propertiesData, error } = await query;
+      const { data, error } = await query;
       
       if (error) {
         console.error("Erro ao buscar propriedades:", error);
         return [] as PropertyData[];
       }
       
-      return (propertiesData || []) as PropertyData[];
+      return (data || []) as PropertyData[];
     },
   });
 
@@ -94,7 +94,7 @@ const Index = () => {
                   id={property.id}
                   property_code={property.property_code || ''}
                   title={property.title}
-                  price={Number(property.price)}
+                  price={property.price}
                   location={`${property.neighborhood}, ${property.city}`}
                   bedrooms={property.bedrooms || 0}
                   bathrooms={property.bathrooms || 0}
