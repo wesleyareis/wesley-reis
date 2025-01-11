@@ -6,79 +6,44 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuthCheck } from "@/hooks/useAuthCheck";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [agentProfile, setAgentProfile] = useState<any>(null);
 
+  // Verifica autenticação
+  useAuthCheck(true);
+
+  // Busca o perfil do agente
   useEffect(() => {
-    const checkAuth = async () => {
+    const fetchAgentProfile = async () => {
       try {
-        // Primeiro, limpa qualquer token inválido
-        const currentSession = localStorage.getItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
-        if (currentSession) {
-          try {
-            JSON.parse(currentSession);
-          } catch (e) {
-            console.error("Token inválido encontrado, removendo...");
-            localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
-            navigate("/login", { replace: true });
-            return;
-          }
-        }
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
 
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) {
-          console.error("Erro ao verificar sessão:", sessionError);
-          localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
-          navigate("/login", { replace: true });
-          return;
-        }
-
-        if (!session) {
-          localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
-          navigate("/login", { replace: true });
-          return;
-        }
-
-        // Busca o perfil do agente apenas se houver uma sessão válida
-        const { data: profile, error: profileError } = await supabase
+        const { data: profile, error } = await supabase
           .from('agent_profiles')
           .select('*')
           .eq('id', session.user.id)
           .single();
 
-        if (profileError) {
-          console.error("Erro ao buscar perfil:", profileError);
+        if (error) {
+          console.error("Erro ao buscar perfil:", error);
           return;
         }
 
         setAgentProfile(profile);
       } catch (error) {
-        console.error("Erro ao verificar autenticação:", error);
-        localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
-        navigate("/login", { replace: true });
+        console.error("Erro ao buscar perfil:", error);
       }
     };
 
-    // Configura o listener de mudança de estado de autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_OUT' || !session) {
-        localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
-        navigate("/login", { replace: true });
-        return;
-      }
-    });
+    fetchAgentProfile();
+  }, []);
 
-    checkAuth();
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [navigate]);
-
+  // Busca as propriedades do agente
   const { data: properties, isLoading } = useQuery({
     queryKey: ["agent-properties"],
     queryFn: async () => {
@@ -90,7 +55,8 @@ const Dashboard = () => {
       const { data, error } = await supabase
         .from("properties")
         .select("*")
-        .eq("agent_id", session.user.id);
+        .eq("agent_id", session.user.id)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       return data;
@@ -107,25 +73,23 @@ const Dashboard = () => {
 
   const handleLogout = async () => {
     try {
-      localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
-      
       const { error } = await supabase.auth.signOut();
       
       if (error) {
         console.error("Erro ao fazer logout:", error);
         toast({
           title: "Erro ao fazer logout",
-          description: "Você foi desconectado, mas ocorreu um erro.",
+          description: "Ocorreu um erro ao tentar desconectar.",
           variant: "destructive",
         });
       } else {
+        localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
         toast({
           title: "Logout realizado com sucesso",
           description: "Você foi desconectado com sucesso.",
         });
+        navigate("/login", { replace: true });
       }
-      
-      navigate("/login", { replace: true });
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
       navigate("/login", { replace: true });
@@ -143,7 +107,7 @@ const Dashboard = () => {
                 <img
                   src={agentProfile.profile_image || "https://via.placeholder.com/40"}
                   alt={agentProfile.full_name}
-                  className="w-10 h-10 rounded-full"
+                  className="w-10 h-10 rounded-full object-cover"
                 />
                 <span className="text-sm font-medium hidden sm:inline">{agentProfile.full_name}</span>
               </div>
@@ -168,6 +132,13 @@ const Dashboard = () => {
           {isLoading ? (
             <div className="flex justify-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+          ) : properties?.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">Você ainda não possui imóveis cadastrados.</p>
+              <Button onClick={handleNewProperty} className="mt-4">
+                Cadastrar primeiro imóvel
+              </Button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
