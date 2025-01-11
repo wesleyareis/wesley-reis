@@ -10,7 +10,7 @@ export function SearchFilters() {
   const [searchParams] = useSearchParams()
 
   const createQueryString = (name: string, value: string): string => {
-    const params = new URLSearchParams(searchParams.toString())
+    const params = new URLSearchParams(searchParams)
     params.delete(name)
     if (value && value.trim()) {
       params.set(name, value.trim())
@@ -34,7 +34,7 @@ export function SearchFilters() {
   }
 
   const handleClearFilters = () => {
-    navigate('/', { replace: true })
+    navigate('/')
   }
 
   const currentLocation = searchParams.get("location") ?? ""
