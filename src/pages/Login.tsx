@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { AuthError, AuthApiError } from "@supabase/supabase-js";
 
 const Login = () => {
@@ -12,6 +12,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [isCheckingSession, setIsCheckingSession] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     const checkSession = async () => {
@@ -35,7 +36,7 @@ const Login = () => {
       switch (error.status) {
         case 400:
           if (error.message.includes("Invalid login credentials")) {
-            return "Email ou senha inválidos. Por favor, verifique suas credenciais.";
+            return "Email ou senha incorretos. Por favor, verifique suas credenciais.";
           }
           if (error.message.includes("Email not confirmed")) {
             return "Por favor, confirme seu email antes de fazer login.";
@@ -77,8 +78,8 @@ const Login = () => {
         });
         navigate("/dashboard", { replace: true });
       }
-    } catch (error: any) {
-      console.error("Erro no login:", error);
+    } catch (error) {
+      console.error("Erro inesperado no login:", error);
       toast({
         variant: "destructive",
         title: "Erro no login",
