@@ -5,11 +5,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { PropertyFormData } from '@/types/imovel';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { toast } from "sonner";
+import { useState } from 'react';
 
 const EditarImovel = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [formState, setFormState] = useState<PropertyFormData | null>(null);
 
   const { data: property, isLoading } = useQuery({
     queryKey: ['property', id],
@@ -67,6 +69,21 @@ const EditarImovel = () => {
     }
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormState(prev => prev ? {
+      ...prev,
+      [name]: value
+    } : null);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formState) {
+      mutation.mutateAsync(formState);
+    }
+  };
+
   if (isLoading) {
     return <LoadingSpinner />;
   }
@@ -75,7 +92,7 @@ const EditarImovel = () => {
     return <div>Imóvel não encontrado</div>;
   }
 
-  const formData: PropertyFormData = {
+  const formData: PropertyFormData = formState || {
     title: property.title,
     description: property.description,
     price: property.price,
@@ -100,14 +117,9 @@ const EditarImovel = () => {
         formData={formData}
         isLoading={mutation.isPending}
         isGeneratingDescription={false}
-        onInputChange={(field, value) => {
-          // Atualização local do formulário seria implementada aqui
-          console.log('Campo atualizado:', field, value);
-        }}
+        onInputChange={handleInputChange}
         onGenerateDescription={handleGenerateDescription}
-        onSubmit={async (data) => {
-          await mutation.mutateAsync(data);
-        }}
+        onSubmit={handleSubmit}
       />
     </div>
   );
