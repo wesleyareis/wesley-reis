@@ -10,11 +10,15 @@ export function SearchFilters() {
   const [searchParams] = useSearchParams()
 
   const createQueryString = (name: string, value: string) => {
-    const params = new URLSearchParams(searchParams.toString())
+    const params = new URLSearchParams()
+    // Copiar parâmetros existentes
+    for (const [key, val] of searchParams.entries()) {
+      if (key !== name) {
+        params.append(key, val)
+      }
+    }
     if (value) {
-      params.set(name, value)
-    } else {
-      params.delete(name)
+      params.append(name, value)
     }
     return params.toString()
   }
