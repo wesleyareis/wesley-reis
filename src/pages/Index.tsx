@@ -30,7 +30,7 @@ const Index = () => {
       }
 
       if (propertyType && propertyType !== "") {
-        query = query.eq("property_type", propertyType);
+        query = query.eq("property_type", propertyType.toLowerCase());
       }
 
       if (priceRange) {

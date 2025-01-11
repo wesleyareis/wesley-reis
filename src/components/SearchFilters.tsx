@@ -65,6 +65,7 @@ export function SearchFilters() {
             <SelectItem value="">Todos os tipos</SelectItem>
             <SelectItem value="apartamento">Apartamento</SelectItem>
             <SelectItem value="casa">Casa</SelectItem>
+            <SelectItem value="cobertura">Cobertura</SelectItem>
             <SelectItem value="comercial">Comercial</SelectItem>
             <SelectItem value="terreno">Terreno</SelectItem>
           </SelectContent>
