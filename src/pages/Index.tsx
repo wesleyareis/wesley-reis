@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { toast } from "sonner";
+import type { PropertyData } from "@/types/imovel";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -47,7 +48,7 @@ const Index = () => {
         return [];
       }
 
-      return data || [];
+      return (data || []) as PropertyData[];
     },
   });
 
