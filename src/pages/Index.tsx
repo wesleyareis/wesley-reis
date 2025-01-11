@@ -51,7 +51,7 @@ const Index = () => {
         return [];
       }
       
-      return data as PropertyData[];
+      return (data || []) as PropertyData[];
     },
   });
 
