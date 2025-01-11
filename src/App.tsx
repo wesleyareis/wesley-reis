@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HelmetProvider } from 'react-helmet-async';
 import { useState } from "react";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
@@ -21,46 +22,48 @@ const App = () => {
   }));
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <BrowserRouter>
-          <Routes>
-            {/* Rotas públicas */}
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/imovel/:property_code" element={<ImovelDetalhe />} />
-            
-            {/* Rotas protegidas */}
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/imovel/novo" 
-              element={
-                <ProtectedRoute>
-                  <ImovelDetalhe />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/imovel/editar/:property_code" 
-              element={
-                <ProtectedRoute>
-                  <ImovelDetalhe />
-                </ProtectedRoute>
-              } 
-            />
-          </Routes>
-        </BrowserRouter>
-        <Toaster />
-        <Sonner />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <BrowserRouter>
+            <Routes>
+              {/* Rotas públicas */}
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/imovel/:property_code" element={<ImovelDetalhe />} />
+              
+              {/* Rotas protegidas */}
+              <Route 
+                path="/dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/imovel/novo" 
+                element={
+                  <ProtectedRoute>
+                    <ImovelDetalhe />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/imovel/editar/:property_code" 
+                element={
+                  <ProtectedRoute>
+                    <ImovelDetalhe />
+                  </ProtectedRoute>
+                } 
+              />
+            </Routes>
+          </BrowserRouter>
+          <Toaster />
+          <Sonner />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </HelmetProvider>
   );
 };
 

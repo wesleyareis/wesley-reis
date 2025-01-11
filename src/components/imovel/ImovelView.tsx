@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { PropertyData } from "@/types/imovel";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Helmet } from 'react-helmet-async';
 import { ImovelHeader } from "./view/ImovelHeader";
 import { ImovelImagens } from "./view/ImovelImagens";
 import { ImovelDetalhes } from "./view/ImovelDetalhes";
@@ -33,7 +34,6 @@ export const ImovelView = ({ property, canEdit }: ImovelViewProps) => {
 
   const handleWhatsAppClick = () => {
     if (agent?.whatsapp_url) {
-      // Adiciona a mensagem padrão com informações do imóvel
       const message = encodeURIComponent(
         `Olá! Vi o imóvel ${property.title} (código: ${property.property_code}) e gostaria de mais informações.`
       );
@@ -42,8 +42,19 @@ export const ImovelView = ({ property, canEdit }: ImovelViewProps) => {
     }
   };
 
+  const mainImage = property.images?.[0] || "https://kjlipbbrbwdzqiwvrnpw.supabase.co/storage/v1/object/public/property-images/og-image.png";
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <Helmet>
+        <title>{property.title} - Wesley Reis Imóveis</title>
+        <meta name="description" content={property.description?.slice(0, 155) || `${property.title} - Imóvel à venda em ${property.neighborhood}, ${property.city}`} />
+        <meta property="og:title" content={`${property.title} - Wesley Reis Imóveis`} />
+        <meta property="og:description" content={property.description?.slice(0, 155) || `${property.title} - Imóvel à venda em ${property.neighborhood}, ${property.city}`} />
+        <meta property="og:image" content={mainImage} />
+        <meta property="og:url" content={window.location.href} />
+      </Helmet>
+
       <ImovelHeader property={property} canEdit={canEdit} />
 
       <main className="max-w-7xl mx-auto px-4 py-8 flex-grow">
