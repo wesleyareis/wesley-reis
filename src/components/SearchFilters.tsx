@@ -16,22 +16,19 @@ export function SearchFilters() {
     } else {
       params.delete(name)
     }
-    return `/?${params.toString()}`
+    return params.toString()
   }
 
   const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const path = createQueryString('location', e.target.value)
-    navigate(path)
+    navigate(`/?${createQueryString('location', e.target.value)}`)
   }
 
   const handleTypeChange = (value: string) => {
-    const path = createQueryString('type', value)
-    navigate(path)
+    navigate(`/?${createQueryString('type', value)}`)
   }
 
   const handlePriceChange = (value: string) => {
-    const path = createQueryString('price', value)
-    navigate(path)
+    navigate(`/?${createQueryString('price', value)}`)
   }
 
   const handleClearFilters = () => {
