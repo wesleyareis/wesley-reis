@@ -58,7 +58,7 @@ export function ImovelCard({
       const { data: property, error } = await supabase
         .from('properties')
         .select('*')
-        .eq('property_code', property_code)
+        .eq('id', id)
         .maybeSingle();
 
       if (error) {
@@ -70,7 +70,7 @@ export function ImovelCard({
         return;
       }
 
-      // Se encontrou o imóvel, navega para a página de edição
+      // Navega para a página de edição com os dados do imóvel
       navigate(`/imovel/editar/${property_code}`, {
         state: { property }
       });

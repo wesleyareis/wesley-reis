@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +11,7 @@ import { useAuthCheck } from "@/hooks/useAuthCheck";
 const ImovelDetalhe = () => {
   const { property_code } = useParams();
   const { toast } = useToast();
+  const location = useLocation();
   const isNewProperty = !property_code;
   const isEditMode = isNewProperty || window.location.pathname.includes("/editar/");
 
@@ -22,6 +23,11 @@ const ImovelDetalhe = () => {
     queryKey: ["property", property_code],
     queryFn: async () => {
       if (isNewProperty) return null;
+
+      // Se os dados foram passados via state na navegação, use-os
+      if (location.state?.property) {
+        return location.state.property;
+      }
 
       const { data, error } = await supabase
         .from("properties")
@@ -42,7 +48,8 @@ const ImovelDetalhe = () => {
       return data;
     },
     enabled: !isNewProperty,
-    retry: false
+    retry: false,
+    initialData: location.state?.property // Usa os dados do state como valor inicial
   });
 
   // Busca dados do usuário atual
