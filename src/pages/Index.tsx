@@ -26,7 +26,9 @@ const Index = () => {
       const priceRange = searchParams.get("price");
 
       if (location) {
-        query = query.or(`neighborhood.ilike.%${location}%,city.ilike.%${location}%`);
+        query = query.or(
+          `neighborhood.ilike.%${location}%,city.ilike.%${location}%`
+        );
       }
 
       if (propertyType && propertyType !== "") {
@@ -35,7 +37,7 @@ const Index = () => {
 
       if (priceRange && priceRange !== "") {
         const [min, max] = priceRange.split("-").map(Number);
-        if (min !== undefined && max !== undefined) {
+        if (!isNaN(min) && !isNaN(max)) {
           query = query.gte("price", min).lte("price", max);
         }
       }
@@ -48,7 +50,7 @@ const Index = () => {
         return [];
       }
 
-      return data as PropertyData[];
+      return data;
     },
   });
 
