@@ -49,6 +49,8 @@ const Login = () => {
           return "Credenciais inválidas. Verifique seu email e senha.";
         case 422:
           return "Email ou senha inválidos. Verifique o formato das credenciais.";
+        case 429:
+          return "Muitas tentativas de login. Por favor, aguarde alguns minutos e tente novamente.";
         default:
           return "Ocorreu um erro ao tentar fazer login. Por favor, tente novamente.";
       }
