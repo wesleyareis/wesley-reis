@@ -94,7 +94,7 @@ const Index = () => {
                   id={property.id}
                   property_code={property.property_code || ''}
                   title={property.title}
-                  price={property.price}
+                  price={Number(property.price)}
                   location={`${property.neighborhood}, ${property.city}`}
                   bedrooms={property.bedrooms || 0}
                   bathrooms={property.bathrooms || 0}
