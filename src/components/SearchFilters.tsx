@@ -18,14 +18,16 @@ export function SearchFilters() {
       const { data, error } = await supabase
         .from('properties')
         .select('property_type')
-        .distinct()
-      
+        .is('property_type', 'not.null')
+
       if (error) {
         toast.error('Erro ao carregar tipos de imóveis')
         return []
       }
 
-      return data.map(item => item.property_type).sort()
+      // Remove duplicates and sort
+      const uniqueTypes = [...new Set(data.map(item => item.property_type))].sort()
+      return uniqueTypes
     }
   })
 
