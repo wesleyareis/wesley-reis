@@ -20,15 +20,18 @@ export function SearchFilters() {
   }
 
   const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    navigate(createQueryString('location', e.target.value))
+    const path = createQueryString('location', e.target.value)
+    navigate(path)
   }
 
   const handleTypeChange = (value: string) => {
-    navigate(createQueryString('type', value))
+    const path = createQueryString('type', value)
+    navigate(path)
   }
 
   const handlePriceChange = (value: string) => {
-    navigate(createQueryString('price', value))
+    const path = createQueryString('price', value)
+    navigate(path)
   }
 
   const handleClearFilters = () => {
