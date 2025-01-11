@@ -2,51 +2,57 @@ import { SearchFilters } from "@/components/SearchFilters"
 import { ImovelCard } from "@/components/ImovelCard"
 import { Button } from "@/components/ui/button"
 import { LogIn } from "lucide-react"
-import Link from "next/link"
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { Link, useSearchParams } from "react-router-dom"
+import { supabase } from "@/integrations/supabase/client"
+import { useQuery } from "@tanstack/react-query"
 
-export const dynamic = 'force-dynamic'
+export default function Home() {
+  const [searchParams] = useSearchParams()
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined }
-}) {
-  const supabase = createServerComponentClient({ cookies })
+  const { data: properties } = useQuery({
+    queryKey: ["properties", Object.fromEntries(searchParams)],
+    queryFn: async () => {
+      let query = supabase
+        .from("properties")
+        .select("*")
+        .eq("status", "active")
 
-  let query = supabase
-    .from("properties")
-    .select("*")
-    .eq("status", "active")
+      const location = searchParams.get("location")
+      const propertyType = searchParams.get("type")
+      const priceRange = searchParams.get("price")
 
-  const location = searchParams.location as string
-  const propertyType = searchParams.type as string
-  const priceRange = searchParams.price as string
+      if (location) {
+        query = query.or(`city.ilike.%${location}%,neighborhood.ilike.%${location}%`)
+      }
 
-  if (location) {
-    query = query.or(`city.ilike.%${location}%,neighborhood.ilike.%${location}%`)
-  }
+      if (propertyType) {
+        query = query.eq("property_type", propertyType)
+      }
 
-  if (propertyType) {
-    query = query.eq("property_type", propertyType)
-  }
+      if (priceRange) {
+        const [min, max] = priceRange.split("-").map(Number)
+        if (max) {
+          query = query.lte("price", max)
+        }
+        query = query.gte("price", min || 0)
+      }
 
-  if (priceRange) {
-    const [min, max] = priceRange.split("-").map(Number)
-    if (max) {
-      query = query.lte("price", max)
-    }
-    query = query.gte("price", min || 0)
-  }
-
-  const { data: properties } = await query
+      const { data, error } = await query
+      
+      if (error) {
+        console.error("Error fetching properties:", error)
+        return []
+      }
+      
+      return data
+    },
+  })
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link href="/" className="text-2xl font-black tracking-tight text-primary hover:text-primary/90 transition-colors">
+          <Link to="/" className="text-2xl font-black tracking-tight text-primary hover:text-primary/90 transition-colors">
             WesleyReis
           </Link>
           <nav className="flex gap-4 items-center">
@@ -55,7 +61,7 @@ export default async function Home({
               asChild
               className="flex items-center gap-2"
             >
-              <Link href="/login">
+              <Link to="/login">
                 <LogIn className="w-4 h-4" />
                 Login Corretor
               </Link>
