@@ -46,11 +46,19 @@ export function ImovelCard({
 
   const handleEditClick = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     navigate(`/imovel/editar/${property_code}`);
   };
 
+  const handleCardClick = () => {
+    navigate(`/imovel/${property_code}`);
+  };
+
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
+    <Card 
+      className="overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+      onClick={handleCardClick}
+    >
       <div className="relative h-48 overflow-hidden">
         <img
           src={imageUrl}
@@ -84,22 +92,15 @@ export function ImovelCard({
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-0 flex justify-between">
-        <Link
-          to={`/imovel/${property_code}`}
-          className="text-primary hover:text-primary/80 font-medium text-sm"
-        >
-          Ver detalhes →
-        </Link>
         {isAgent && (
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={handleEditClick}
-            >
-              <Edit className="w-4 h-4" />
-            </Button>
-          </div>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleEditClick}
+            className="z-10"
+          >
+            <Edit className="w-4 h-4" />
+          </Button>
         )}
       </CardFooter>
     </Card>
