@@ -12,6 +12,8 @@ export function ImovelCardImage({ imageUrl, title, price }: ImovelCardImageProps
       <img
         src={imageUrl}
         alt={title}
+        loading="lazy"
+        decoding="async"
         className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
       />
       <Badge className="absolute top-2 right-2 bg-primary text-white">
