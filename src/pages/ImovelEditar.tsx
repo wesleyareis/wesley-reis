@@ -77,10 +77,10 @@ const EditarImovel = () => {
     } : null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formState) {
-      mutation.mutateAsync(formState);
+      await mutation.mutateAsync(formState);
     }
   };
 
