@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { toast } from "sonner";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -15,47 +16,45 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const currentSession = localStorage.getItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
-        if (currentSession) {
-          try {
-            JSON.parse(currentSession);
-          } catch (e) {
-            console.error("Token inválido encontrado, removendo...");
-            localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
-          }
-        }
-
-        const { data: { session }, error } = await supabase.auth.getSession();
+        // Primeiro, verifica se há uma sessão válida
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
-        if (error) {
-          console.error("Erro ao obter sessão:", error);
-          localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
-          setIsAuthenticated(false);
-          navigate('/login', { replace: true });
-          return;
+        if (sessionError) {
+          console.error("Erro ao obter sessão:", sessionError);
+          throw sessionError;
         }
 
         if (!session) {
-          setIsAuthenticated(false);
-          navigate('/login', { replace: true });
-          return;
+          throw new Error("Sessão não encontrada");
+        }
+
+        // Verifica se o token ainda é válido
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
+        if (userError || !user) {
+          console.error("Erro ao verificar usuário:", userError);
+          throw userError || new Error("Usuário não encontrado");
         }
 
         setIsAuthenticated(true);
       } catch (error) {
-        console.error("Erro ao inicializar autenticação:", error);
+        console.error("Erro de autenticação:", error);
+        // Limpa a sessão local em caso de erro
+        await supabase.auth.signOut();
         localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
         setIsAuthenticated(false);
+        toast.error("Sua sessão expirou. Por favor, faça login novamente.");
         navigate('/login', { replace: true });
       } finally {
         setIsLoading(false);
       }
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    // Configura o listener de mudança de estado de autenticação
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
-        localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
         setIsAuthenticated(false);
+        localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
         navigate('/login', { replace: true });
         return;
       }
