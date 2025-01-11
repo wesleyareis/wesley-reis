@@ -73,23 +73,29 @@ const Dashboard = () => {
 
   const handleLogout = async () => {
     try {
-      // Primeiro limpa todos os dados locais
+      // Primeiro limpa todos os tokens do Supabase
+      const supabaseTokenKey = 'sb-' + process.env.SUPABASE_PROJECT_ID + '-auth-token';
+      localStorage.removeItem(supabaseTokenKey);
+      
+      // Limpa qualquer outro dado de autenticação
       for (const key of Object.keys(localStorage)) {
-        localStorage.removeItem(key);
+        if (key.includes('supabase') || key.includes('auth')) {
+          localStorage.removeItem(key);
+        }
       }
-      for (const key of Object.keys(sessionStorage)) {
-        sessionStorage.removeItem(key);
-      }
-
-      // Tenta fazer o signOut no Supabase
-      await supabase.auth.signOut();
-
-      // Força um reload completo da página para limpar todos os estados
-      window.location.href = '/login';
+      
+      // Limpa dados da sessão
+      sessionStorage.clear();
+      
+      // Faz o signOut no Supabase com escopo global
+      await supabase.auth.signOut({ scope: 'global' });
+      
+      // Força um reload completo da página
+      window.location.replace('/login');
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
       // Mesmo com erro, força o redirecionamento
-      window.location.href = '/login';
+      window.location.replace('/login');
     }
   };
 
@@ -111,7 +117,7 @@ const Dashboard = () => {
             )}
           </div>
           <div className="flex gap-4">
-            <Button onClick={handleNewProperty} className="flex items-center gap-2">
+            <Button onClick={() => navigate("/imovel/novo")} className="flex items-center gap-2">
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">Novo Imóvel</span>
             </Button>
