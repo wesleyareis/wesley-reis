@@ -13,7 +13,7 @@ const Index = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const { data: properties = [], isLoading } = useQuery({
+  const { data: properties = [], isLoading } = useQuery<PropertyData[]>({
     queryKey: ["properties", Object.fromEntries(searchParams)],
     queryFn: async () => {
       let query = supabase
