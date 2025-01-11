@@ -20,7 +20,8 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         
         if (sessionError) {
           console.error("Erro ao obter sessão:", sessionError);
-          throw sessionError;
+          await handleLogout();
+          return;
         }
 
         if (!session) {
@@ -48,20 +49,26 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
     const handleLogout = async () => {
       try {
-        // Primeiro remove o token local
-        localStorage.removeItem('sb-kjlipbbrbwdzqiwvrnpw-auth-token');
-        
-        // Depois tenta fazer o signOut no Supabase
-        const { error } = await supabase.auth.signOut();
-        if (error) {
-          console.error("Erro ao fazer logout:", error);
+        // Limpa todos os dados locais
+        for (const key of Object.keys(localStorage)) {
+          localStorage.removeItem(key);
         }
-      } catch (error) {
-        console.error("Erro ao fazer logout:", error);
-      } finally {
+        for (const key of Object.keys(sessionStorage)) {
+          sessionStorage.removeItem(key);
+        }
+
+        // Tenta fazer o signOut no Supabase
+        await supabase.auth.signOut();
+        
         setIsAuthenticated(false);
         toast.error("Sua sessão expirou. Por favor, faça login novamente.");
-        navigate('/login', { replace: true });
+        
+        // Força um reload completo da página
+        window.location.href = '/login';
+      } catch (error) {
+        console.error("Erro ao fazer logout:", error);
+        // Mesmo com erro, força o redirecionamento
+        window.location.href = '/login';
       }
     };
 
