@@ -1,7 +1,7 @@
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
-export default function NotFound() {
+const NotFound = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
       <div className="text-center space-y-4">
@@ -11,9 +11,11 @@ export default function NotFound() {
           A página que você está procurando não existe ou foi removida.
         </p>
         <Button asChild>
-          <Link href="/">Voltar para a página inicial</Link>
+          <Link to="/">Voltar para a página inicial</Link>
         </Button>
       </div>
     </div>
   );
-}
+};
+
+export default NotFound;
