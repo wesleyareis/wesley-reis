@@ -6,6 +6,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
 import { Footer } from "@/components/Footer";
+import type { PropertyData } from "@/types/imovel";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -48,7 +49,7 @@ const Index = () => {
         return [];
       }
       
-      return data;
+      return (data || []) as PropertyData[];
     },
   });
 
