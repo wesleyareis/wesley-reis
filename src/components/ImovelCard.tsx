@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ImovelCardImage } from "./imovel/card/ImovelCardImage";
 import { ImovelCardFeatures } from "./imovel/card/ImovelCardFeatures";
 import { ImovelCardActions } from "./imovel/card/ImovelCardActions";
+import { toast } from "sonner";
 
 interface ImovelCardProps {
   id: string;
@@ -44,10 +45,33 @@ export function ImovelCard({
     checkIfAgent();
   }, [agent_id]);
 
-  const handleEditClick = (e: React.MouseEvent) => {
+  const handleEditClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    navigate(`/imovel/editar/${property_code}`);
+    
+    try {
+      // Verifica se o imóvel existe antes de navegar
+      const { data: property, error } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('property_code', property_code)
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      if (!property) {
+        toast.error("Imóvel não encontrado");
+        return;
+      }
+
+      // Se encontrou o imóvel, navega para a página de edição
+      navigate(`/imovel/editar/${property_code}`);
+    } catch (error) {
+      console.error('Erro ao buscar dados do imóvel:', error);
+      toast.error("Erro ao carregar dados do imóvel");
+    }
   };
 
   const handleCardClick = () => {
