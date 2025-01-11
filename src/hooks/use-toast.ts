@@ -90,8 +90,6 @@ export const reducer = (state: State, action: Action): State => {
     case "DISMISS_TOAST": {
       const { toastId } = action
 
-      // ! Side effects ! - This could be extracted into a dismissToast() action,
-      // but I'll keep it here for simplicity
       if (toastId) {
         addToRemoveQueue(toastId)
       } else {
@@ -166,6 +164,22 @@ function toast({ ...props }: Toast) {
     dismiss,
     update,
   }
+}
+
+// Adiciona métodos de conveniência para diferentes tipos de toast
+toast.error = (message: string) => {
+  return toast({ 
+    variant: "destructive", 
+    title: "Erro",
+    description: message 
+  })
+}
+
+toast.success = (message: string) => {
+  return toast({ 
+    title: "Sucesso",
+    description: message 
+  })
 }
 
 function useToast() {
