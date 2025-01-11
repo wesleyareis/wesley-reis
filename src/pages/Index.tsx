@@ -27,15 +27,16 @@ const Index = () => {
 
       if (location) {
         query = query.or(
-          `neighborhood.ilike.%${location}%,city.ilike.%${location}%`
+          `neighborhood.ilike.%${location}%`,
+          `city.ilike.%${location}%`
         );
       }
 
-      if (propertyType && propertyType !== "") {
+      if (propertyType) {
         query = query.eq("property_type", propertyType);
       }
 
-      if (priceRange && priceRange !== "") {
+      if (priceRange) {
         const [min, max] = priceRange.split("-").map(Number);
         if (!isNaN(min) && !isNaN(max)) {
           query = query.gte("price", min).lte("price", max);
