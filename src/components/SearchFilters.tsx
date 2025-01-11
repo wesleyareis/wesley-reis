@@ -11,19 +11,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export function SearchFilters() {
-  const [location, setLocation] = useState("");
-  const [propertyType, setPropertyType] = useState("");
-  const [priceRange, setPriceRange] = useState("");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  const [location, setLocation] = useState(searchParams.get("location") || "");
+  const [propertyType, setPropertyType] = useState(searchParams.get("type") || "");
+  const [priceRange, setPriceRange] = useState(searchParams.get("price") || "");
 
   const handleSearch = () => {
-    // Por enquanto apenas loga os filtros, implementaremos a busca depois
-    console.log({
-      location,
-      propertyType,
-      priceRange,
-    });
+    const params = new URLSearchParams();
+    if (location) params.set("location", location);
+    if (propertyType) params.set("type", propertyType);
+    if (priceRange) params.set("price", priceRange);
+    
+    router.push(`/?${params.toString()}`);
   };
 
   return (
