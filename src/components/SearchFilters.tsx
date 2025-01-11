@@ -1,75 +1,88 @@
-"use client";
-
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useSearchParams } from "react-router-dom";
 
 export function SearchFilters() {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  
-  const [location, setLocation] = useState(searchParams.get("location") || "");
-  const [propertyType, setPropertyType] = useState(searchParams.get("type") || "");
-  const [priceRange, setPriceRange] = useState(searchParams.get("price") || "");
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const handleSearch = () => {
-    const params = new URLSearchParams();
-    if (location) params.set("location", location);
-    if (propertyType) params.set("type", propertyType);
-    if (priceRange) params.set("price", priceRange);
-    
-    navigate(`/?${params.toString()}`);
+  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (e.target.value) {
+      newParams.set("location", e.target.value);
+    } else {
+      newParams.delete("location");
+    }
+    setSearchParams(newParams);
+  };
+
+  const handleTypeChange = (value: string) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (value) {
+      newParams.set("type", value);
+    } else {
+      newParams.delete("type");
+    }
+    setSearchParams(newParams);
+  };
+
+  const handlePriceChange = (value: string) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (value) {
+      newParams.set("price", value);
+    } else {
+      newParams.delete("price");
+    }
+    setSearchParams(newParams);
   };
 
   return (
-    <div className="search-container p-6 rounded-lg shadow-md bg-white/50 backdrop-blur-sm">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Input
-            placeholder="Cidade, bairro ou condomínio"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            className="bg-white"
-          />
-          <Select value={propertyType} onValueChange={setPropertyType}>
-            <SelectTrigger className="bg-white">
-              <SelectValue placeholder="Tipo de Imóvel" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="apartamento">Apartamento</SelectItem>
-              <SelectItem value="casa">Casa</SelectItem>
-              <SelectItem value="comercial">Comercial</SelectItem>
-              <SelectItem value="terreno">Terreno</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={priceRange} onValueChange={setPriceRange}>
-            <SelectTrigger className="bg-white">
-              <SelectValue placeholder="Faixa de Preço" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="0-500000">Até R$ 500.000</SelectItem>
-              <SelectItem value="500000-1000000">R$ 500.000 - R$ 1.000.000</SelectItem>
-              <SelectItem value="1000000-2000000">R$ 1.000.000 - R$ 2.000.000</SelectItem>
-              <SelectItem value="2000000">Acima de R$ 2.000.000</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button 
-            className="bg-primary text-white hover:bg-primary/90 w-full"
-            onClick={handleSearch}
-          >
-            <Search className="w-4 h-4 mr-2" />
-            Buscar Imóveis
-          </Button>
-        </div>
+    <div className="search-container p-8 rounded-lg">
+      <h1 className="text-3xl font-bold text-white mb-6">
+        Encontre seu imóvel ideal
+      </h1>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Input
+          placeholder="Localização"
+          className="bg-white"
+          value={searchParams.get("location") || ""}
+          onChange={handleLocationChange}
+        />
+        <Select
+          value={searchParams.get("type") || ""}
+          onValueChange={handleTypeChange}
+        >
+          <SelectTrigger className="bg-white">
+            <SelectValue placeholder="Tipo de imóvel" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Todos os tipos</SelectItem>
+            <SelectItem value="apartamento">Apartamento</SelectItem>
+            <SelectItem value="casa">Casa</SelectItem>
+            <SelectItem value="cobertura">Cobertura</SelectItem>
+            <SelectItem value="terreno">Terreno</SelectItem>
+            <SelectItem value="sala">Sala Comercial</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select
+          value={searchParams.get("price") || ""}
+          onValueChange={handlePriceChange}
+        >
+          <SelectTrigger className="bg-white">
+            <SelectValue placeholder="Faixa de preço" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Qualquer preço</SelectItem>
+            <SelectItem value="0-300000">Até R$ 300.000</SelectItem>
+            <SelectItem value="300000-500000">R$ 300.000 - R$ 500.000</SelectItem>
+            <SelectItem value="500000-800000">R$ 500.000 - R$ 800.000</SelectItem>
+            <SelectItem value="800000-1000000">R$ 800.000 - R$ 1.000.000</SelectItem>
+            <SelectItem value="1000000-99999999">Acima de R$ 1.000.000</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button className="bg-white text-primary hover:bg-white/90">
+          Buscar
+        </Button>
       </div>
     </div>
   );

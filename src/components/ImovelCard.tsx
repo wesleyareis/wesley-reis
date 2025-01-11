@@ -70,7 +70,6 @@ export function ImovelCard({
         return;
       }
 
-      // Navega para a página de edição com os dados do imóvel
       navigate(`/imovel/editar/${property_code}`, {
         state: { property }
       });
