@@ -4,10 +4,30 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useSearchParams, useNavigate } from "react-router-dom"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
+import { toast } from "sonner"
 
 export function SearchFilters() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+
+  const { data: propertyTypes = [], isLoading: isLoadingTypes } = useQuery({
+    queryKey: ['propertyTypes'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('property_type')
+        .distinct()
+      
+      if (error) {
+        toast.error('Erro ao carregar tipos de imóveis')
+        return []
+      }
+
+      return data.map(item => item.property_type).sort()
+    }
+  })
 
   const createQueryString = (name: string, value: string) => {
     const params = new URLSearchParams(searchParams)
@@ -60,11 +80,15 @@ export function SearchFilters() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="">Todos os tipos</SelectItem>
-            <SelectItem value="apartamento">Apartamento</SelectItem>
-            <SelectItem value="casa">Casa</SelectItem>
-            <SelectItem value="cobertura">Cobertura</SelectItem>
-            <SelectItem value="comercial">Comercial</SelectItem>
-            <SelectItem value="terreno">Terreno</SelectItem>
+            {isLoadingTypes ? (
+              <SelectItem value="" disabled>Carregando...</SelectItem>
+            ) : (
+              propertyTypes.map((type) => (
+                <SelectItem key={type} value={type}>
+                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                </SelectItem>
+              ))
+            )}
           </SelectContent>
         </Select>
         <Select
