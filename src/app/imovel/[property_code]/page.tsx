@@ -53,12 +53,27 @@ export default async function ImovelPage({ params, searchParams }: PageProps) {
   const isAgent = user?.id === property.agent_id;
   const isEditMode = searchParams.mode === 'edit' && isAgent;
 
+  const initialFormData = {
+    ...property,
+    features: property.features || {},
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {isEditMode ? (
-        <ImovelEdit property={property} />
+        <ImovelEdit 
+          formData={initialFormData}
+          isLoading={false}
+          isGeneratingDescription={false}
+          onInputChange={() => {}}
+          onGenerateDescription={async () => {}}
+          onSubmit={async () => {}}
+        />
       ) : (
-        <ImovelView property={property} isAgent={isAgent} />
+        <ImovelView 
+          property={property}
+          canEdit={isAgent}
+        />
       )}
     </div>
   );
