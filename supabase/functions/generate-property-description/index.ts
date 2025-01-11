@@ -12,17 +12,23 @@ serve(async (req) => {
   }
 
   try {
-    const { propertyDetails } = await req.json()
+    const { property } = await req.json()
+
+    if (!property) {
+      throw new Error('Dados do imóvel não fornecidos')
+    }
 
     const prompt = `Gere uma descrição profissional e atraente para um imóvel com as seguintes características:
-    - Tipo: ${propertyDetails.type}
-    - Quartos: ${propertyDetails.bedrooms}
-    - Banheiros: ${propertyDetails.bathrooms}
-    - Vagas: ${propertyDetails.parkingSpaces}
-    - Área: ${propertyDetails.area}m²
-    - Localização: ${propertyDetails.location}
+    - Tipo: ${property.property_type || 'Não especificado'}
+    - Quartos: ${property.bedrooms || 0}
+    - Banheiros: ${property.bathrooms || 0}
+    - Vagas: ${property.parking_spaces || 0}
+    - Área: ${property.total_area || 0}m²
+    - Localização: ${property.neighborhood}, ${property.city}
     
     A descrição deve ser em português, enfatizar os pontos fortes do imóvel e ter um tom profissional de corretor.`
+
+    console.log('Enviando prompt para OpenAI:', prompt)
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -45,12 +51,13 @@ serve(async (req) => {
       }),
     })
 
-    const data = await response.json()
-    
     if (!response.ok) {
-      throw new Error(data.error?.message || 'Erro ao gerar descrição')
+      const error = await response.json()
+      console.error('Erro na resposta da OpenAI:', error)
+      throw new Error('Falha ao gerar descrição com OpenAI')
     }
 
+    const data = await response.json()
     const description = data.choices[0].message.content
 
     return new Response(
