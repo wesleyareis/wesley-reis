@@ -15,7 +15,7 @@ interface PropertyTypeFilterProps {
 }
 
 export function PropertyTypeFilter({ value, onChange }: PropertyTypeFilterProps) {
-  const { data: propertyTypes = [], isLoading: isLoadingTypes } = useQuery({
+  const { data: propertyTypes = [], isLoading } = useQuery({
     queryKey: ['propertyTypes'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -34,16 +34,13 @@ export function PropertyTypeFilter({ value, onChange }: PropertyTypeFilterProps)
   })
 
   return (
-    <Select
-      value={value}
-      onValueChange={onChange}
-    >
+    <Select value={value} onValueChange={onChange}>
       <SelectTrigger className="bg-white">
         <SelectValue placeholder="Tipo de imóvel" />
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="">Todos os tipos</SelectItem>
-        {isLoadingTypes ? (
+        {isLoading ? (
           <SelectItem value="" disabled>Carregando...</SelectItem>
         ) : (
           propertyTypes.map((type) => (
