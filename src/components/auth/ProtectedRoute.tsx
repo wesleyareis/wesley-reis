@@ -49,8 +49,13 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
     const handleLogout = async () => {
       try {
+        setIsAuthenticated(false);
+        
+        // Primeiro faz o signOut no Supabase
+        await supabase.auth.signOut();
+        
         // Limpa token do Supabase
-        const supabaseTokenKey = 'sb-' + process.env.SUPABASE_PROJECT_ID + '-auth-token';
+        const supabaseTokenKey = 'sb-kjlipbbrbwdzqiwvrnpw-auth-token';
         localStorage.removeItem(supabaseTokenKey);
         
         // Limpa outros dados de autenticação
@@ -63,17 +68,13 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         // Limpa dados da sessão
         sessionStorage.clear();
         
-        // Faz o signOut no Supabase
-        await supabase.auth.signOut({ scope: 'global' });
-        
-        setIsAuthenticated(false);
         toast.error("Sua sessão expirou. Por favor, faça login novamente.");
         
         // Força um reload completo da página
-        window.location.replace('/login');
+        window.location.href = '/login';
       } catch (error) {
         console.error("Erro ao fazer logout:", error);
-        window.location.replace('/login');
+        window.location.href = '/login';
       }
     };
 

@@ -67,17 +67,17 @@ const Dashboard = () => {
     }
   });
 
-  const handleNewProperty = () => {
-    navigate("/imovel/novo");
-  };
-
   const handleLogout = async () => {
     try {
-      // Primeiro limpa todos os tokens do Supabase
-      const supabaseTokenKey = 'sb-' + process.env.SUPABASE_PROJECT_ID + '-auth-token';
+      // Primeiro faz o signOut no Supabase
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      // Limpa token do Supabase
+      const supabaseTokenKey = 'sb-kjlipbbrbwdzqiwvrnpw-auth-token';
       localStorage.removeItem(supabaseTokenKey);
       
-      // Limpa qualquer outro dado de autenticação
+      // Limpa outros dados de autenticação
       for (const key of Object.keys(localStorage)) {
         if (key.includes('supabase') || key.includes('auth')) {
           localStorage.removeItem(key);
@@ -87,15 +87,11 @@ const Dashboard = () => {
       // Limpa dados da sessão
       sessionStorage.clear();
       
-      // Faz o signOut no Supabase com escopo global
-      await supabase.auth.signOut({ scope: 'global' });
-      
       // Força um reload completo da página
-      window.location.replace('/login');
+      window.location.href = '/login';
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
-      // Mesmo com erro, força o redirecionamento
-      window.location.replace('/login');
+      window.location.href = '/login';
     }
   };
 
@@ -139,7 +135,7 @@ const Dashboard = () => {
           ) : properties?.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground">Você ainda não possui imóveis cadastrados.</p>
-              <Button onClick={handleNewProperty} className="mt-4">
+              <Button onClick={() => navigate("/imovel/novo")} className="mt-4">
                 Cadastrar primeiro imóvel
               </Button>
             </div>
