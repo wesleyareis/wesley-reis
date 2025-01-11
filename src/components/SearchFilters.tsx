@@ -11,8 +11,8 @@ export function SearchFilters() {
 
   const createQueryString = (name: string, value: string): string => {
     const params = new URLSearchParams(searchParams.toString())
-    if (value) {
-      params.set(name, value)
+    if (value && value.trim() !== '') {
+      params.set(name, value.trim())
     } else {
       params.delete(name)
     }
@@ -47,11 +47,11 @@ export function SearchFilters() {
         <Input
           placeholder="Localização"
           className="bg-white"
-          value={searchParams.get("location") || ""}
+          value={searchParams.get("location") ?? ""}
           onChange={handleLocationChange}
         />
         <Select
-          value={searchParams.get("type") || ""}
+          value={searchParams.get("type") ?? ""}
           onValueChange={handleTypeChange}
         >
           <SelectTrigger className="bg-white">
@@ -66,7 +66,7 @@ export function SearchFilters() {
           </SelectContent>
         </Select>
         <Select
-          value={searchParams.get("price") || ""}
+          value={searchParams.get("price") ?? ""}
           onValueChange={handlePriceChange}
         >
           <SelectTrigger className="bg-white">
