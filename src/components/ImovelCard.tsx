@@ -92,6 +92,13 @@ export function ImovelCard({
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-0 flex justify-between">
+        <Link
+          to={`/imovel/${property_code}`}
+          className="text-primary hover:text-primary/80 font-medium text-sm"
+          onClick={(e) => e.stopPropagation()}
+        >
+          Ver detalhes →
+        </Link>
         {isAgent && (
           <Button 
             variant="outline" 
