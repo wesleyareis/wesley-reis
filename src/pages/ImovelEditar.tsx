@@ -10,6 +10,7 @@ const EditarImovel = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [formState, setFormState] = useState<PropertyFormData | null>(null);
+  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
 
   const { data: property, isLoading } = useQuery({
     queryKey: ["property", id],
@@ -28,6 +29,7 @@ const EditarImovel = () => {
   useEffect(() => {
     if (property) {
       setFormState({
+        id: property.id,
         title: property.title,
         description: property.description || "",
         price: property.price,
@@ -70,10 +72,11 @@ const EditarImovel = () => {
     },
   });
 
-  const handleInputChange = (field: keyof PropertyFormData, value: any) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
     setFormState((prev) => prev ? {
       ...prev,
-      [field]: value,
+      [name]: value,
     } : null);
   };
 
@@ -87,6 +90,7 @@ const EditarImovel = () => {
   const handleGenerateDescription = async () => {
     if (!formState) return;
 
+    setIsGeneratingDescription(true);
     try {
       const { data, error } = await supabase.functions.invoke('generate-property-description', {
         body: {
@@ -97,26 +101,32 @@ const EditarImovel = () => {
       if (error) throw error;
 
       if (data?.description) {
-        handleInputChange('description', data.description);
+        setFormState(prev => prev ? {
+          ...prev,
+          description: data.description
+        } : null);
         toast.success('Descrição gerada com sucesso!');
       }
     } catch (error) {
       console.error('Error generating description:', error);
       toast.error('Erro ao gerar descrição. Tente novamente.');
+    } finally {
+      setIsGeneratingDescription(false);
     }
   };
 
-  if (isLoading) {
-    return <div>Carregando...</div>;
+  if (!formState) {
+    return null;
   }
 
   return (
     <ImovelEdit
-      initialData={formState}
-      onInputChange={handleInputChange}
-      onSubmit={handleSubmit}
-      onGenerateDescription={handleGenerateDescription}
+      formData={formState}
       isLoading={mutation.isPending}
+      isGeneratingDescription={isGeneratingDescription}
+      onInputChange={handleInputChange}
+      onGenerateDescription={handleGenerateDescription}
+      onSubmit={handleSubmit}
     />
   );
 };
