@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 import { AuthError, AuthApiError } from "@supabase/supabase-js";
 
 const Login = () => {
@@ -60,16 +60,30 @@ const Login = () => {
         password: password,
       });
 
-      if (error) throw error;
+      if (error) {
+        const errorMessage = getErrorMessage(error);
+        toast({
+          variant: "destructive",
+          title: "Erro no login",
+          description: errorMessage,
+        });
+        return;
+      }
 
       if (data?.user) {
-        toast.success("Login realizado com sucesso!");
+        toast({
+          title: "Login realizado com sucesso!",
+          description: "Você será redirecionado para o dashboard.",
+        });
         navigate("/dashboard", { replace: true });
       }
     } catch (error: any) {
       console.error("Erro no login:", error);
-      const errorMessage = getErrorMessage(error as AuthError);
-      toast.error(errorMessage);
+      toast({
+        variant: "destructive",
+        title: "Erro no login",
+        description: "Ocorreu um erro inesperado. Por favor, tente novamente.",
+      });
     } finally {
       setLoading(false);
     }
