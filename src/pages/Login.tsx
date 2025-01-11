@@ -23,13 +23,18 @@ const Login = () => {
         }
       } catch (error) {
         console.error("Erro ao verificar sessão:", error);
+        toast({
+          variant: "destructive",
+          title: "Erro ao verificar sessão",
+          description: "Houve um problema ao verificar sua sessão. Por favor, tente novamente.",
+        });
       } finally {
         setIsCheckingSession(false);
       }
     };
 
     checkSession();
-  }, [navigate]);
+  }, [navigate, toast]);
 
   const getErrorMessage = (error: AuthError) => {
     if (error instanceof AuthApiError) {
