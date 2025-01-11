@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { AuthError } from "@supabase/supabase-js";
+import { AuthError, AuthApiError } from "@supabase/supabase-js";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -31,11 +31,21 @@ const Login = () => {
   }, [navigate]);
 
   const getErrorMessage = (error: AuthError) => {
-    if (error.message.includes("Invalid login credentials")) {
-      return "Email ou senha inválidos. Por favor, verifique suas credenciais.";
-    }
-    if (error.message.includes("Email not confirmed")) {
-      return "Por favor, confirme seu email antes de fazer login.";
+    if (error instanceof AuthApiError) {
+      switch (error.status) {
+        case 400:
+          if (error.message.includes("Invalid login credentials")) {
+            return "Email ou senha inválidos. Por favor, verifique suas credenciais.";
+          }
+          if (error.message.includes("Email not confirmed")) {
+            return "Por favor, confirme seu email antes de fazer login.";
+          }
+          return "Credenciais inválidas. Verifique seu email e senha.";
+        case 422:
+          return "Email ou senha inválidos. Verifique o formato das credenciais.";
+        default:
+          return "Ocorreu um erro ao tentar fazer login. Por favor, tente novamente.";
+      }
     }
     return "Ocorreu um erro ao tentar fazer login. Por favor, tente novamente.";
   };
@@ -46,8 +56,8 @@ const Login = () => {
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: email.trim(),
+        password: password,
       });
 
       if (error) throw error;
