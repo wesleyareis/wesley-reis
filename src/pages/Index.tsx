@@ -1,45 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
-import { ImovelCard } from "@/components/ImovelCard";
-import { SearchFilters } from "@/components/SearchFilters";
 import { supabase } from "@/integrations/supabase/client";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
-import { Footer } from "@/components/Footer";
 
 const Index = () => {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-
   const { data: properties, isLoading } = useQuery({
-    queryKey: ["properties", Object.fromEntries(searchParams)],
+    queryKey: ["properties"],
     queryFn: async () => {
-      let query = supabase
+      const { data, error } = await supabase
         .from("properties")
         .select("*")
         .eq("status", "active");
-
-      const location = searchParams.get("location");
-      const propertyType = searchParams.get("type");
-      const priceRange = searchParams.get("price");
-
-      if (location) {
-        query = query.or(`city.ilike.%${location}%,neighborhood.ilike.%${location}%`);
-      }
-
-      if (propertyType) {
-        query = query.eq("property_type", propertyType);
-      }
-
-      if (priceRange) {
-        const [min, max] = priceRange.split("-").map(Number);
-        if (max) {
-          query = query.lte("price", max);
-        }
-        query = query.gte("price", min || 0);
-      }
-
-      const { data, error } = await query;
       
       if (error) {
         console.error("Error fetching properties:", error);
@@ -50,19 +22,16 @@ const Index = () => {
     },
   });
 
-  const handleLoginClick = () => {
-    navigate('/login');
-  };
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link to="/" className="text-2xl font-black tracking-tight text-primary hover:text-primary/90 transition-colors">WesleyReis</Link>
+          <Link to="/" className="text-2xl font-black tracking-tight text-primary hover:text-primary/90 transition-colors">
+            WesleyReis
+          </Link>
           <nav className="flex gap-4 items-center">
             <Button
               variant="outline"
-              onClick={handleLoginClick}
               className="flex items-center gap-2"
             >
               <LogIn className="w-4 h-4" />
@@ -73,8 +42,6 @@ const Index = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8 flex-grow">
-        <SearchFilters />
-        
         <div className="mt-12">
           <h2 className="text-2xl font-semibold mb-6">Imóveis em Destaque</h2>
           {isLoading ? (
@@ -84,26 +51,18 @@ const Index = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {properties?.map((property) => (
-                <ImovelCard
-                  key={property.id}
-                  id={property.id}
-                  property_code={property.property_code || ''}
-                  title={property.title}
-                  price={property.price}
-                  location={`${property.neighborhood}, ${property.city}`}
-                  bedrooms={property.bedrooms || 0}
-                  bathrooms={property.bathrooms || 0}
-                  parkingSpaces={property.parking_spaces || 0}
-                  area={property.total_area || 0}
-                  imageUrl={property.images?.[0] || "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=400"}
-                />
+                <div key={property.id} className="bg-white rounded-lg shadow-md p-4">
+                  <h3 className="text-lg font-semibold">{property.title}</h3>
+                  <p className="text-gray-600">{property.neighborhood}, {property.city}</p>
+                  <p className="text-primary font-bold mt-2">
+                    R$ {property.price.toLocaleString('pt-BR')}
+                  </p>
+                </div>
               ))}
             </div>
           )}
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 };
