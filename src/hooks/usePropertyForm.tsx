@@ -36,7 +36,7 @@ export const usePropertyForm = (initialData: PropertyFormData) => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+            Authorization: `Bearer ${supabase.auth.session()?.access_token}`,
           },
           body: JSON.stringify({
             property: {
