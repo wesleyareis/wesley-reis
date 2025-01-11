@@ -1,40 +1,35 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useSearchParams } from "react-router-dom";
+'use client'
+
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useRouter, useSearchParams } from "next/navigation"
 
 export function SearchFilters() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  const createQueryString = (name: string, value: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (value) {
+      params.set(name, value)
+    } else {
+      params.delete(name)
+    }
+    return params.toString()
+  }
 
   const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newParams = new URLSearchParams(searchParams);
-    if (e.target.value) {
-      newParams.set("location", e.target.value);
-    } else {
-      newParams.delete("location");
-    }
-    setSearchParams(newParams);
-  };
+    router.push(`/?${createQueryString('location', e.target.value)}`)
+  }
 
   const handleTypeChange = (value: string) => {
-    const newParams = new URLSearchParams(searchParams);
-    if (value) {
-      newParams.set("type", value);
-    } else {
-      newParams.delete("type");
-    }
-    setSearchParams(newParams);
-  };
+    router.push(`/?${createQueryString('type', value)}`)
+  }
 
   const handlePriceChange = (value: string) => {
-    const newParams = new URLSearchParams(searchParams);
-    if (value) {
-      newParams.set("price", value);
-    } else {
-      newParams.delete("price");
-    }
-    setSearchParams(newParams);
-  };
+    router.push(`/?${createQueryString('price', value)}`)
+  }
 
   return (
     <div className="search-container p-8 rounded-lg">
@@ -85,5 +80,5 @@ export function SearchFilters() {
         </Button>
       </div>
     </div>
-  );
+  )
 }

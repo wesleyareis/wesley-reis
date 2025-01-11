@@ -1,24 +1,26 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { ImovelCardImage } from "./imovel/card/ImovelCardImage";
-import { ImovelCardFeatures } from "./imovel/card/ImovelCardFeatures";
-import { ImovelCardActions } from "./imovel/card/ImovelCardActions";
-import { toast } from "sonner";
+'use client'
+
+import { Card, CardContent } from "@/components/ui/card"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import { supabase } from "@/integrations/supabase/client"
+import { ImovelCardImage } from "./imovel/card/ImovelCardImage"
+import { ImovelCardFeatures } from "./imovel/card/ImovelCardFeatures"
+import { ImovelCardActions } from "./imovel/card/ImovelCardActions"
+import { toast } from "sonner"
 
 interface ImovelCardProps {
-  id: string;
-  property_code: string;
-  title: string;
-  price: number;
-  location: string;
-  bedrooms: number;
-  bathrooms: number;
-  parkingSpaces: number;
-  area: number;
-  imageUrl: string;
-  agent_id?: string;
+  id: string
+  property_code: string
+  title: string
+  price: number
+  location: string
+  bedrooms: number
+  bathrooms: number
+  parkingSpaces: number
+  area: number
+  imageUrl: string
+  agent_id?: string
 }
 
 export function ImovelCard({
@@ -34,56 +36,54 @@ export function ImovelCard({
   imageUrl,
   agent_id,
 }: ImovelCardProps) {
-  const [isAgent, setIsAgent] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  const [isAgent, setIsAgent] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
     const checkIfAgent = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setIsAgent(!!user && user.id === agent_id);
-    };
-    checkIfAgent();
-  }, [agent_id]);
+      const { data: { user } } = await supabase.auth.getUser()
+      setIsAgent(!!user && user.id === agent_id)
+    }
+    checkIfAgent()
+  }, [agent_id])
 
   const handleEditClick = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+    e.preventDefault()
+    e.stopPropagation()
 
-    if (isLoading) return;
+    if (isLoading) return
     
-    setIsLoading(true);
+    setIsLoading(true)
     
     try {
       const { data: property, error } = await supabase
         .from('properties')
         .select('*')
         .eq('id', id)
-        .maybeSingle();
+        .maybeSingle()
 
       if (error) {
-        throw error;
+        throw error
       }
 
       if (!property) {
-        toast.error("Imóvel não encontrado");
-        return;
+        toast.error("Imóvel não encontrado")
+        return
       }
 
-      navigate(`/imovel/editar/${property_code}`, {
-        state: { property }
-      });
+      router.push(`/imovel/editar/${property_code}`)
     } catch (error) {
-      console.error('Erro ao buscar dados do imóvel:', error);
-      toast.error("Erro ao carregar dados do imóvel");
+      console.error('Erro ao buscar dados do imóvel:', error)
+      toast.error("Erro ao carregar dados do imóvel")
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const handleCardClick = () => {
-    navigate(`/imovel/${property_code}`);
-  };
+    router.push(`/imovel/${property_code}`)
+  }
 
   return (
     <Card 
@@ -108,5 +108,5 @@ export function ImovelCard({
         isLoading={isLoading}
       />
     </Card>
-  );
+  )
 }
