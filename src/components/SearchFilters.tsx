@@ -12,14 +12,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export interface SearchFiltersProps {
-  onFilterChange: (filters: {
-    location: string;
-    propertyType: string;
-    priceRange: string;
-  }) => void;
-}
-
 export function SearchFilters() {
   const [location, setLocation] = useState("");
   const [propertyType, setPropertyType] = useState("");
