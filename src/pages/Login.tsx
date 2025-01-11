@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { AuthError } from "@supabase/supabase-js";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -29,6 +30,16 @@ const Login = () => {
     checkSession();
   }, [navigate]);
 
+  const getErrorMessage = (error: AuthError) => {
+    if (error.message.includes("Invalid login credentials")) {
+      return "Email ou senha inválidos. Por favor, verifique suas credenciais.";
+    }
+    if (error.message.includes("Email not confirmed")) {
+      return "Por favor, confirme seu email antes de fazer login.";
+    }
+    return "Ocorreu um erro ao tentar fazer login. Por favor, tente novamente.";
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -47,7 +58,8 @@ const Login = () => {
       }
     } catch (error: any) {
       console.error("Erro no login:", error);
-      toast.error(error.message || "Ocorreu um erro ao tentar fazer login");
+      const errorMessage = getErrorMessage(error as AuthError);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
