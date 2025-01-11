@@ -1,11 +1,14 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "@/pages/Index";
+import Dashboard from "@/pages/Dashboard";
+import NovoImovel from "@/pages/ImovelNovo";
+import EditarImovel from "@/pages/ImovelEditar";
 import { supabase } from "@/integrations/supabase/client";
 
 const App = () => {
@@ -60,6 +63,13 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       setSession(session);
       setLoading(false);
     });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   if (loading) {

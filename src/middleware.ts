@@ -1,15 +1,19 @@
 import { supabase } from "@/integrations/supabase/client";
-import { Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-export async function authMiddleware(Component: React.ComponentType) {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+export const useAuthMiddleware = () => {
+  const navigate = useNavigate();
 
-  // Protege rotas do dashboard
-  if (!session) {
-    return <Navigate to="/login" replace />;
-  }
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        navigate('/login', { replace: true });
+      }
+    };
 
-  return <Component />;
-}
+    checkAuth();
+  }, [navigate]);
+};
