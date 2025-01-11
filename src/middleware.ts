@@ -1,28 +1,15 @@
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { supabase } from "@/integrations/supabase/client";
+import { Navigate } from "react-router-dom";
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next()
-  const supabase = createMiddlewareClient({ req, res })
+export async function authMiddleware(Component: React.ComponentType) {
   const {
     data: { session },
-  } = await supabase.auth.getSession()
+  } = await supabase.auth.getSession();
 
   // Protege rotas do dashboard
-  if (req.nextUrl.pathname.startsWith('/dashboard')) {
-    if (!session) {
-      return NextResponse.redirect(new URL('/login', req.url))
-    }
+  if (!session) {
+    return <Navigate to="/login" replace />;
   }
 
-  return res
-}
-
-export const config = {
-  matcher: [
-    '/dashboard/:path*',
-    '/imovel/novo',
-    '/imovel/editar/:path*'
-  ],
+  return <Component />;
 }
