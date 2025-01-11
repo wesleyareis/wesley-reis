@@ -1,16 +1,18 @@
 import { Button } from "@/components/ui/button";
-import { Edit } from "lucide-react";
+import { Edit, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface ImovelCardActionsProps {
   propertyCode: string;
   isAgent: boolean;
+  isLoading?: boolean;
   onEditClick: (e: React.MouseEvent) => void;
 }
 
 export function ImovelCardActions({ 
   propertyCode, 
   isAgent, 
+  isLoading,
   onEditClick 
 }: ImovelCardActionsProps) {
   return (
@@ -27,9 +29,14 @@ export function ImovelCardActions({
           variant="outline" 
           size="sm"
           onClick={onEditClick}
+          disabled={isLoading}
           className="z-10"
         >
-          <Edit className="w-4 h-4" />
+          {isLoading ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Edit className="w-4 h-4" />
+          )}
         </Button>
       )}
     </div>

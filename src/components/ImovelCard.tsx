@@ -35,6 +35,7 @@ export function ImovelCard({
   agent_id,
 }: ImovelCardProps) {
   const [isAgent, setIsAgent] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -48,14 +49,17 @@ export function ImovelCard({
   const handleEditClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (isLoading) return;
+    
+    setIsLoading(true);
     
     try {
-      // Verifica se o imóvel existe antes de navegar
       const { data: property, error } = await supabase
         .from('properties')
         .select('*')
         .eq('property_code', property_code)
-        .single();
+        .maybeSingle();
 
       if (error) {
         throw error;
@@ -67,10 +71,14 @@ export function ImovelCard({
       }
 
       // Se encontrou o imóvel, navega para a página de edição
-      navigate(`/imovel/editar/${property_code}`);
+      navigate(`/imovel/editar/${property_code}`, {
+        state: { property }
+      });
     } catch (error) {
       console.error('Erro ao buscar dados do imóvel:', error);
       toast.error("Erro ao carregar dados do imóvel");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -98,6 +106,7 @@ export function ImovelCard({
         propertyCode={property_code}
         isAgent={isAgent}
         onEditClick={handleEditClick}
+        isLoading={isLoading}
       />
     </Card>
   );
