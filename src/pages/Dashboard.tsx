@@ -69,29 +69,11 @@ const Dashboard = () => {
 
   const handleLogout = async () => {
     try {
-      // Primeiro faz o signOut no Supabase
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      
-      // Limpa token do Supabase
-      const supabaseTokenKey = 'sb-kjlipbbrbwdzqiwvrnpw-auth-token';
-      localStorage.removeItem(supabaseTokenKey);
-      
-      // Limpa outros dados de autenticação
-      for (const key of Object.keys(localStorage)) {
-        if (key.includes('supabase') || key.includes('auth')) {
-          localStorage.removeItem(key);
-        }
-      }
-      
-      // Limpa dados da sessão
-      sessionStorage.clear();
-      
-      // Força um reload completo da página
-      window.location.href = '/login';
+      await supabase.auth.signOut();
+      navigate('/login', { replace: true });
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
-      window.location.href = '/login';
+      toast.error("Erro ao fazer logout. Tente novamente.");
     }
   };
 

@@ -3,11 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -17,7 +16,6 @@ const Login = () => {
     const checkSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        
         if (session?.user) {
           navigate("/dashboard", { replace: true });
         }
@@ -27,7 +25,7 @@ const Login = () => {
         setIsCheckingSession(false);
       }
     };
-    
+
     checkSession();
   }, [navigate]);
 
@@ -44,20 +42,12 @@ const Login = () => {
       if (error) throw error;
 
       if (data?.user) {
-        toast({
-          title: "Login realizado com sucesso!",
-          description: "Redirecionando para o dashboard...",
-        });
-
+        toast.success("Login realizado com sucesso!");
         navigate("/dashboard", { replace: true });
       }
     } catch (error: any) {
       console.error("Erro no login:", error);
-      toast({
-        title: "Erro ao fazer login",
-        description: error.message || "Ocorreu um erro ao tentar fazer login",
-        variant: "destructive",
-      });
+      toast.error(error.message || "Ocorreu um erro ao tentar fazer login");
     } finally {
       setLoading(false);
     }
