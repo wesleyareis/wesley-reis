@@ -1,35 +1,14 @@
 'use client'
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useSearchParams, useNavigate } from "react-router-dom"
-import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
-import { toast } from "sonner"
+import { LocationFilter } from "./filters/LocationFilter"
+import { PropertyTypeFilter } from "./filters/PropertyTypeFilter"
+import { PriceRangeFilter } from "./filters/PriceRangeFilter"
 
 export function SearchFilters() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-
-  const { data: propertyTypes = [], isLoading: isLoadingTypes } = useQuery({
-    queryKey: ['propertyTypes'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('properties')
-        .select('property_type')
-        .is('property_type', 'not.null')
-
-      if (error) {
-        toast.error('Erro ao carregar tipos de imóveis')
-        return []
-      }
-
-      // Remove duplicates and sort
-      const uniqueTypes = [...new Set(data.map(item => item.property_type))].sort()
-      return uniqueTypes
-    }
-  })
 
   const createQueryString = (name: string, value: string) => {
     const params = new URLSearchParams(searchParams)
@@ -41,8 +20,8 @@ export function SearchFilters() {
     return params.toString()
   }
 
-  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    navigate(`/?${createQueryString('location', e.target.value)}`)
+  const handleLocationChange = (value: string) => {
+    navigate(`/?${createQueryString('location', value)}`)
   }
 
   const handleTypeChange = (value: string) => {
@@ -67,48 +46,18 @@ export function SearchFilters() {
         Encontre seu imóvel ideal
       </h1>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Input
-          placeholder="Localização"
-          className="bg-white"
+        <LocationFilter 
           value={currentLocation}
           onChange={handleLocationChange}
         />
-        <Select
+        <PropertyTypeFilter
           value={currentType}
-          onValueChange={handleTypeChange}
-        >
-          <SelectTrigger className="bg-white">
-            <SelectValue placeholder="Tipo de imóvel" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">Todos os tipos</SelectItem>
-            {isLoadingTypes ? (
-              <SelectItem value="" disabled>Carregando...</SelectItem>
-            ) : (
-              propertyTypes.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {type.charAt(0).toUpperCase() + type.slice(1)}
-                </SelectItem>
-              ))
-            )}
-          </SelectContent>
-        </Select>
-        <Select
+          onChange={handleTypeChange}
+        />
+        <PriceRangeFilter
           value={currentPrice}
-          onValueChange={handlePriceChange}
-        >
-          <SelectTrigger className="bg-white">
-            <SelectValue placeholder="Faixa de preço" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">Qualquer preço</SelectItem>
-            <SelectItem value="0-300000">Até R$ 300.000</SelectItem>
-            <SelectItem value="300000-500000">R$ 300.000 - R$ 500.000</SelectItem>
-            <SelectItem value="500000-800000">R$ 500.000 - R$ 800.000</SelectItem>
-            <SelectItem value="800000-1000000">R$ 800.000 - R$ 1.000.000</SelectItem>
-            <SelectItem value="1000000-99999999">Acima de R$ 1.000.000</SelectItem>
-          </SelectContent>
-        </Select>
+          onChange={handlePriceChange}
+        />
         <Button 
           onClick={handleClearFilters}
           className="bg-white text-primary hover:bg-white/90"
