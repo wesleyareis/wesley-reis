@@ -6,7 +6,6 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
 import { Footer } from "@/components/Footer";
-import type { PropertyData } from "@/types/imovel";
 import { toast } from "sonner";
 
 const Index = () => {
@@ -48,7 +47,7 @@ const Index = () => {
         return [];
       }
 
-      return data;
+      return data || [];
     },
   });
 
