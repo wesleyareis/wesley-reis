@@ -35,6 +35,10 @@ export function SearchFilters() {
     navigate(`/?${createQueryString('price', value)}`)
   }
 
+  const handleClearFilters = () => {
+    navigate('/', { replace: true })
+  }
+
   return (
     <div className="search-container p-8 rounded-lg">
       <h1 className="text-3xl font-bold text-white mb-6">
@@ -79,10 +83,10 @@ export function SearchFilters() {
           </SelectContent>
         </Select>
         <Button 
-          onClick={() => navigate('/')}
+          onClick={handleClearFilters}
           className="bg-white text-primary hover:bg-white/90"
         >
-          Buscar
+          Limpar Filtros
         </Button>
       </div>
     </div>
