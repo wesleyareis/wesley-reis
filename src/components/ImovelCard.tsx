@@ -44,6 +44,11 @@ export function ImovelCard({
     checkIfAgent();
   }, [agent_id]);
 
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate(`/imovel/editar/${property_code}`);
+  };
+
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
       <div className="relative h-48 overflow-hidden">
@@ -87,11 +92,13 @@ export function ImovelCard({
         </Link>
         {isAgent && (
           <div className="flex gap-2">
-            <Link to={`/imovel/editar/${property_code}`}>
-              <Button variant="outline" size="sm">
-                <Edit className="w-4 h-4" />
-              </Button>
-            </Link>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleEditClick}
+            >
+              <Edit className="w-4 h-4" />
+            </Button>
           </div>
         )}
       </CardFooter>
