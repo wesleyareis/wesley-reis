@@ -78,7 +78,10 @@ export function SearchFilters() {
             <SelectItem value="1000000-99999999">Acima de R$ 1.000.000</SelectItem>
           </SelectContent>
         </Select>
-        <Button className="bg-white text-primary hover:bg-white/90">
+        <Button 
+          onClick={() => navigate('/')}
+          className="bg-white text-primary hover:bg-white/90"
+        >
           Buscar
         </Button>
       </div>
