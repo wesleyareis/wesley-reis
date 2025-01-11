@@ -9,29 +9,26 @@ export function SearchFilters() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
 
-  const createQueryString = (name: string, value: string): string => {
+  const createQueryString = (name: string, value: string) => {
     const params = new URLSearchParams(searchParams)
-    if (!value || !value.trim()) {
-      params.delete(name)
+    if (value) {
+      params.set(name, value)
     } else {
-      params.set(name, value.trim())
+      params.delete(name)
     }
-    return params.toString()
+    return `/?${params.toString()}`
   }
 
   const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const queryString = createQueryString('location', e.target.value)
-    navigate(queryString ? `/?${queryString}` : '/')
+    navigate(createQueryString('location', e.target.value))
   }
 
   const handleTypeChange = (value: string) => {
-    const queryString = createQueryString('type', value)
-    navigate(queryString ? `/?${queryString}` : '/')
+    navigate(createQueryString('type', value))
   }
 
   const handlePriceChange = (value: string) => {
-    const queryString = createQueryString('price', value)
-    navigate(queryString ? `/?${queryString}` : '/')
+    navigate(createQueryString('price', value))
   }
 
   const handleClearFilters = () => {
