@@ -11,10 +11,9 @@ export function SearchFilters() {
 
   const createQueryString = (name: string, value: string): string => {
     const params = new URLSearchParams(searchParams.toString())
-    if (value && value.trim() !== '') {
+    params.delete(name)
+    if (value && value.trim()) {
       params.set(name, value.trim())
-    } else {
-      params.delete(name)
     }
     return params.toString()
   }
@@ -38,6 +37,10 @@ export function SearchFilters() {
     navigate('/', { replace: true })
   }
 
+  const currentLocation = searchParams.get("location") ?? ""
+  const currentType = searchParams.get("type") ?? ""
+  const currentPrice = searchParams.get("price") ?? ""
+
   return (
     <div className="search-container p-8 rounded-lg">
       <h1 className="text-3xl font-bold text-white mb-6">
@@ -47,11 +50,11 @@ export function SearchFilters() {
         <Input
           placeholder="Localização"
           className="bg-white"
-          value={searchParams.get("location") ?? ""}
+          value={currentLocation}
           onChange={handleLocationChange}
         />
         <Select
-          value={searchParams.get("type") ?? ""}
+          value={currentType}
           onValueChange={handleTypeChange}
         >
           <SelectTrigger className="bg-white">
@@ -66,7 +69,7 @@ export function SearchFilters() {
           </SelectContent>
         </Select>
         <Select
-          value={searchParams.get("price") ?? ""}
+          value={currentPrice}
           onValueChange={handlePriceChange}
         >
           <SelectTrigger className="bg-white">
