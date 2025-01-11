@@ -13,7 +13,7 @@ const Index = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const { data: properties = [], isLoading } = useQuery<PropertyData[]>({
+  const { data: properties = [], isLoading } = useQuery({
     queryKey: ["properties", Object.fromEntries(searchParams)],
     queryFn: async () => {
       let query = supabase
@@ -26,10 +26,7 @@ const Index = () => {
       const priceRange = searchParams.get("price");
 
       if (location) {
-        query = query.or(
-          `neighborhood.ilike.%${location}%`,
-          `city.ilike.%${location}%`
-        );
+        query = query.or(`neighborhood.ilike.%${location}%,city.ilike.%${location}%`);
       }
 
       if (propertyType) {
