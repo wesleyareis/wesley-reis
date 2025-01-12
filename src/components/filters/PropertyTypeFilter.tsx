@@ -16,23 +16,38 @@ interface PropertyTypeFilterProps {
 }
 
 export function PropertyTypeFilter({ value, onChange }: PropertyTypeFilterProps) {
+  console.log('PropertyTypeFilter - valor atual:', value) // Debug do valor atual
+
   const { data: propertyTypes = [], isLoading, error } = useQuery({
     queryKey: ['propertyTypes'],
     queryFn: async () => {
       try {
+        console.log('Iniciando busca de tipos de imóveis...') // Debug
+
+        // Teste direto da conexão
+        const { data: testData, error: testError } = await supabase
+          .from('properties')
+          .select('property_type')
+          .limit(1)
+        
+        console.log('Teste de conexão:', { testData, testError })
+
+        // Query principal
         const { data, error } = await supabase
           .from('properties')
           .select('property_type')
           .not('property_type', 'is', null)
           .distinct()
 
+        console.log('Resposta completa do Supabase:', { data, error }) // Debug detalhado
+
         if (error) {
+          console.error('Erro do Supabase:', error)
           toast({
             title: "Erro ao carregar tipos",
             description: "Não foi possível carregar os tipos de imóveis",
             variant: "destructive",
           })
-          console.error('Erro Supabase:', error)
           return []
         }
 
@@ -41,31 +56,40 @@ export function PropertyTypeFilter({ value, onChange }: PropertyTypeFilterProps)
           return []
         }
 
+        // Log dos dados brutos
+        console.log('Dados brutos:', data)
+
         const types = data
-          .map(item => item.property_type)
+          .map(item => {
+            console.log('Processando item:', item) // Debug de cada item
+            return item.property_type
+          })
           .filter(Boolean)
           .sort((a, b) => a.localeCompare(b))
 
-        console.log('Tipos de imóveis carregados:', types)
+        console.log('Tipos de imóveis processados:', types)
         return types
 
       } catch (error) {
+        console.error('Erro inesperado completo:', error)
         toast({
           title: "Erro inesperado",
           description: "Ocorreu um erro ao carregar os tipos de imóveis",
           variant: "destructive",
         })
-        console.error('Erro inesperado:', error)
         return []
       }
     },
     retry: 1,
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    staleTime: 1000 * 60 * 5,
   })
 
-  // Mostra mensagem de erro se a query falhar
-  if (error) {
-    console.error('Erro na query:', error)
+  // Debug dos dados carregados
+  console.log('PropertyTypes carregados:', propertyTypes)
+
+  const handleChange = (newValue: string) => {
+    console.log('Tipo selecionado:', newValue)
+    onChange(newValue)
   }
 
   return (
@@ -73,7 +97,7 @@ export function PropertyTypeFilter({ value, onChange }: PropertyTypeFilterProps)
       <Label htmlFor="type">Tipo de Imóvel</Label>
       <Select 
         value={value} 
-        onValueChange={onChange}
+        onValueChange={handleChange}
         disabled={isLoading}
       >
         <SelectTrigger id="type" className="bg-white">
@@ -84,15 +108,18 @@ export function PropertyTypeFilter({ value, onChange }: PropertyTypeFilterProps)
           {isLoading ? (
             <SelectItem value="" disabled>Carregando...</SelectItem>
           ) : propertyTypes.length > 0 ? (
-            propertyTypes.map((type) => (
-              <SelectItem 
-                key={type} 
-                value={type.toLowerCase()}
-                className="capitalize"
-              >
-                {type}
-              </SelectItem>
-            ))
+            propertyTypes.map((type) => {
+              console.log('Renderizando tipo:', type) // Debug de renderização
+              return (
+                <SelectItem 
+                  key={type} 
+                  value={type.toLowerCase()}
+                  className="capitalize"
+                >
+                  {type}
+                </SelectItem>
+              )
+            })
           ) : (
             <SelectItem value="" disabled>Nenhum tipo encontrado</SelectItem>
           )}
@@ -102,6 +129,13 @@ export function PropertyTypeFilter({ value, onChange }: PropertyTypeFilterProps)
         {isLoading ? 'Carregando...' : 
          `${propertyTypes.length} tipos disponíveis`}
       </div>
+      {/* Debug visual */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="text-xs text-muted-foreground mt-2">
+          <div>Valor atual: {value || 'nenhum'}</div>
+          <div>Tipos carregados: {propertyTypes.join(', ')}</div>
+        </div>
+      )}
     </div>
   )
 }
