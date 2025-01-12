@@ -5,21 +5,21 @@ import { useSearchParams, useNavigate } from "react-router-dom"
 import { LocationFilter } from "./filters/LocationFilter"
 import { PropertyTypeFilter } from "./filters/PropertyTypeFilter"
 import { PriceRangeFilter } from "./filters/PriceRangeFilter"
+import { useEffect } from "react"
 
 export function SearchFilters() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
 
   const handleTypeChange = (value: string) => {
+    console.log('Tipo selecionado:', value) // Debug
     const params = new URLSearchParams(searchParams)
-    
     if (value) {
       params.set('type', value)
     } else {
       params.delete('type')
     }
-    
-    navigate(`?${params.toString()}`, { replace: true })
+    navigate(`?${params.toString()}`)
   }
 
   const handleLocationChange = (value: string) => {
@@ -29,7 +29,7 @@ export function SearchFilters() {
     } else {
       params.delete('location')
     }
-    navigate(`?${params.toString()}`, { replace: true })
+    navigate(`?${params.toString()}`)
   }
 
   const handlePriceChange = (value: string) => {
@@ -39,16 +39,25 @@ export function SearchFilters() {
     } else {
       params.delete('price')
     }
-    navigate(`?${params.toString()}`, { replace: true })
+    navigate(`?${params.toString()}`)
   }
 
   const handleClearFilters = () => {
-    navigate('/', { replace: true })
+    navigate('/')
   }
 
   const currentType = searchParams.get("type") ?? ""
   const currentLocation = searchParams.get("location") ?? ""
   const currentPrice = searchParams.get("price") ?? ""
+
+  // Debug
+  useEffect(() => {
+    console.log('Filtros atuais:', {
+      type: currentType,
+      location: currentLocation,
+      price: currentPrice
+    })
+  }, [currentType, currentLocation, currentPrice])
 
   return (
     <div className="search-container p-8 rounded-lg bg-primary/10">
@@ -71,7 +80,7 @@ export function SearchFilters() {
         <Button 
           onClick={handleClearFilters}
           variant="outline"
-          className="bg-white hover:bg-white/90"
+          className="h-10 bg-white hover:bg-white/90"
         >
           Limpar Filtros
         </Button>
