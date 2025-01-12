@@ -31,8 +31,8 @@ const Index = () => {
       }
 
       if (propertyType) {
-        // Atualização da query para usar ilike e ser case-insensitive
-        query = query.ilike("property_type", propertyType);
+        // Atualização da query para usar ilike com % para correspondência parcial
+        query = query.ilike("property_type", `%${propertyType}%`);
       }
 
       if (priceRange) {
