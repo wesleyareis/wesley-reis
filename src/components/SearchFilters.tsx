@@ -5,10 +5,20 @@ import { useSearchParams, useNavigate } from "react-router-dom"
 import { LocationFilter } from "./filters/LocationFilter"
 import { PropertyTypeFilter } from "./filters/PropertyTypeFilter"
 import { PriceRangeFilter } from "./filters/PriceRangeFilter"
+import { useEffect } from "react"
 
 export function SearchFilters() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+
+  // Log dos parâmetros atuais
+  useEffect(() => {
+    console.log('Filtros ativos:', {
+      location: searchParams.get("location"),
+      type: searchParams.get("type"),
+      price: searchParams.get("price")
+    })
+  }, [searchParams])
 
   const createQueryString = (name: string, value: string) => {
     const params = new URLSearchParams(searchParams)
