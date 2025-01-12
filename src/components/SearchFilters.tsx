@@ -41,8 +41,8 @@ export function SearchFilters() {
   const currentPrice = searchParams.get("price") ?? ""
 
   return (
-    <div className="search-container p-8 rounded-lg">
-      <h1 className="text-3xl font-bold text-white mb-6">
+    <div className="search-container p-8 rounded-lg bg-primary/10">
+      <h1 className="text-3xl font-bold text-primary mb-6">
         Encontre seu imóvel ideal
       </h1>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -60,7 +60,8 @@ export function SearchFilters() {
         />
         <Button 
           onClick={handleClearFilters}
-          className="bg-white text-primary hover:bg-white/90"
+          variant="outline"
+          className="bg-white hover:bg-white/90"
         >
           Limpar Filtros
         </Button>

@@ -26,8 +26,8 @@ const Index = () => {
       const priceRange = searchParams.get("price");
 
       if (location) {
-        const searchTerm = `%${location.toLowerCase()}%`;
-        query = query.or(`neighborhood.ilike.${searchTerm},city.ilike.${searchTerm}`);
+        const searchTerm = location.toLowerCase();
+        query = query.or(`neighborhood.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`);
       }
 
       if (propertyType) {
