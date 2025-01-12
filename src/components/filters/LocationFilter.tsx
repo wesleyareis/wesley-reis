@@ -24,7 +24,7 @@ export function LocationFilter({ value, onChange }: LocationFilterProps) {
         
         const { data, error } = await supabase
           .from('properties')
-          .select('neighborhood') // Assumindo que neighborhood é o campo de localização
+          .select('neighborhood')
           .not('neighborhood', 'is', null)
           .distinct()
 
@@ -57,6 +57,7 @@ export function LocationFilter({ value, onChange }: LocationFilterProps) {
         return []
       }
     },
+    retry: 1,
     staleTime: 1000 * 60 * 5, // 5 minutos de cache
   })
 
