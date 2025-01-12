@@ -32,7 +32,8 @@ const Index = () => {
         }
 
         if (propertyType && propertyType.trim() !== "") {
-          query = query.ilike("property_type", `%${propertyType.trim()}%`);
+          // Alterado para match exato em vez de ILIKE
+          query = query.eq("property_type", propertyType.trim());
         }
 
         if (priceRange) {
