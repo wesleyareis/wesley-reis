@@ -1,3 +1,4 @@
+import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
@@ -11,28 +12,23 @@ interface PropertyTypeFilterProps {
   onChange: (value: string) => void
 }
 
-const propertyTypes = [
-  { value: 'apartamento', label: 'Apartamento' },
-  { value: 'casa', label: 'Casa' },
-  { value: 'cobertura', label: 'Cobertura' },
-  { value: 'terreno', label: 'Terreno' },
-  { value: 'sala', label: 'Sala Comercial' },
-]
-
 export function PropertyTypeFilter({ value, onChange }: PropertyTypeFilterProps) {
   return (
-    <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="bg-white">
-        <SelectValue placeholder="Tipo de imóvel" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="">Todos os tipos</SelectItem>
-        {propertyTypes.map((type) => (
-          <SelectItem key={type.value} value={type.value}>
-            {type.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <div className="flex flex-col gap-2">
+      <Label htmlFor="type">Tipo de Imóvel</Label>
+      <Select value={value} onValueChange={onChange}>
+        <SelectTrigger id="type" className="bg-white">
+          <SelectValue placeholder="Selecione o tipo" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="">Todos os tipos</SelectItem>
+          <SelectItem value="apartamento">Apartamento</SelectItem>
+          <SelectItem value="casa">Casa</SelectItem>
+          <SelectItem value="cobertura">Cobertura</SelectItem>
+          <SelectItem value="terreno">Terreno</SelectItem>
+          <SelectItem value="sala">Sala Comercial</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
   )
 }
