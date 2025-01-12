@@ -6,6 +6,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
 
 interface PropertyTypeFilterProps {
   value: string
@@ -13,40 +15,40 @@ interface PropertyTypeFilterProps {
 }
 
 const PROPERTY_TYPES = [
-  { value: 'apartamento', label: 'Apartamento' },
-  { value: 'casa', label: 'Casa' },
-  { value: 'cobertura', label: 'Cobertura' },
-  { value: 'sala', label: 'Sala Comercial' },
-  { value: 'terreno', label: 'Terreno' }
+  { value: "apartamento", label: "Apartamento" },
+  { value: "casa", label: "Casa" },
+  { value: "cobertura", label: "Cobertura" },
+  { value: "sala", label: "Sala Comercial" },
+  { value: "terreno", label: "Terreno" }
 ]
 
 export function PropertyTypeFilter({ value, onChange }: PropertyTypeFilterProps) {
+  // Debug
+  console.log('PropertyTypeFilter - valor atual:', value)
+
   return (
     <div className="flex flex-col gap-2">
       <Label htmlFor="type">Tipo de Imóvel</Label>
       <Select 
-        value={value} 
+        value={value}
         onValueChange={onChange}
       >
-        <SelectTrigger id="type" className="bg-white">
+        <SelectTrigger id="type" className="h-10 bg-white">
           <SelectValue placeholder="Selecione o tipo" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="">Todos os tipos</SelectItem>
-          {PROPERTY_TYPES.map(({ value, label }) => (
+          {PROPERTY_TYPES.map(type => (
             <SelectItem 
-              key={value} 
-              value={value}
+              key={type.value} 
+              value={type.value}
               className="capitalize"
             >
-              {label}
+              {type.label}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
-      <div className="text-xs text-muted-foreground">
-        {PROPERTY_TYPES.length} tipos disponíveis
-      </div>
     </div>
   )
 }
