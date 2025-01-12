@@ -31,7 +31,7 @@ const Index = () => {
       }
 
       if (propertyType) {
-        query = query.eq("property_type", propertyType.toLowerCase());
+        query = query.eq("property_type", propertyType);
       }
 
       if (priceRange) {
