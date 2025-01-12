@@ -16,41 +16,49 @@ const Index = () => {
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ["properties", Object.fromEntries(searchParams)],
     queryFn: async () => {
-      let query = supabase
-        .from("properties")
-        .select("*")
-        .eq("status", "active");
+      try {
+        let query = supabase
+          .from("properties")
+          .select("*")
+          .eq("status", "active");
 
-      const location = searchParams.get("location");
-      const propertyType = searchParams.get("type");
-      const priceRange = searchParams.get("price");
+        const location = searchParams.get("location");
+        const propertyType = searchParams.get("type");
+        const priceRange = searchParams.get("price");
 
-      if (location) {
-        const searchTerm = location.toLowerCase();
-        query = query.or(`neighborhood.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`);
-      }
-
-      if (propertyType) {
-        // Atualização da query para usar ilike com % para correspondência parcial
-        query = query.ilike("property_type", `%${propertyType}%`);
-      }
-
-      if (priceRange) {
-        const [min, max] = priceRange.split("-").map(Number);
-        if (!isNaN(min) && !isNaN(max)) {
-          query = query.gte("price", min).lte("price", max);
+        if (location) {
+          const searchTerm = location.toLowerCase();
+          query = query.or(`neighborhood.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`);
         }
-      }
 
-      const { data, error } = await query;
+        if (propertyType && propertyType.trim() !== "") {
+          query = query.ilike("property_type", `%${propertyType.trim()}%`);
+        }
 
-      if (error) {
-        console.error("Erro ao buscar propriedades:", error);
+        if (priceRange) {
+          const [min, max] = priceRange.split("-").map(Number);
+          if (!isNaN(min) && !isNaN(max)) {
+            query = query.gte("price", min).lte("price", max);
+          }
+        }
+
+        console.log("Query params:", { location, propertyType, priceRange });
+        
+        const { data, error } = await query;
+
+        if (error) {
+          console.error("Erro ao buscar propriedades:", error);
+          toast.error("Erro ao carregar imóveis");
+          return [];
+        }
+
+        console.log("Properties found:", data?.length);
+        return data as PropertyData[];
+      } catch (error) {
+        console.error("Erro inesperado:", error);
         toast.error("Erro ao carregar imóveis");
         return [];
       }
-
-      return data as PropertyData[];
     },
   });
 
