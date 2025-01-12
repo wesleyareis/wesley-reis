@@ -26,11 +26,12 @@ const Index = () => {
       const priceRange = searchParams.get("price");
 
       if (location) {
-        query = query.or(`neighborhood.ilike.%${location}%,city.ilike.%${location}%`);
+        const searchTerm = `%${location.toLowerCase()}%`;
+        query = query.or(`neighborhood.ilike.${searchTerm},city.ilike.${searchTerm}`);
       }
 
       if (propertyType) {
-        query = query.eq("property_type", propertyType);
+        query = query.eq("property_type", propertyType.toLowerCase());
       }
 
       if (priceRange) {

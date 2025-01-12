@@ -14,25 +14,15 @@ interface PropertyTypeFilterProps {
   onChange: (value: string) => void
 }
 
+const propertyTypes = [
+  { value: 'apartamento', label: 'Apartamento' },
+  { value: 'casa', label: 'Casa' },
+  { value: 'cobertura', label: 'Cobertura' },
+  { value: 'terreno', label: 'Terreno' },
+  { value: 'sala', label: 'Sala Comercial' },
+]
+
 export function PropertyTypeFilter({ value, onChange }: PropertyTypeFilterProps) {
-  const { data: propertyTypes = [], isLoading } = useQuery({
-    queryKey: ['propertyTypes'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('properties')
-        .select('property_type')
-        .is('property_type', 'not.null')
-
-      if (error) {
-        toast.error('Erro ao carregar tipos de imóveis')
-        return []
-      }
-
-      const uniqueTypes = [...new Set(data.map(item => item.property_type))].sort()
-      return uniqueTypes
-    }
-  })
-
   return (
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger className="bg-white">
@@ -40,15 +30,11 @@ export function PropertyTypeFilter({ value, onChange }: PropertyTypeFilterProps)
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="">Todos os tipos</SelectItem>
-        {isLoading ? (
-          <SelectItem value="" disabled>Carregando...</SelectItem>
-        ) : (
-          propertyTypes.map((type) => (
-            <SelectItem key={type} value={type}>
-              {type.charAt(0).toUpperCase() + type.slice(1)}
-            </SelectItem>
-          ))
-        )}
+        {propertyTypes.map((type) => (
+          <SelectItem key={type.value} value={type.value}>
+            {type.label}
+          </SelectItem>
+        ))}
       </SelectContent>
     </Select>
   )
