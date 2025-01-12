@@ -90,7 +90,7 @@ const Index = () => {
         <SearchFilters />
         
         <div className="mt-12">
-          <h2 className="text-2xl font-semibold mb-6">Imóveis em Destaque</h2>
+          <h2 className="text-2xl font-semibold mb-6">Listagem em Destaque</h2>
           {isLoading ? (
             <div className="flex justify-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
