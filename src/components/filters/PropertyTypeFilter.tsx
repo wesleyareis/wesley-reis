@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/select"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { toast } from "@/components/ui/use-toast" // Usando seu sistema de toast personalizado
+import { toast } from "@/components/ui/use-toast"
 
 interface PropertyTypeFilterProps {
   value: string
@@ -88,8 +88,9 @@ export function PropertyTypeFilter({ value, onChange }: PropertyTypeFilterProps)
               <SelectItem 
                 key={type} 
                 value={type.toLowerCase()}
+                className="capitalize"
               >
-                {type.charAt(0).toUpperCase() + type.slice(1)}
+                {type}
               </SelectItem>
             ))
           ) : (
@@ -97,6 +98,10 @@ export function PropertyTypeFilter({ value, onChange }: PropertyTypeFilterProps)
           )}
         </SelectContent>
       </Select>
+      <div className="text-xs text-muted-foreground">
+        {isLoading ? 'Carregando...' : 
+         `${propertyTypes.length} tipos disponíveis`}
+      </div>
     </div>
   )
 }
