@@ -36,7 +36,9 @@ export function SearchFilters() {
   }
 
   const handleTypeChange = (value: string) => {
+    console.log('SearchFilters - Novo tipo selecionado:', value)
     const newQuery = createQueryString('type', value)
+    console.log('SearchFilters - Nova query:', newQuery)
     navigate(newQuery)
   }
 
@@ -51,6 +53,7 @@ export function SearchFilters() {
 
   const currentLocation = searchParams.get("location") ?? ""
   const currentType = searchParams.get("type") ?? ""
+  console.log('SearchFilters - Tipo atual:', currentType)
   const currentPrice = searchParams.get("price") ?? ""
 
   return (
