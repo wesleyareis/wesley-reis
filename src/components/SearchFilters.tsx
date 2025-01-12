@@ -5,55 +5,49 @@ import { useSearchParams, useNavigate } from "react-router-dom"
 import { LocationFilter } from "./filters/LocationFilter"
 import { PropertyTypeFilter } from "./filters/PropertyTypeFilter"
 import { PriceRangeFilter } from "./filters/PriceRangeFilter"
-import { useEffect } from "react"
 
 export function SearchFilters() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
 
-  // Log dos parâmetros atuais
-  useEffect(() => {
-    console.log('Filtros ativos:', {
-      location: searchParams.get("location"),
-      type: searchParams.get("type"),
-      price: searchParams.get("price")
-    })
-  }, [searchParams])
-
-  const createQueryString = (name: string, value: string) => {
+  const handleTypeChange = (value: string) => {
     const params = new URLSearchParams(searchParams)
+    
     if (value) {
-      params.set(name, value)
+      params.set('type', value)
     } else {
-      params.delete(name)
+      params.delete('type')
     }
-    return `?${params.toString()}`
+    
+    navigate(`?${params.toString()}`, { replace: true })
   }
 
   const handleLocationChange = (value: string) => {
-    const newQuery = createQueryString('location', value)
-    navigate(newQuery)
-  }
-
-  const handleTypeChange = (value: string) => {
-    console.log('SearchFilters - Novo tipo selecionado:', value)
-    const newQuery = createQueryString('type', value)
-    console.log('SearchFilters - Nova query:', newQuery)
-    navigate(newQuery)
+    const params = new URLSearchParams(searchParams)
+    if (value) {
+      params.set('location', value)
+    } else {
+      params.delete('location')
+    }
+    navigate(`?${params.toString()}`, { replace: true })
   }
 
   const handlePriceChange = (value: string) => {
-    const newQuery = createQueryString('price', value)
-    navigate(newQuery)
+    const params = new URLSearchParams(searchParams)
+    if (value) {
+      params.set('price', value)
+    } else {
+      params.delete('price')
+    }
+    navigate(`?${params.toString()}`, { replace: true })
   }
 
   const handleClearFilters = () => {
-    navigate('/')
+    navigate('/', { replace: true })
   }
 
-  const currentLocation = searchParams.get("location") ?? ""
   const currentType = searchParams.get("type") ?? ""
-  console.log('SearchFilters - Tipo atual:', currentType)
+  const currentLocation = searchParams.get("location") ?? ""
   const currentPrice = searchParams.get("price") ?? ""
 
   return (
