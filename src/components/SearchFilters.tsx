@@ -17,19 +17,22 @@ export function SearchFilters() {
     } else {
       params.delete(name)
     }
-    return params.toString()
+    return `?${params.toString()}`
   }
 
   const handleLocationChange = (value: string) => {
-    navigate(`/?${createQueryString('location', value)}`)
+    const newQuery = createQueryString('location', value)
+    navigate(newQuery)
   }
 
   const handleTypeChange = (value: string) => {
-    navigate(`/?${createQueryString('type', value)}`)
+    const newQuery = createQueryString('type', value)
+    navigate(newQuery)
   }
 
   const handlePriceChange = (value: string) => {
-    navigate(`/?${createQueryString('price', value)}`)
+    const newQuery = createQueryString('price', value)
+    navigate(newQuery)
   }
 
   const handleClearFilters = () => {
