@@ -12,6 +12,11 @@ export default defineConfig(({ mode }) => ({
     host: true,
     port: 8080,
   },
+  build: {
+    outDir: 'dist',
+    sourcemap: true,
+    chunkSizeWarningLimit: 1000,
+  },
   plugins: [
     react(),
     mode === 'development' &&
