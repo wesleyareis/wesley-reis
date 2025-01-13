@@ -3,9 +3,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from "sonner";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AuthError, AuthApiError } from '@supabase/supabase-js';
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "sonner";
 
 const Login = () => {
   const navigate = useNavigate();
