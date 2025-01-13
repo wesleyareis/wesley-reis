@@ -16,6 +16,14 @@ export default defineConfig(({ mode }) => ({
     outDir: 'dist',
     sourcemap: true,
     chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom'],
+          'ui-vendor': ['@radix-ui/react-select', '@radix-ui/react-dialog']
+        }
+      }
+    }
   },
   plugins: [
     react(),
