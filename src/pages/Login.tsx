@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from "sonner";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ const Login = () => {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN') {
+        toast.success("Login realizado com sucesso!");
         navigate('/');
       }
     });
@@ -24,7 +26,7 @@ const Login = () => {
           <h1 className="text-2xl font-bold">Bem-vindo</h1>
           <p className="text-muted-foreground">Faça login para continuar</p>
         </div>
-        <div className="bg-card p-6 rounded-lg shadow-lg">
+        <div className="bg-card p-6 rounded-lg shadow-lg border">
           <Auth
             supabaseClient={supabase}
             appearance={{
