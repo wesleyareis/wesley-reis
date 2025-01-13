@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => ({
   },
   preview: {
     host: true,
-    port: 8080,
+    port: 4173,  // Alterado de 8080 para 4173 (porta padrão do Vite preview)
   },
   build: {
     outDir: 'dist',

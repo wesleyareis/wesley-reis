@@ -11,20 +11,41 @@ interface UseImovelCardProps {
 
 export function useImovelCard({ id, property_code, agent_id }: UseImovelCardProps) {
   const [isAgent, setIsAgent] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
-    const checkIfAgent = async () => {
+    const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser()
+      setIsAuthenticated(!!user)
       setIsAgent(!!user && user.id === agent_id)
     }
-    checkIfAgent()
+    checkAuth()
+
+    // Inscrever para mudanças no estado de autenticação
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session?.user)
+      setIsAgent(!!session?.user && session.user.id === agent_id)
+    })
+
+    return () => subscription.unsubscribe()
   }, [agent_id])
 
   const handleEditClick = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
+
+    if (!isAuthenticated) {
+      toast.error("Você precisa estar logado para editar")
+      navigate('/login')
+      return
+    }
+
+    if (!isAgent) {
+      toast.error("Apenas o corretor responsável pode editar este imóvel")
+      return
+    }
 
     if (isLoading) return
     
@@ -61,6 +82,7 @@ export function useImovelCard({ id, property_code, agent_id }: UseImovelCardProp
 
   return {
     isAgent,
+    isAuthenticated,
     isLoading,
     handleEditClick,
     handleCardClick

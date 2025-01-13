@@ -7,13 +7,15 @@ interface ImovelCardActionsProps {
   isAgent: boolean;
   isLoading?: boolean;
   onEditClick: (e: React.MouseEvent) => void;
+  isAuthenticated: boolean;
 }
 
 export function ImovelCardActions({ 
   propertyCode, 
   isAgent, 
   isLoading,
-  onEditClick 
+  onEditClick,
+  isAuthenticated
 }: ImovelCardActionsProps) {
   return (
     <div className="p-4 pt-0 flex justify-between">
@@ -24,7 +26,7 @@ export function ImovelCardActions({
       >
         Ver detalhes →
       </Link>
-      {isAgent && (
+      {isAuthenticated && isAgent && (
         <Button 
           variant="outline" 
           size="sm"
