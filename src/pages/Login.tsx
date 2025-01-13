@@ -1,23 +1,38 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import type { AuthError } from '@supabase/supabase-js';
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [error, setError] = useState<string>("");
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN') {
+      if (event === 'SIGNED_IN' && session) {
         toast.success("Login realizado com sucesso!");
-        navigate('/');
+        const returnTo = location.state?.from || '/';
+        navigate(returnTo, { replace: true });
+      }
+      if (event === 'SIGNED_OUT') {
+        setError("");
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, location]);
+
+  const handleError = (error: AuthError) => {
+    const errorMessage = error.message === 'Invalid login credentials'
+      ? 'Credenciais inválidas. Por favor, verifique seu email e senha.'
+      : error.message;
+    setError(errorMessage);
+  };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -26,6 +41,11 @@ const Login = () => {
           <h1 className="text-2xl font-bold">Bem-vindo</h1>
           <p className="text-muted-foreground">Faça login para continuar</p>
         </div>
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
         <div className="bg-card p-6 rounded-lg shadow-lg border">
           <Auth
             supabaseClient={supabase}
