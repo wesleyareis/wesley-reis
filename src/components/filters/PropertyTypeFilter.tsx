@@ -21,7 +21,7 @@ export function PropertyTypeFilter({ value, onChange }: PropertyTypeFilterProps)
           <SelectValue placeholder="Selecione o tipo" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">Todos os tipos</SelectItem>
+          <SelectItem value="todos">Todos os tipos</SelectItem>
           <SelectItem value="apartamento">Apartamento</SelectItem>
           <SelectItem value="casa">Casa</SelectItem>
           <SelectItem value="cobertura">Cobertura</SelectItem>

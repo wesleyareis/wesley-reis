@@ -12,7 +12,7 @@ export function SearchFilters() {
 
   const createQueryString = (name: string, value: string) => {
     const params = new URLSearchParams(searchParams)
-    if (value) {
+    if (value && value !== "todos") {
       params.set(name, value)
     } else {
       params.delete(name)
@@ -37,8 +37,8 @@ export function SearchFilters() {
   }
 
   const currentLocation = searchParams.get("location") ?? ""
-  const currentType = searchParams.get("type") ?? ""
-  const currentPrice = searchParams.get("price") ?? ""
+  const currentType = searchParams.get("type") ?? "todos"
+  const currentPrice = searchParams.get("price") ?? "todos"
 
   return (
     <div className="search-container p-8 rounded-lg bg-primary/10">

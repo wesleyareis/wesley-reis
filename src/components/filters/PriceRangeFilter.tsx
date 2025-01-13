@@ -13,7 +13,7 @@ interface PriceRangeFilterProps {
 
 export function PriceRangeFilter({ value, onChange }: PriceRangeFilterProps) {
   const priceRanges = [
-    { value: "", label: "Qualquer preço" },
+    { value: "todos", label: "Qualquer preço" },
     { value: "0-300000", label: "Até R$ 300.000" },
     { value: "300000-500000", label: "R$ 300.000 - R$ 500.000" },
     { value: "500000-800000", label: "R$ 500.000 - R$ 800.000" },
