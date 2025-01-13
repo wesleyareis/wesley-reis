@@ -5,14 +5,12 @@ import { componentTagger } from "lovable-tagger";
 
 export default defineConfig(({ mode }) => ({
   server: {
-    host: true, // Aceita conexões de qualquer IP
+    host: true,
     port: 8080,
-    strictPort: true, // Falha se a porta estiver em uso
   },
   preview: {
-    host: true, // Aceita conexões de qualquer IP
+    host: true,
     port: 8080,
-    strictPort: true, // Falha se a porta estiver em uso
   },
   plugins: [
     react(),
