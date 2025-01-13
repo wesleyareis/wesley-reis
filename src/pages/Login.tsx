@@ -5,7 +5,7 @@ import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import type { AuthError } from '@supabase/supabase-js';
+import type { AuthError, AuthApiError } from '@supabase/supabase-js';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -13,7 +13,7 @@ const Login = () => {
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session) {
         toast.success("Login realizado com sucesso!");
         const returnTo = location.state?.from || '/';
@@ -27,11 +27,22 @@ const Login = () => {
     return () => subscription.unsubscribe();
   }, [navigate, location]);
 
-  const handleError = (error: AuthError) => {
-    const errorMessage = error.message === 'Invalid login credentials'
-      ? 'Credenciais inválidas. Por favor, verifique seu email e senha.'
-      : error.message;
-    setError(errorMessage);
+  const getErrorMessage = (error: AuthError) => {
+    if (error instanceof AuthApiError) {
+      switch (error.code) {
+        case 'invalid_credentials':
+          return 'Credenciais inválidas. Por favor, verifique seu email e senha.';
+        case 'email_not_confirmed':
+          return 'Por favor, verifique seu email antes de fazer login.';
+        case 'user_not_found':
+          return 'Usuário não encontrado com essas credenciais.';
+        case 'invalid_grant':
+          return 'Credenciais de login inválidas.';
+        default:
+          return error.message;
+      }
+    }
+    return error.message;
   };
 
   return (
