@@ -5,8 +5,11 @@ import { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Auth } from "@supabase/auth-ui-react";
+import { supabase } from "@/integrations/supabase/client";
 import Index from "@/pages/Index";
 import NotFound from "@/pages/NotFound";
+import Login from "@/pages/Login";
 
 const App = () => {
   const [queryClient] = useState(() => new QueryClient({
@@ -25,6 +28,7 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />

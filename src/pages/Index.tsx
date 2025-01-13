@@ -4,14 +4,16 @@ import { SearchFilters } from "@/components/SearchFilters";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogIn } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { toast } from "sonner";
 import type { PropertyData } from "@/types/imovel";
+import { useAuthMiddleware } from "@/middleware";
 
 const Index = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  useAuthMiddleware();
 
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ["properties", Object.fromEntries(searchParams)],
@@ -31,19 +33,17 @@ const Index = () => {
           query = query.or(`neighborhood.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`);
         }
 
-        if (propertyType && propertyType.trim() !== "") {
-          query = query.ilike("property_type", `%${propertyType.trim()}%`);
+        if (propertyType && propertyType !== "todos") {
+          query = query.eq("property_type", propertyType);
         }
 
-        if (priceRange) {
+        if (priceRange && priceRange !== "todos") {
           const [min, max] = priceRange.split("-").map(Number);
           if (!isNaN(min) && !isNaN(max)) {
             query = query.gte("price", min).lte("price", max);
           }
         }
 
-        console.log("Query params:", { location, propertyType, priceRange });
-        
         const { data, error } = await query;
 
         if (error) {
@@ -52,7 +52,6 @@ const Index = () => {
           return [];
         }
 
-        console.log("Properties found:", data?.length);
         return data as PropertyData[];
       } catch (error) {
         console.error("Erro inesperado:", error);
@@ -62,8 +61,13 @@ const Index = () => {
     },
   });
 
-  const handleLoginClick = () => {
-    navigate('/login');
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast.error("Erro ao fazer logout");
+    } else {
+      navigate('/login');
+    }
   };
 
   return (
@@ -76,11 +80,11 @@ const Index = () => {
           <nav className="flex gap-4 items-center">
             <Button
               variant="outline"
-              onClick={handleLoginClick}
+              onClick={handleLogout}
               className="flex items-center gap-2"
             >
-              <LogIn className="w-4 h-4" />
-              Login Corretor
+              <LogOut className="w-4 h-4" />
+              Sair
             </Button>
           </nav>
         </div>

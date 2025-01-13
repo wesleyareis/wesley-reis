@@ -10,10 +10,18 @@ export const useAuthMiddleware = () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        navigate('/login', { replace: true });
+        navigate('/login');
       }
     };
 
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!session) {
+        navigate('/login');
+      }
+    });
+
     checkAuth();
+
+    return () => subscription.unsubscribe();
   }, [navigate]);
 };
