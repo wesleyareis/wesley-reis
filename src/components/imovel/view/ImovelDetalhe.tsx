@@ -17,10 +17,30 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ImovelLocalizacao } from "./ImovelLocalizacao";
+import { useEffect, useState } from "react";
 
 const ImovelDetalhe = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [isAgent, setIsAgent] = useState(false);
+
+  // Verifica se o usuário atual é o agente do imóvel
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: property } = await supabase
+          .from("properties")
+          .select("agent_id")
+          .eq("property_code", id)
+          .single();
+
+        setIsAgent(user.id === property?.agent_id);
+      }
+    };
+
+    checkAuth();
+  }, [id]);
 
   const { data: imovel, isLoading } = useQuery({
     queryKey: ["imovel", id],
@@ -101,30 +121,32 @@ const ImovelDetalhe = () => {
                 {imovel.neighborhood}, {imovel.city}
               </p>
             </div>
-            <div className="flex gap-2">
-              <Button onClick={() => navigate(`/imovel/editar/${imovel.property_code}`)}>
-                Editar
-              </Button>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive">
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Tem certeza que deseja excluir este imóvel? Esta ação não pode ser desfeita.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDelete}>Confirmar</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
+            {isAgent && (
+              <div className="flex gap-2">
+                <Button onClick={() => navigate(`/imovel/editar/${imovel.property_code}`)}>
+                  Editar
+                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Tem certeza que deseja excluir este imóvel? Esta ação não pode ser desfeita.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDelete}>Confirmar</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            )}
           </div>
         </div>
       </header>
