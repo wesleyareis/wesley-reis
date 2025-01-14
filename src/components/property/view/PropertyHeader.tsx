@@ -1,13 +1,13 @@
-import { PropertyData } from "@/types/imovel";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { PropertyData } from "@/types/property";
 
-interface ImovelHeaderProps {
+interface PropertyHeaderProps {
   property: PropertyData;
   canEdit: boolean;
 }
 
-export const ImovelHeader = ({ property, canEdit }: ImovelHeaderProps) => {
+export const PropertyHeader = ({ property, canEdit }: PropertyHeaderProps) => {
   const navigate = useNavigate();
 
   return (
@@ -18,19 +18,17 @@ export const ImovelHeader = ({ property, canEdit }: ImovelHeaderProps) => {
           onClick={() => navigate("/")}
           className="mb-4"
         >
-          ← Voltar para Início
+          ← Voltar
         </Button>
-        <div className="flex items-center justify-between">
+        <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold">{property.title}</h1>
-            {property.property_code && (
-              <p className="text-sm text-muted-foreground mt-1">
-                Código: {property.property_code}
-              </p>
-            )}
+            <p className="text-muted-foreground">
+              {property.neighborhood}, {property.city}
+            </p>
           </div>
           {canEdit && (
-            <Button onClick={() => navigate(`/imovel/editar/${property.property_code}`)}>
+            <Button onClick={() => navigate(`/property/edit/${property.id}`)}>
               Editar Imóvel
             </Button>
           )}

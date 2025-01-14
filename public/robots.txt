@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://wesleyreis.com.br/sitemap.xml
