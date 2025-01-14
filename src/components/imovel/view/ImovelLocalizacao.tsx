@@ -15,8 +15,6 @@ declare global {
         Marker: typeof google.maps.Marker;
         Geocoder: typeof google.maps.Geocoder;
         GeocoderStatus: typeof google.maps.GeocoderStatus;
-        MapOptions: typeof google.maps.MapOptions;
-        MarkerOptions: typeof google.maps.MarkerOptions;
       };
     };
   }
