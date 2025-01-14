@@ -7,17 +7,18 @@ interface ImovelLocalizacaoProps {
   address: string;
 }
 
-interface GoogleMapsWindow extends Window {
-  google?: any;
+// Definindo os tipos para o Google Maps
+declare global {
+  interface Window {
+    google: typeof google;
+  }
 }
-
-declare const window: GoogleMapsWindow;
 
 export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const mapInstanceRef = useRef<any>(null);
-  const markerRef = useRef<any>(null);
+  const mapInstanceRef = useRef<google.maps.Map | null>(null);
+  const markerRef = useRef<google.maps.Marker | null>(null);
 
   useEffect(() => {
     async function loadGoogleMaps() {
@@ -78,7 +79,7 @@ export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
       const geocoder = new window.google.maps.Geocoder();
 
       if (address) {
-        geocoder.geocode({ address }, (results: any, status: string) => {
+        geocoder.geocode({ address }, (results, status) => {
           if (status === 'OK' && results?.[0]) {
             const location = results[0].geometry.location;
             if (mapInstanceRef.current) {
