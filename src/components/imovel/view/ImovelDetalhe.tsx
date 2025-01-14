@@ -103,8 +103,12 @@ const ImovelDetalhe = () => {
     );
   }
 
-  // Formata o endereço completo para o mapa
-  const fullAddress = `${imovel.street_address}, ${imovel.neighborhood}, ${imovel.city}`;
+  // Formata o endereço completo para o mapa, lidando com campos opcionais
+  const fullAddress = [
+    imovel.street_address,
+    imovel.neighborhood,
+    imovel.city
+  ].filter(Boolean).join(", ");
 
   return (
     <div className="min-h-screen bg-background">

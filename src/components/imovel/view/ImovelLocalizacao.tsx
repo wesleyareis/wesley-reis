@@ -19,6 +19,11 @@ export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
 
     const initializeMap = async () => {
       try {
+        if (!address) {
+          setIsLoading(false);
+          return;
+        }
+
         const { data: secrets, error } = await supabase
           .rpc('secrets', { secret_name: 'GOOGLE_MAPS_API_KEY' });
 
@@ -50,7 +55,7 @@ export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
         const initMap = () => {
           if (!mapRef.current) return;
 
-          const defaultLocation = { lat: -23.5505, lng: -46.6333 }; // São Paulo
+          const defaultLocation = { lat: -16.6869, lng: -49.2648 }; // Goiânia
           
           mapInstance = new google.maps.Map(mapRef.current, {
             zoom: 15,
@@ -78,6 +83,7 @@ export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
                   animation: google.maps.Animation.DROP,
                 });
               } else {
+                console.warn('Não foi possível localizar o endereço:', address);
                 toast.error('Não foi possível localizar o endereço no mapa');
               }
               setIsLoading(false);
