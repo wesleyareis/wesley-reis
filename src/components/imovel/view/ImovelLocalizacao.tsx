@@ -7,7 +7,7 @@ interface ImovelLocalizacaoProps {
   address: string;
 }
 
-export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
+export default function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [geocodeError, setGeocodeError] = useState<string | null>(null);
   const { isLoaded, loadError } = useGoogleMaps();
@@ -17,15 +17,10 @@ export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
 
     const geocoder = new window.google.maps.Geocoder();
     
-    console.log('Tentando geocodificar endereço:', address);
-
     geocoder.geocode({
       address: address,
       region: 'BR',
     }, (results, status) => {
-      console.log('Status da geocodificação:', status);
-      console.log('Resultados:', results);
-
       if (status === 'OK' && results?.[0]) {
         const loc = results[0].geometry.location;
         const newLocation = {
@@ -33,7 +28,6 @@ export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
           lng: loc.lng()
         };
         
-        console.log('Nova localização encontrada:', newLocation);
         setLocation(newLocation);
         setGeocodeError(null);
       } else {

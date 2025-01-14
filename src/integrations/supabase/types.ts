@@ -45,6 +45,27 @@ export type Database = {
         }
         Relationships: []
       }
+      app_settings: {
+        Row: {
+          created_at: string | null
+          key: string
+          updated_at: string | null
+          value: string
+        }
+        Insert: {
+          created_at?: string | null
+          key: string
+          updated_at?: string | null
+          value: string
+        }
+        Update: {
+          created_at?: string | null
+          key?: string
+          updated_at?: string | null
+          value?: string
+        }
+        Relationships: []
+      }
       carros: {
         Row: {
           ano: number | null
@@ -507,6 +528,12 @@ export type Database = {
             }
             Returns: unknown
           }
+      get_setting: {
+        Args: {
+          setting_key: string
+        }
+        Returns: string
+      }
       halfvec_avg: {
         Args: {
           "": number[]

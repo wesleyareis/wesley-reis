@@ -41,7 +41,7 @@ export function LocationPicker({
       const geocoder = new google.maps.Geocoder();
       geocoder.geocode(
         { location: event.latLng },
-        (results, status) => {
+        (results: google.maps.GeocoderResult[] | null, status: google.maps.GeocoderStatus) => {
           if (status === "OK" && results?.[0]) {
             const location = {
               address: results[0].formatted_address,
@@ -67,7 +67,7 @@ export function LocationPicker({
           <GoogleMapComponent
             center={selectedLocation || undefined}
             markers={selectedLocation ? [selectedLocation] : []}
-            onMapClick={handleMapClick}
+            onClick={handleMapClick}
             className="w-full h-[400px] rounded-lg"
           />
         </div>
