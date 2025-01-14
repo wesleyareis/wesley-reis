@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 // Declaração explícita dos tipos do Google Maps
 declare global {
   interface Window {
-    google: typeof google;
+    google: any;
   }
 }
 
@@ -20,8 +20,8 @@ export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
   const defaultLocation = { lat: -16.6869, lng: -49.2648 }; // Goiânia
 
   useEffect(() => {
-    let mapInstance: google.maps.Map | null = null;
-    let marker: google.maps.Marker | null = null;
+    let mapInstance: any = null;
+    let marker: any = null;
 
     const initializeMap = (apiKey: string) => {
       if (!mapRef.current) return;
@@ -32,7 +32,7 @@ export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
       script.defer = true;
       
       script.onload = () => {
-        if (!mapRef.current) return;
+        if (!mapRef.current || !window.google) return;
 
         mapInstance = new window.google.maps.Map(mapRef.current, {
           zoom: 15,
@@ -45,7 +45,7 @@ export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
         const geocoder = new window.google.maps.Geocoder();
 
         if (address) {
-          geocoder.geocode({ address }, (results, status) => {
+          geocoder.geocode({ address }, (results: any, status: any) => {
             if (status === 'OK' && results?.[0]) {
               const location = results[0].geometry.location;
               mapInstance?.setCenter(location);
