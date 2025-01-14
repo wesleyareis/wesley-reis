@@ -1,141 +1,138 @@
-import { useEffect, useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import type { PropertyData } from "@/types/imovel";
-import { Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from 'react';
+import { Card, CardContent } from "@/components/ui/card";
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface ImovelLocalizacaoProps {
-  property: PropertyData;
+  address: string;
 }
 
-declare global {
-  interface Window {
-    google: {
-      maps: {
-        Map: new (
-          mapDiv: HTMLElement,
-          opts?: google.maps.MapOptions
-        ) => google.maps.Map;
-        Marker: new (
-          opts?: google.maps.MarkerOptions
-        ) => google.maps.Marker;
-        Geocoder: new () => google.maps.Geocoder;
-        GeocoderStatus: {
-          OK: google.maps.GeocoderStatus;
-        };
-        MapTypeControlStyle: {
-          DEFAULT: number;
-        };
-      };
-    };
-  }
-}
-
-export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
+export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [googleMapsKey, setGoogleMapsKey] = useState<string | null>(null);
-  const scriptRef = useRef<HTMLScriptElement | null>(null);
-
-  const address = property.street_address 
-    ? `${property.street_address} - ${property.neighborhood}, ${property.city}`
-    : `${property.neighborhood}, ${property.city}`;
+  const [googleMapsLoaded, setGoogleMapsLoaded] = useState(false);
 
   useEffect(() => {
-    const loadGoogleMapsKey = async () => {
+    let mapInstance: google.maps.Map | null = null;
+    let geocoder: google.maps.Geocoder | null = null;
+    let marker: google.maps.Marker | null = null;
+
+    const initializeMap = async () => {
       try {
-        const { data, error } = await supabase.rpc('secrets', {
-          secret_name: 'GOOGLE_MAPS_API_KEY'
-        });
+        const { data: secrets, error } = await supabase
+          .rpc('secrets', { secret_name: 'GOOGLE_MAPS_API_KEY' });
 
-        if (error) throw error;
-        setGoogleMapsKey(data);
-      } catch (error) {
-        console.error('Erro ao carregar chave do Google Maps:', error);
-        setIsLoading(false);
-      }
-    };
+        if (error || !secrets) {
+          throw new Error('Erro ao carregar a chave da API do Google Maps');
+        }
 
-    loadGoogleMapsKey();
+        const apiKey = secrets;
+        
+        // Carrega o script do Google Maps
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+        script.async = true;
+        script.defer = true;
+        script.id = 'google-maps-script';
+        
+        script.onload = () => {
+          setGoogleMapsLoaded(true);
+          initMap();
+        };
 
-    return () => {
-      if (scriptRef.current) {
-        document.head.removeChild(scriptRef.current);
-      }
-    };
-  }, []);
+        script.onerror = () => {
+          toast.error('Erro ao carregar o Google Maps');
+          setIsLoading(false);
+        };
 
-  useEffect(() => {
-    if (!googleMapsKey || !mapRef.current) return;
+        document.head.appendChild(script);
 
-    const loadGoogleMaps = () => {
-      if (window.google?.maps) {
-        initializeMap();
-        return;
-      }
+        const initMap = () => {
+          if (!mapRef.current) return;
 
-      scriptRef.current = document.createElement('script');
-      scriptRef.current.src = `https://maps.googleapis.com/maps/api/js?key=${googleMapsKey}&libraries=places`;
-      scriptRef.current.async = true;
-      scriptRef.current.defer = true;
-      scriptRef.current.onload = () => initializeMap();
-      scriptRef.current.onerror = () => {
-        console.error('Erro ao carregar o Google Maps');
-        setIsLoading(false);
-      };
-      
-      document.head.appendChild(scriptRef.current);
-    };
-
-    const initializeMap = () => {
-      if (!window.google?.maps || !mapRef.current) return;
-      
-      const geocoder = new window.google.maps.Geocoder();
-      
-      geocoder.geocode({ address }, (results, status) => {
-        if (status === window.google.maps.GeocoderStatus.OK && results?.[0] && mapRef.current) {
-          const map = new window.google.maps.Map(mapRef.current, {
+          const defaultLocation = { lat: -23.5505, lng: -46.6333 }; // São Paulo
+          
+          mapInstance = new google.maps.Map(mapRef.current, {
             zoom: 15,
-            center: results[0].geometry.location,
+            center: defaultLocation,
             mapTypeControl: false,
             streetViewControl: false,
             fullscreenControl: false,
-            styles: [
-              {
-                featureType: "poi",
-                elementType: "labels",
-                stylers: [{ visibility: "off" }],
-              },
-            ],
           });
 
-          new window.google.maps.Marker({
-            map,
-            position: results[0].geometry.location,
-          });
-        }
+          geocoder = new google.maps.Geocoder();
+
+          if (address) {
+            geocoder.geocode({ address }, (results, status) => {
+              if (status === 'OK' && results?.[0]) {
+                const location = results[0].geometry.location;
+                mapInstance?.setCenter(location);
+                
+                if (marker) {
+                  marker.setMap(null);
+                }
+                
+                marker = new google.maps.Marker({
+                  map: mapInstance,
+                  position: location,
+                  animation: google.maps.Animation.DROP,
+                });
+              } else {
+                toast.error('Não foi possível localizar o endereço no mapa');
+              }
+              setIsLoading(false);
+            });
+          } else {
+            setIsLoading(false);
+          }
+        };
+
+      } catch (error) {
+        console.error('Erro ao inicializar o mapa:', error);
+        toast.error('Erro ao carregar o mapa');
         setIsLoading(false);
-      });
+      }
     };
 
-    loadGoogleMaps();
-  }, [address, googleMapsKey]);
+    initializeMap();
+
+    return () => {
+      // Limpa o script e instâncias do Google Maps
+      const script = document.getElementById('google-maps-script');
+      if (script) {
+        script.remove();
+      }
+      if (marker) {
+        marker.setMap(null);
+      }
+      if (mapInstance) {
+        // @ts-ignore
+        mapInstance = null;
+      }
+    };
+  }, [address]);
 
   return (
-    <div className="mt-8">
-      <h2 className="text-2xl font-semibold mb-4">Localização</h2>
-      <div 
-        ref={mapRef} 
-        className="w-full h-[400px] rounded-lg overflow-hidden shadow-sm bg-background relative"
-      >
-        {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/80">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+    <Card>
+      <CardContent className="p-6">
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Localização</h3>
+          <div 
+            ref={mapRef} 
+            className="w-full h-[400px] rounded-lg overflow-hidden"
+            style={{ 
+              backgroundColor: '#f0f0f0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center' 
+            }}
+          >
+            {isLoading && (
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+            )}
           </div>
-        )}
-      </div>
-      <p className="mt-4 text-sm text-muted-foreground text-center">
-        {address}
-      </p>
-    </div>
+        </div>
+      </CardContent>
+    </Card>
   );
-};
+}
