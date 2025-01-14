@@ -11,9 +11,9 @@ declare global {
   interface Window {
     google: {
       maps: {
-        Map: typeof google.maps.Map;
-        Marker: typeof google.maps.Marker;
-        Geocoder: typeof google.maps.Geocoder;
+        Map: new (element: HTMLElement, options: google.maps.MapOptions) => google.maps.Map;
+        Marker: new (options: google.maps.MarkerOptions) => google.maps.Marker;
+        Geocoder: new () => google.maps.Geocoder;
         GeocoderStatus: typeof google.maps.GeocoderStatus;
       };
     };
