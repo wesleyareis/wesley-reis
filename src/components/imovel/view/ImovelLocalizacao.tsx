@@ -43,7 +43,7 @@ export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
         script.async = true;
         script.defer = true;
         
-        script.onload = async () => {
+        script.onload = () => {
           const geocoder = new google.maps.Geocoder();
           
           geocoder.geocode({ address }, (results, status) => {
