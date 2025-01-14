@@ -9,6 +9,8 @@ import { toast } from 'sonner';
 import type { PropertyData } from '@/types/imovel';
 import { usePropertyForm } from '@/hooks/usePropertyForm';
 import { useAuthCheck } from '@/hooks/useAuthCheck';
+import { FeaturesField } from './form/FeaturesField';
+import { ImageUploadField } from './form/ImageUploadField';
 
 const ImovelEdit = () => {
   const { id } = useParams();
@@ -161,6 +163,18 @@ const ImovelEdit = () => {
                     />
                   </div>
                 </div>
+
+                <ImageUploadField 
+                  images={formData.images || []}
+                  onChange={(newImages) => {
+                    handleInputChange({
+                      target: {
+                        name: 'images',
+                        value: newImages
+                      }
+                    } as React.ChangeEvent<HTMLInputElement>);
+                  }}
+                />
               </div>
 
               <div className="space-y-4">
@@ -215,6 +229,22 @@ const ImovelEdit = () => {
                     rows={4}
                   />
                 </div>
+
+                <FeaturesField 
+                  features={formData.features as Record<string, boolean> || {}}
+                  onChange={(feature, checked) => {
+                    const newFeatures = {
+                      ...(formData.features as Record<string, boolean> || {}),
+                      [feature]: checked
+                    };
+                    handleInputChange({
+                      target: {
+                        name: 'features',
+                        value: newFeatures
+                      }
+                    } as React.ChangeEvent<HTMLInputElement>);
+                  }}
+                />
               </div>
             </div>
 

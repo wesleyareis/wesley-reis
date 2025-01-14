@@ -1,146 +1,97 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { GoogleMapComponent } from '@/components/Maps/GoogleMapComponent';
+import { useGoogleMaps } from '@/components/Maps/GoogleMapsProvider';
 
 interface ImovelLocalizacaoProps {
   address: string;
 }
 
-declare global {
-  interface Window {
-    google: any;
-  }
-}
-
 export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<google.maps.Map | null>(null);
-  const markerRef = useRef<google.maps.Marker | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [geocodeError, setGeocodeError] = useState<string | null>(null);
+  const { isLoaded, loadError } = useGoogleMaps();
 
   useEffect(() => {
-    const initMap = (apiKey: string) => {
-      if (!mapRef.current) return;
+    if (!isLoaded || !address) return;
 
-      const defaultLocation = { lat: -16.6869, lng: -49.2648 }; // Goiânia
+    const geocoder = new window.google.maps.Geocoder();
+    
+    console.log('Tentando geocodificar endereço:', address);
 
-      const loadGoogleMaps = () => {
-        if (!window.google) {
-          const script = document.createElement('script');
-          script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
-          script.async = true;
-          script.defer = true;
-          script.id = 'google-maps-script';
-          
-          script.onload = () => {
-            console.log('Google Maps carregado com sucesso');
-            createMap();
-          };
+    geocoder.geocode({
+      address: address,
+      region: 'BR',
+    }, (results, status) => {
+      console.log('Status da geocodificação:', status);
+      console.log('Resultados:', results);
 
-          script.onerror = () => {
-            console.error('Erro ao carregar Google Maps');
-            toast.error('Erro ao carregar o mapa');
-            setIsLoading(false);
-          };
-
-          document.head.appendChild(script);
-        } else {
-          createMap();
-        }
-      };
-
-      const createMap = () => {
-        mapInstanceRef.current = new window.google.maps.Map(mapRef.current!, {
-          zoom: 15,
-          center: defaultLocation,
-          mapTypeControl: false,
-          streetViewControl: false,
-          fullscreenControl: false,
-        });
-
-        if (address) {
-          const geocoder = new window.google.maps.Geocoder();
-          
-          geocoder.geocode({ address }, (results: any, status: any) => {
-            if (status === 'OK' && results?.[0]) {
-              const location = results[0].geometry.location;
-              mapInstanceRef.current?.setCenter(location);
-              
-              if (markerRef.current) {
-                markerRef.current.setMap(null);
-              }
-              
-              markerRef.current = new window.google.maps.Marker({
-                map: mapInstanceRef.current!,
-                position: location,
-                animation: window.google.maps.Animation.DROP,
-              });
-            } else {
-              console.warn('Endereço não localizado:', address);
-              toast.error('Não foi possível localizar o endereço no mapa');
-            }
-            setIsLoading(false);
-          });
-        } else {
-          setIsLoading(false);
-        }
-      };
-
-      loadGoogleMaps();
-    };
-
-    const loadGoogleMapsKey = async () => {
-      if (!address) {
-        setIsLoading(false);
-        return;
+      if (status === 'OK' && results?.[0]) {
+        const loc = results[0].geometry.location;
+        const newLocation = {
+          lat: loc.lat(),
+          lng: loc.lng()
+        };
+        
+        console.log('Nova localização encontrada:', newLocation);
+        setLocation(newLocation);
+        setGeocodeError(null);
+      } else {
+        console.error('Erro na geocodificação:', status);
+        setGeocodeError(`Não foi possível localizar o endereço (${status})`);
+        setLocation(null);
       }
+    });
+  }, [isLoaded, address]);
 
-      try {
-        const { data: apiKey, error } = await supabase
-          .rpc('secrets', { secret_name: 'GOOGLE_MAPS_API_KEY' });
+  if (!isLoaded) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Localização</h3>
+            <div className="w-full h-[400px] rounded-lg overflow-hidden flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+            </div>
+            <p className="text-sm text-muted-foreground">{address}</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
-        if (error || !apiKey) {
-          throw new Error('Erro ao carregar a chave da API');
-        }
-
-        console.log('Inicializando mapa com endereço:', address);
-        initMap(apiKey);
-      } catch (error) {
-        console.error('Erro ao inicializar mapa:', error);
-        toast.error('Erro ao carregar o mapa');
-        setIsLoading(false);
-      }
-    };
-
-    loadGoogleMapsKey();
-
-    return () => {
-      if (markerRef.current) {
-        markerRef.current.setMap(null);
-      }
-      mapInstanceRef.current = null;
-    };
-  }, [address]);
+  if (loadError || geocodeError) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Localização</h3>
+            <div className="w-full h-[400px] rounded-lg overflow-hidden flex items-center justify-center text-red-500">
+              <div className="text-center">
+                <p>{loadError?.message || geocodeError || 'Erro ao carregar o mapa'}</p>
+                <p className="text-sm mt-2">{address}</p>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground">{address}</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
       <CardContent className="p-6">
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Localização</h3>
-          <div 
-            ref={mapRef} 
-            className="w-full h-[400px] rounded-lg overflow-hidden"
-            style={{ 
-              backgroundColor: '#f0f0f0',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center' 
-            }}
-          >
-            {isLoading && (
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-            )}
+          <div className="space-y-2">
+            <GoogleMapComponent
+              center={location}
+              markers={location ? [location] : []}
+              className="w-full h-[400px] rounded-lg overflow-hidden"
+              zoom={16}
+            />
+            <p className="text-sm text-muted-foreground">{address}</p>
           </div>
         </div>
       </CardContent>

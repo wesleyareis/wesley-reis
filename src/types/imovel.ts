@@ -26,4 +26,6 @@ export interface PropertyFormData {
 export interface PropertyData extends PropertyFormData {
   created_at?: string;
   updated_at?: string;
+  features: Record<string, boolean>;
+  images: string[];
 }

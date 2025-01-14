@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { GoogleMapsProvider } from "@/components/Maps/GoogleMapsProvider";
 import Index from "@/pages/Index";
 import NotFound from "@/pages/NotFound";
 import Login from "@/pages/Login";
@@ -22,7 +23,13 @@ const router = createBrowserRouter(
       <Route path="/dashboard" element={<Navigate to="/" replace />} />
       <Route path="*" element={<NotFound />} />
     </>
-  )
+  ),
+  {
+    future: {
+      v7_startTransition: true,
+      v7_relativeSplatPath: true
+    }
+  }
 );
 
 const App = () => {
@@ -40,9 +47,11 @@ const App = () => {
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <RouterProvider router={router} />
-          <Toaster />
-          <Sonner position="top-right" />
+          <GoogleMapsProvider>
+            <RouterProvider router={router} />
+            <Toaster />
+            <Sonner position="top-right" />
+          </GoogleMapsProvider>
         </TooltipProvider>
       </QueryClientProvider>
     </HelmetProvider>

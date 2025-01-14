@@ -18,6 +18,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ImovelLocalizacao } from "./ImovelLocalizacao";
 import { useEffect, useState } from "react";
+import { Footer } from "@/components/Footer";
 
 const ImovelDetalhe = () => {
   const { id } = useParams();
@@ -107,11 +108,12 @@ const ImovelDetalhe = () => {
   const fullAddress = [
     imovel.street_address,
     imovel.neighborhood,
-    imovel.city
+    imovel.city,
+    'Brasil'
   ].filter(Boolean).join(", ");
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <Button 
@@ -158,7 +160,7 @@ const ImovelDetalhe = () => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <main className="max-w-7xl mx-auto px-4 py-8 flex-grow">
         {imovel.images && imovel.images.length > 0 && (
           <div className="aspect-video w-full mb-8 rounded-lg overflow-hidden">
             <img
@@ -225,7 +227,7 @@ const ImovelDetalhe = () => {
               </div>
             )}
 
-            <ImovelLocalizacao address={fullAddress} />
+            {fullAddress && <ImovelLocalizacao address={fullAddress} />}
           </div>
 
           <div className="space-y-6">
@@ -236,16 +238,28 @@ const ImovelDetalhe = () => {
                   currency: 'BRL' 
                 }).format(imovel.price || 0)}
               </div>
-              {typeof imovel.features === 'object' && imovel.features && 'condominio' in imovel.features && imovel.features.condominio && (
+              
+              {imovel.condominium_fee > 0 && (
                 <div className="mb-2">
                   <span className="text-muted-foreground">Condomínio:</span>
-                  <span className="ml-2">R$ 670/mês</span>
+                  <span className="ml-2">
+                    {new Intl.NumberFormat('pt-BR', { 
+                      style: 'currency', 
+                      currency: 'BRL' 
+                    }).format(imovel.condominium_fee)}/mês
+                  </span>
                 </div>
               )}
-              {typeof imovel.features === 'object' && imovel.features && 'iptu' in imovel.features && imovel.features.iptu && (
+              
+              {imovel.property_tax > 0 && (
                 <div className="mb-4">
                   <span className="text-muted-foreground">IPTU:</span>
-                  <span className="ml-2">R$ 78,00/mês</span>
+                  <span className="ml-2">
+                    {new Intl.NumberFormat('pt-BR', { 
+                      style: 'currency', 
+                      currency: 'BRL' 
+                    }).format(imovel.property_tax)}/mês
+                  </span>
                 </div>
               )}
             </div>
@@ -266,7 +280,13 @@ const ImovelDetalhe = () => {
                 </div>
                 {agent.whatsapp_url && (
                   <Button className="w-full" asChild>
-                    <a href={agent.whatsapp_url} target="_blank" rel="noopener noreferrer">
+                    <a 
+                      href={`${agent.whatsapp_url}${agent.whatsapp_url.includes('?') ? '&' : '?'}text=${encodeURIComponent(
+                        `Olá! Vi o imóvel ${imovel.title} (código: ${imovel.property_code}) e gostaria de mais informações.`
+                      )}`}
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                    >
                       Falar no WhatsApp
                     </a>
                   </Button>
@@ -276,6 +296,8 @@ const ImovelDetalhe = () => {
           </div>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 };
