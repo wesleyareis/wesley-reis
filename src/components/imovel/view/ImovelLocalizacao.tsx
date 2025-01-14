@@ -6,7 +6,16 @@ import { Loader2 } from "lucide-react";
 // Definindo tipos para o Google Maps
 declare global {
   interface Window {
-    google: typeof google;
+    google: {
+      maps: {
+        Map: typeof google.maps.Map;
+        Marker: typeof google.maps.Marker;
+        Geocoder: typeof google.maps.Geocoder;
+        GeocoderStatus: typeof google.maps.GeocoderStatus;
+        Animation: typeof google.maps.Animation;
+        NavigationControl: typeof google.maps.NavigationControl;
+      };
+    };
   }
 }
 
