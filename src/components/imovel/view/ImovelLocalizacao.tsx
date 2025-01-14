@@ -45,7 +45,7 @@ export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
     if (!googleMapsKey || !mapRef.current) return;
 
     const loadGoogleMaps = () => {
-      if (typeof google !== 'undefined') {
+      if (typeof google !== 'undefined' && google.maps) {
         initializeMap();
         return;
       }
