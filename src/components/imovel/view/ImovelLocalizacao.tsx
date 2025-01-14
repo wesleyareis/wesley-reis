@@ -9,7 +9,16 @@ interface ImovelLocalizacaoProps {
 
 declare global {
   interface Window {
-    google: typeof google;
+    google: {
+      maps: {
+        Map: typeof google.maps.Map;
+        Marker: typeof google.maps.Marker;
+        Geocoder: typeof google.maps.Geocoder;
+        GeocoderStatus: typeof google.maps.GeocoderStatus;
+        MapOptions: typeof google.maps.MapOptions;
+        MarkerOptions: typeof google.maps.MarkerOptions;
+      };
+    };
   }
 }
 
