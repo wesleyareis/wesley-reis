@@ -15,7 +15,6 @@ declare global {
         Animation: typeof google.maps.Animation;
         ControlPosition: typeof google.maps.ControlPosition;
         MapTypeControlStyle: typeof google.maps.MapTypeControlStyle;
-        NavigationControlOptions: typeof google.maps.NavigationControlOptions;
       };
     };
   }
