@@ -3,6 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import type { PropertyData } from "@/types/imovel";
 import { Loader2 } from "lucide-react";
 
+// Definindo tipos para o Google Maps
+declare global {
+  interface Window {
+    google: typeof google;
+  }
+}
+
 interface ImovelLocalizacaoProps {
   property: PropertyData;
 }
@@ -45,7 +52,8 @@ export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
     if (!googleMapsKey || !mapRef.current) return;
 
     const loadGoogleMaps = () => {
-      if (window.google?.maps) {
+      const googleMaps = window.google?.maps;
+      if (googleMaps) {
         initializeMap();
         return;
       }
@@ -64,13 +72,14 @@ export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
     };
 
     const initializeMap = () => {
-      if (!window.google?.maps) return;
+      const googleMaps = window.google?.maps;
+      if (!googleMaps || !mapRef.current) return;
       
-      const geocoder = new window.google.maps.Geocoder();
+      const geocoder = new googleMaps.Geocoder();
       
       geocoder.geocode({ address }, (results, status) => {
-        if (status === window.google.maps.GeocoderStatus.OK && results?.[0] && mapRef.current) {
-          const map = new window.google.maps.Map(mapRef.current, {
+        if (status === googleMaps.GeocoderStatus.OK && results?.[0] && mapRef.current) {
+          const map = new googleMaps.Map(mapRef.current, {
             zoom: 15,
             center: results[0].geometry.location,
             mapTypeControl: false,
@@ -85,10 +94,10 @@ export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
             ],
           });
 
-          new window.google.maps.Marker({
+          new googleMaps.Marker({
             map,
             position: results[0].geometry.location,
-            animation: window.google.maps.Animation.DROP,
+            animation: googleMaps.Animation.DROP,
           });
         }
         setIsLoading(false);
