@@ -1,30 +1,27 @@
 'use client'
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useSearchParams, useNavigate } from "react-router-dom"
+import { LocationFilter } from "./filters/LocationFilter"
+import { PropertyTypeFilter } from "./filters/PropertyTypeFilter"
+import { PriceRangeFilter } from "./filters/PriceRangeFilter"
 
 export function SearchFilters() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
 
   const createQueryString = (name: string, value: string) => {
-    const params = new URLSearchParams()
-    // Copiar parâmetros existentes
-    for (const [key, val] of searchParams.entries()) {
-      if (key !== name) {
-        params.append(key, val)
-      }
-    }
-    if (value) {
-      params.append(name, value)
+    const params = new URLSearchParams(searchParams)
+    if (value && value !== "todos") {
+      params.set(name, value)
+    } else {
+      params.delete(name)
     }
     return params.toString()
   }
 
-  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    navigate(`/?${createQueryString('location', e.target.value)}`)
+  const handleLocationChange = (value: string) => {
+    navigate(`/?${createQueryString('location', value)}`)
   }
 
   const handleTypeChange = (value: string) => {
@@ -35,52 +32,38 @@ export function SearchFilters() {
     navigate(`/?${createQueryString('price', value)}`)
   }
 
+  const handleClearFilters = () => {
+    navigate('/')
+  }
+
+  const currentLocation = searchParams.get("location") ?? ""
+  const currentType = searchParams.get("type") ?? "todos"
+  const currentPrice = searchParams.get("price") ?? "todos"
+
   return (
-    <div className="search-container p-8 rounded-lg">
-      <h1 className="text-3xl font-bold text-white mb-6">
+    <div className="search-container p-8 rounded-lg bg-primary/10">
+      <h1 className="text-3xl font-bold text-primary mb-6">
         Encontre seu imóvel ideal
       </h1>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Input
-          placeholder="Localização"
-          className="bg-white"
-          value={searchParams.get("location") || ""}
+        <LocationFilter 
+          value={currentLocation}
           onChange={handleLocationChange}
         />
-        <Select
-          value={searchParams.get("type") || ""}
-          onValueChange={handleTypeChange}
+        <PropertyTypeFilter
+          value={currentType}
+          onChange={handleTypeChange}
+        />
+        <PriceRangeFilter
+          value={currentPrice}
+          onChange={handlePriceChange}
+        />
+        <Button 
+          onClick={handleClearFilters}
+          variant="outline"
+          className="bg-white hover:bg-white/90"
         >
-          <SelectTrigger className="bg-white">
-            <SelectValue placeholder="Tipo de imóvel" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">Todos os tipos</SelectItem>
-            <SelectItem value="apartamento">Apartamento</SelectItem>
-            <SelectItem value="casa">Casa</SelectItem>
-            <SelectItem value="cobertura">Cobertura</SelectItem>
-            <SelectItem value="terreno">Terreno</SelectItem>
-            <SelectItem value="sala">Sala Comercial</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select
-          value={searchParams.get("price") || ""}
-          onValueChange={handlePriceChange}
-        >
-          <SelectTrigger className="bg-white">
-            <SelectValue placeholder="Faixa de preço" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">Qualquer preço</SelectItem>
-            <SelectItem value="0-300000">Até R$ 300.000</SelectItem>
-            <SelectItem value="300000-500000">R$ 300.000 - R$ 500.000</SelectItem>
-            <SelectItem value="500000-800000">R$ 500.000 - R$ 800.000</SelectItem>
-            <SelectItem value="800000-1000000">R$ 800.000 - R$ 1.000.000</SelectItem>
-            <SelectItem value="1000000-99999999">Acima de R$ 1.000.000</SelectItem>
-          </SelectContent>
-        </Select>
-        <Button className="bg-white text-primary hover:bg-white/90">
-          Buscar
+          Limpar Filtros
         </Button>
       </div>
     </div>

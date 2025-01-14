@@ -4,54 +4,70 @@ import { SearchFilters } from "@/components/SearchFilters";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogIn } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { Footer } from "@/components/Footer";
+import { toast } from "sonner";
+import type { PropertyData } from "@/types/imovel";
+import { useAuthMiddleware } from "@/middleware";
 
 const Index = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  useAuthMiddleware();
 
-  const { data: properties, isLoading } = useQuery({
+  const { data: properties = [], isLoading } = useQuery({
     queryKey: ["properties", Object.fromEntries(searchParams)],
     queryFn: async () => {
-      let query = supabase
-        .from("properties")
-        .select("*")
-        .eq("status", "active");
+      try {
+        let query = supabase
+          .from("properties")
+          .select("*")
+          .eq("status", "active");
 
-      const location = searchParams.get("location");
-      const propertyType = searchParams.get("type");
-      const priceRange = searchParams.get("price");
+        const location = searchParams.get("location");
+        const propertyType = searchParams.get("type");
+        const priceRange = searchParams.get("price");
 
-      if (location) {
-        query = query.or(`city.ilike.%${location}%,neighborhood.ilike.%${location}%`);
-      }
-
-      if (propertyType) {
-        query = query.eq("property_type", propertyType);
-      }
-
-      if (priceRange) {
-        const [min, max] = priceRange.split("-").map(Number);
-        if (max) {
-          query = query.lte("price", max);
+        if (location) {
+          const searchTerm = location.toLowerCase();
+          query = query.or(`neighborhood.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`);
         }
-        query = query.gte("price", min || 0);
-      }
 
-      const { data, error } = await query;
-      
-      if (error) {
-        console.error("Error fetching properties:", error);
+        if (propertyType && propertyType !== "todos") {
+          query = query.eq("property_type", propertyType);
+        }
+
+        if (priceRange && priceRange !== "todos") {
+          const [min, max] = priceRange.split("-").map(Number);
+          if (!isNaN(min) && !isNaN(max)) {
+            query = query.gte("price", min).lte("price", max);
+          }
+        }
+
+        const { data, error } = await query;
+
+        if (error) {
+          console.error("Erro ao buscar propriedades:", error);
+          toast.error("Erro ao carregar imóveis");
+          return [];
+        }
+
+        return data as PropertyData[];
+      } catch (error) {
+        console.error("Erro inesperado:", error);
+        toast.error("Erro ao carregar imóveis");
         return [];
       }
-      
-      return data;
     },
   });
 
-  const handleLoginClick = () => {
-    navigate('/login');
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast.error("Erro ao fazer logout");
+    } else {
+      navigate('/login');
+    }
   };
 
   return (
@@ -64,11 +80,11 @@ const Index = () => {
           <nav className="flex gap-4 items-center">
             <Button
               variant="outline"
-              onClick={handleLoginClick}
+              onClick={handleLogout}
               className="flex items-center gap-2"
             >
-              <LogIn className="w-4 h-4" />
-              Login Corretor
+              <LogOut className="w-4 h-4" />
+              Sair
             </Button>
           </nav>
         </div>
@@ -78,14 +94,14 @@ const Index = () => {
         <SearchFilters />
         
         <div className="mt-12">
-          <h2 className="text-2xl font-semibold mb-6">Imóveis em Destaque</h2>
+          <h2 className="text-2xl font-semibold mb-6">Listagem em Destaque</h2>
           {isLoading ? (
             <div className="flex justify-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {properties?.map((property) => (
+              {properties.map((property) => (
                 <ImovelCard
                   key={property.id}
                   id={property.id}

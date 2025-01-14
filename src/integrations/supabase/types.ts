@@ -314,6 +314,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           features: Json | null
+          features_pt: Json | null
           id: string
           images: string[] | null
           neighborhood: string
@@ -339,6 +340,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           features?: Json | null
+          features_pt?: Json | null
           id?: string
           images?: string[] | null
           neighborhood: string
@@ -364,6 +366,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           features?: Json | null
+          features_pt?: Json | null
           id?: string
           images?: string[] | null
           neighborhood?: string

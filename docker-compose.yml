@@ -9,11 +9,9 @@ services:
     container_name: imovel-nexus
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "8080:80"  # Mapeia a porta 8080 do host para a porta 80 do container
     networks:
       - imovel-network
-    environment:
-      - NODE_ENV=production
 
 networks:
   imovel-network:

@@ -23,7 +23,7 @@ serve(async (req) => {
       .select('property_code, city, neighborhood, title, updated_at')
       .eq('status', 'active')
 
-    const baseUrl = 'https://wesleyreis.imb.br'
+    const baseUrl = 'https://wesleyreis.com.br'
     
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
