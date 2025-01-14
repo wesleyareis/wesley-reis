@@ -7,12 +7,19 @@ interface ImovelLocalizacaoProps {
   property: PropertyData;
 }
 
-interface GoogleMapsWindow extends Window {
-  google: typeof google;
-}
-
+// Definindo os tipos do Google Maps de forma não recursiva
 declare global {
-  interface Window extends GoogleMapsWindow {}
+  interface Window {
+    google: {
+      maps: {
+        Map: typeof google.maps.Map;
+        Marker: typeof google.maps.Marker;
+        Geocoder: typeof google.maps.Geocoder;
+        GeocoderStatus: typeof google.maps.GeocoderStatus;
+        Animation: typeof google.maps.Animation;
+      };
+    };
+  }
 }
 
 export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
