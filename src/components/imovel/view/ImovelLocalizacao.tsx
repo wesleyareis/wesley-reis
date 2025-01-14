@@ -7,10 +7,12 @@ interface ImovelLocalizacaoProps {
   property: PropertyData;
 }
 
+interface GoogleMapsWindow extends Window {
+  google: typeof google;
+}
+
 declare global {
-  interface Window {
-    google: typeof google;
-  }
+  interface Window extends GoogleMapsWindow {}
 }
 
 export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
@@ -51,7 +53,7 @@ export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
     if (!googleMapsKey || !mapRef.current) return;
 
     const loadGoogleMaps = () => {
-      if (typeof window.google !== 'undefined') {
+      if (window.google?.maps) {
         initializeMap();
         return;
       }
@@ -60,7 +62,7 @@ export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
       scriptRef.current.src = `https://maps.googleapis.com/maps/api/js?key=${googleMapsKey}&libraries=places`;
       scriptRef.current.async = true;
       scriptRef.current.defer = true;
-      scriptRef.current.onload = initializeMap;
+      scriptRef.current.onload = () => initializeMap();
       scriptRef.current.onerror = () => {
         console.error('Erro ao carregar o Google Maps');
         setIsLoading(false);
