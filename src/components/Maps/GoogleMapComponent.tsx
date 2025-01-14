@@ -5,13 +5,15 @@ interface GoogleMapComponentProps {
   markers?: { lat: number; lng: number }[];
   className?: string;
   zoom?: number;
+  onClick?: (event: google.maps.MapMouseEvent) => void;
 }
 
 export function GoogleMapComponent({ 
   center, 
   markers = [], 
   className,
-  zoom = 15 
+  zoom = 15,
+  onClick
 }: GoogleMapComponentProps) {
   // Centro padrão em Goiânia se nenhum centro for fornecido
   const defaultCenter = { lat: -16.6869, lng: -49.2648 };
@@ -28,6 +30,7 @@ export function GoogleMapComponent({
           fullscreenControl: true,
           zoomControl: true,
         }}
+        onClick={onClick}
       >
         {markers.map((position, index) => (
           <Marker

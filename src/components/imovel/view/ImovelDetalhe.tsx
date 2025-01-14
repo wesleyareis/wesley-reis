@@ -16,7 +16,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ImovelLocalizacao } from "./ImovelLocalizacao";
+import ImovelLocalizacao from "./ImovelLocalizacao";
 import { useEffect, useState } from "react";
 import { Footer } from "@/components/Footer";
 

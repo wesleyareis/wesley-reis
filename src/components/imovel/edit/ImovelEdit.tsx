@@ -172,7 +172,7 @@ const ImovelEdit = () => {
                         name: 'images',
                         value: newImages
                       }
-                    } as React.ChangeEvent<HTMLInputElement>);
+                    } as unknown as React.ChangeEvent<HTMLInputElement>);
                   }}
                 />
               </div>
@@ -242,7 +242,7 @@ const ImovelEdit = () => {
                         name: 'features',
                         value: newFeatures
                       }
-                    } as React.ChangeEvent<HTMLInputElement>);
+                    } as unknown as React.ChangeEvent<HTMLInputElement>);
                   }}
                 />
               </div>
