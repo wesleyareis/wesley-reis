@@ -7,6 +7,12 @@ interface ImovelLocalizacaoProps {
   address: string;
 }
 
+declare global {
+  interface Window {
+    google: typeof google;
+  }
+}
+
 export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,31 +39,34 @@ export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
 
         const apiKey = secrets;
         
-        // Carrega o script do Google Maps
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
-        script.async = true;
-        script.defer = true;
-        script.id = 'google-maps-script';
-        
-        script.onload = () => {
-          setGoogleMapsLoaded(true);
+        if (!document.getElementById('google-maps-script')) {
+          const script = document.createElement('script');
+          script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+          script.async = true;
+          script.defer = true;
+          script.id = 'google-maps-script';
+          
+          script.onload = () => {
+            setGoogleMapsLoaded(true);
+            initMap();
+          };
+
+          script.onerror = () => {
+            toast.error('Erro ao carregar o Google Maps');
+            setIsLoading(false);
+          };
+
+          document.head.appendChild(script);
+        } else if (window.google) {
           initMap();
-        };
-
-        script.onerror = () => {
-          toast.error('Erro ao carregar o Google Maps');
-          setIsLoading(false);
-        };
-
-        document.head.appendChild(script);
+        }
 
         const initMap = () => {
-          if (!mapRef.current) return;
+          if (!mapRef.current || !window.google) return;
 
           const defaultLocation = { lat: -16.6869, lng: -49.2648 }; // Goiânia
           
-          mapInstance = new google.maps.Map(mapRef.current, {
+          mapInstance = new window.google.maps.Map(mapRef.current, {
             zoom: 15,
             center: defaultLocation,
             mapTypeControl: false,
@@ -65,7 +74,7 @@ export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
             fullscreenControl: false,
           });
 
-          geocoder = new google.maps.Geocoder();
+          geocoder = new window.google.maps.Geocoder();
 
           if (address) {
             geocoder.geocode({ address }, (results, status) => {
@@ -77,10 +86,10 @@ export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
                   marker.setMap(null);
                 }
                 
-                marker = new google.maps.Marker({
+                marker = new window.google.maps.Marker({
                   map: mapInstance,
                   position: location,
-                  animation: google.maps.Animation.DROP,
+                  animation: window.google.maps.Animation.DROP,
                 });
               } else {
                 console.warn('Não foi possível localizar o endereço:', address);
@@ -103,17 +112,16 @@ export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
     initializeMap();
 
     return () => {
-      // Limpa o script e instâncias do Google Maps
-      const script = document.getElementById('google-maps-script');
-      if (script) {
-        script.remove();
-      }
       if (marker) {
         marker.setMap(null);
       }
       if (mapInstance) {
         // @ts-ignore
         mapInstance = null;
+      }
+      const script = document.getElementById('google-maps-script');
+      if (script) {
+        script.remove();
       }
     };
   }, [address]);
