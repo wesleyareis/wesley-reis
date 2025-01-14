@@ -7,62 +7,19 @@ interface ImovelLocalizacaoProps {
   address: string;
 }
 
-declare global {
-  interface Window {
-    google: typeof google;
-  }
+interface GoogleMapsWindow extends Window {
+  google?: any;
 }
+
+declare const window: GoogleMapsWindow;
 
 export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const mapInstanceRef = useRef<any>(null);
+  const markerRef = useRef<any>(null);
 
   useEffect(() => {
-    let mapInstance: google.maps.Map | null = null;
-    let geocoder: google.maps.Geocoder | null = null;
-    let marker: google.maps.Marker | null = null;
-
-    function initMap() {
-      if (!mapRef.current || !window.google) return;
-
-      const defaultLocation = { lat: -16.6869, lng: -49.2648 }; // Goiânia
-      
-      mapInstance = new window.google.maps.Map(mapRef.current, {
-        zoom: 15,
-        center: defaultLocation,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: false,
-      });
-
-      geocoder = new window.google.maps.Geocoder();
-
-      if (address) {
-        geocoder.geocode({ address }, (results, status) => {
-          if (status === 'OK' && results?.[0]) {
-            const location = results[0].geometry.location;
-            mapInstance?.setCenter(location);
-            
-            if (marker) {
-              marker.setMap(null);
-            }
-            
-            marker = new window.google.maps.Marker({
-              map: mapInstance,
-              position: location,
-              animation: window.google.maps.Animation.DROP,
-            });
-          } else {
-            console.warn('Não foi possível localizar o endereço:', address);
-            toast.error('Não foi possível localizar o endereço no mapa');
-          }
-          setIsLoading(false);
-        });
-      } else {
-        setIsLoading(false);
-      }
-    }
-
     async function loadGoogleMaps() {
       if (!address) {
         setIsLoading(false);
@@ -70,25 +27,21 @@ export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
       }
 
       try {
-        const { data: secrets, error } = await supabase
+        const { data: apiKey, error } = await supabase
           .rpc('secrets', { secret_name: 'GOOGLE_MAPS_API_KEY' });
 
-        if (error || !secrets) {
+        if (error || !apiKey) {
           throw new Error('Erro ao carregar a chave da API do Google Maps');
         }
 
-        const apiKey = secrets; // Verifique se a chave está correta
-        console.log('Chave da API do Google Maps:', apiKey);
-
         if (!document.getElementById('google-maps-script')) {
           const script = document.createElement('script');
+          script.id = 'google-maps-script';
           script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
           script.async = true;
           script.defer = true;
-          script.id = 'google-maps-script';
           
           script.onload = () => {
-            console.log('Google Maps script loaded successfully');
             initMap();
           };
 
@@ -109,15 +62,56 @@ export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
       }
     }
 
+    function initMap() {
+      if (!mapRef.current || !window.google) return;
+
+      const defaultLocation = { lat: -16.6869, lng: -49.2648 }; // Goiânia
+      
+      mapInstanceRef.current = new window.google.maps.Map(mapRef.current, {
+        zoom: 15,
+        center: defaultLocation,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
+      });
+
+      const geocoder = new window.google.maps.Geocoder();
+
+      if (address) {
+        geocoder.geocode({ address }, (results: any, status: string) => {
+          if (status === 'OK' && results?.[0]) {
+            const location = results[0].geometry.location;
+            if (mapInstanceRef.current) {
+              mapInstanceRef.current.setCenter(location);
+              
+              if (markerRef.current) {
+                markerRef.current.setMap(null);
+              }
+              
+              markerRef.current = new window.google.maps.Marker({
+                map: mapInstanceRef.current,
+                position: location,
+                animation: window.google.maps.Animation.DROP,
+              });
+            }
+          } else {
+            console.warn('Não foi possível localizar o endereço:', address);
+            toast.error('Não foi possível localizar o endereço no mapa');
+          }
+          setIsLoading(false);
+        });
+      } else {
+        setIsLoading(false);
+      }
+    }
+
     loadGoogleMaps();
 
     return () => {
-      if (marker) {
-        marker.setMap(null);
+      if (markerRef.current) {
+        markerRef.current.setMap(null);
       }
-      if (mapInstance) {
-        mapInstance = null;
-      }
+      mapInstanceRef.current = null;
     };
   }, [address]);
 
