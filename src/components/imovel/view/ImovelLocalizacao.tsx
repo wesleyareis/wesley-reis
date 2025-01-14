@@ -14,6 +14,8 @@ declare global {
         GeocoderStatus: typeof google.maps.GeocoderStatus;
         Animation: typeof google.maps.Animation;
         ControlPosition: typeof google.maps.ControlPosition;
+        MapTypeControlStyle: typeof google.maps.MapTypeControlStyle;
+        NavigationControlOptions: typeof google.maps.NavigationControlOptions;
       };
     };
   }
@@ -61,8 +63,7 @@ export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
     if (!googleMapsKey || !mapRef.current) return;
 
     const loadGoogleMaps = () => {
-      const googleMaps = window.google?.maps;
-      if (googleMaps) {
+      if (window.google?.maps) {
         initializeMap();
         return;
       }
@@ -81,14 +82,13 @@ export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
     };
 
     const initializeMap = () => {
-      const googleMaps = window.google?.maps;
-      if (!googleMaps || !mapRef.current) return;
+      if (!window.google?.maps || !mapRef.current) return;
       
-      const geocoder = new googleMaps.Geocoder();
+      const geocoder = new window.google.maps.Geocoder();
       
       geocoder.geocode({ address }, (results, status) => {
-        if (status === googleMaps.GeocoderStatus.OK && results?.[0] && mapRef.current) {
-          const map = new googleMaps.Map(mapRef.current, {
+        if (status === window.google.maps.GeocoderStatus.OK && results?.[0] && mapRef.current) {
+          const map = new window.google.maps.Map(mapRef.current, {
             zoom: 15,
             center: results[0].geometry.location,
             mapTypeControl: false,
@@ -103,10 +103,10 @@ export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
             ],
           });
 
-          new googleMaps.Marker({
+          new window.google.maps.Marker({
             map,
             position: results[0].geometry.location,
-            animation: googleMaps.Animation.DROP,
+            animation: window.google.maps.Animation.DROP,
           });
         }
         setIsLoading(false);
