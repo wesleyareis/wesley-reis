@@ -45,7 +45,7 @@ export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
     if (!googleMapsKey || !mapRef.current) return;
 
     const loadGoogleMaps = () => {
-      if (window.google) {
+      if (typeof window.google !== 'undefined') {
         initializeMap();
         return;
       }
@@ -64,11 +64,11 @@ export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
     };
 
     const initializeMap = () => {
-      const geocoder = new google.maps.Geocoder();
+      const geocoder = new window.google.maps.Geocoder();
       
       geocoder.geocode({ address }, (results, status) => {
-        if (status === google.maps.GeocoderStatus.OK && results?.[0] && mapRef.current) {
-          const map = new google.maps.Map(mapRef.current, {
+        if (status === window.google.maps.GeocoderStatus.OK && results?.[0] && mapRef.current) {
+          const map = new window.google.maps.Map(mapRef.current, {
             zoom: 15,
             center: results[0].geometry.location,
             mapTypeControl: false,
@@ -83,10 +83,10 @@ export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
             ],
           });
 
-          new google.maps.Marker({
+          new window.google.maps.Marker({
             map,
             position: results[0].geometry.location,
-            animation: google.maps.Animation.DROP,
+            animation: window.google.maps.Animation.DROP,
           });
         }
         setIsLoading(false);
