@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import type { PropertyData } from "@/types/imovel";
 import { Loader2 } from "lucide-react";
 
@@ -11,9 +10,8 @@ declare global {
         Marker: typeof google.maps.Marker;
         Geocoder: typeof google.maps.Geocoder;
         GeocoderStatus: typeof google.maps.GeocoderStatus;
-        Animation: typeof google.maps.Animation;
-        ControlPosition: typeof google.maps.ControlPosition;
         MapTypeControlStyle: typeof google.maps.MapTypeControlStyle;
+        ControlPosition: typeof google.maps.ControlPosition;
       };
     };
   }
