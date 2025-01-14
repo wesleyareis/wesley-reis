@@ -12,7 +12,7 @@ const EditarImovel = () => {
   const [formState, setFormState] = useState<PropertyFormData | null>(null);
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
 
-  const { data: property, isLoading } = useQuery({
+  const { data: property, isLoading: isLoadingProperty } = useQuery({
     queryKey: ["property", id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -115,8 +115,15 @@ const EditarImovel = () => {
     }
   };
 
-  if (!formState) {
-    return null;
+  if (isLoadingProperty || !formState) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Carregando dados do imóvel...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
