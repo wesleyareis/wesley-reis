@@ -1,94 +1,27 @@
-import { useEffect, useState } from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import { GoogleMapComponent } from '@/components/Maps/GoogleMapComponent';
-import { useGoogleMaps } from '@/components/Maps/GoogleMapsProvider';
+import { GoogleMapComponent } from "@/components/Maps/GoogleMapComponent";
 
 interface ImovelLocalizacaoProps {
-  address: string;
+  street_address?: string;
+  neighborhood: string;
+  city: string;
 }
 
-export default function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
-  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [geocodeError, setGeocodeError] = useState<string | null>(null);
-  const { isLoaded, loadError } = useGoogleMaps();
-
-  useEffect(() => {
-    if (!isLoaded || !address) return;
-
-    const geocoder = new window.google.maps.Geocoder();
-    
-    geocoder.geocode({
-      address: address,
-      region: 'BR',
-    }, (results, status) => {
-      if (status === 'OK' && results?.[0]) {
-        const loc = results[0].geometry.location;
-        const newLocation = {
-          lat: loc.lat(),
-          lng: loc.lng()
-        };
-        
-        setLocation(newLocation);
-        setGeocodeError(null);
-      } else {
-        console.error('Erro na geocodificação:', status);
-        setGeocodeError(`Não foi possível localizar o endereço (${status})`);
-        setLocation(null);
-      }
-    });
-  }, [isLoaded, address]);
-
-  if (!isLoaded) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Localização</h3>
-            <div className="w-full h-[400px] rounded-lg overflow-hidden flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-            </div>
-            <p className="text-sm text-muted-foreground">{address}</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (loadError || geocodeError) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Localização</h3>
-            <div className="w-full h-[400px] rounded-lg overflow-hidden flex items-center justify-center text-red-500">
-              <div className="text-center">
-                <p>{loadError?.message || geocodeError || 'Erro ao carregar o mapa'}</p>
-                <p className="text-sm mt-2">{address}</p>
-              </div>
-            </div>
-            <p className="text-sm text-muted-foreground">{address}</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
+const ImovelLocalizacao = ({ street_address, neighborhood, city }: ImovelLocalizacaoProps) => {
+  const address = `${street_address ? street_address + ', ' : ''}${neighborhood}, ${city}`;
+  
   return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Localização</h3>
-          <div className="space-y-2">
-            <GoogleMapComponent
-              center={location}
-              markers={location ? [location] : []}
-              className="w-full h-[400px] rounded-lg overflow-hidden"
-              zoom={16}
-            />
-            <p className="text-sm text-muted-foreground">{address}</p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="mt-8">
+      <h2 className="text-2xl font-semibold mb-4">Localização</h2>
+      <div className="rounded-lg overflow-hidden h-[400px]">
+        <GoogleMapComponent
+          center={{ lat: -16.6869, lng: -49.2648 }}
+          markers={[{ lat: -16.6869, lng: -49.2648 }]}
+          className="w-full h-full"
+        />
+      </div>
+      <p className="mt-4 text-gray-600">{address}</p>
+    </div>
   );
-}
+};
+
+export default ImovelLocalizacao;
