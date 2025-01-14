@@ -6,4 +6,6 @@ declare global {
   }
 }
 
+export type MapMouseEvent = google.maps.MapMouseEvent;
+
 export {};

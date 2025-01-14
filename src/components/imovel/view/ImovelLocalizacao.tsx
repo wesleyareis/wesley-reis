@@ -2,12 +2,13 @@ import { GoogleMapComponent } from "@/components/Maps/GoogleMapComponent";
 
 interface ImovelLocalizacaoProps {
   street_address?: string;
-  neighborhood: string;
-  city: string;
+  neighborhood?: string;
+  city?: string;
+  address?: string;
 }
 
-const ImovelLocalizacao = ({ street_address, neighborhood, city }: ImovelLocalizacaoProps) => {
-  const address = `${street_address ? street_address + ', ' : ''}${neighborhood}, ${city}`;
+const ImovelLocalizacao = ({ street_address, neighborhood, city, address }: ImovelLocalizacaoProps) => {
+  const displayAddress = address || `${street_address ? street_address + ', ' : ''}${neighborhood ? neighborhood + ', ' : ''}${city || ''}`;
   
   return (
     <div className="mt-8">
@@ -19,7 +20,7 @@ const ImovelLocalizacao = ({ street_address, neighborhood, city }: ImovelLocaliz
           className="w-full h-full"
         />
       </div>
-      <p className="mt-4 text-gray-600">{address}</p>
+      <p className="mt-4 text-gray-600">{displayAddress}</p>
     </div>
   );
 };
