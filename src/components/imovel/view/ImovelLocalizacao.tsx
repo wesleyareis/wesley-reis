@@ -77,18 +77,22 @@ export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
           throw new Error('Erro ao carregar a chave da API do Google Maps');
         }
 
+        const apiKey = secrets; // Verifique se a chave está correta
+
         if (!document.getElementById('google-maps-script')) {
           const script = document.createElement('script');
-          script.src = `https://maps.googleapis.com/maps/api/js?key=${secrets}&libraries=places`;
+          script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
           script.async = true;
           script.defer = true;
           script.id = 'google-maps-script';
           
           script.onload = () => {
+            console.log('Google Maps script loaded successfully');
             initMap();
           };
 
           script.onerror = () => {
+            console.error('Erro ao carregar o Google Maps');
             toast.error('Erro ao carregar o Google Maps');
             setIsLoading(false);
           };
