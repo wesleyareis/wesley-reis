@@ -11,12 +11,20 @@ declare global {
   interface Window {
     google: {
       maps: {
-        Map: typeof google.maps.Map;
-        Marker: typeof google.maps.Marker;
-        Geocoder: typeof google.maps.Geocoder;
-        GeocoderStatus: typeof google.maps.GeocoderStatus;
-        LatLng: typeof google.maps.LatLng;
-        MapTypeControlStyle: typeof google.maps.MapTypeControlStyle;
+        Map: new (
+          mapDiv: HTMLElement,
+          opts?: google.maps.MapOptions
+        ) => google.maps.Map;
+        Marker: new (
+          opts?: google.maps.MarkerOptions
+        ) => google.maps.Marker;
+        Geocoder: new () => google.maps.Geocoder;
+        GeocoderStatus: {
+          OK: google.maps.GeocoderStatus;
+        };
+        MapTypeControlStyle: {
+          DEFAULT: number;
+        };
       };
     };
   }
