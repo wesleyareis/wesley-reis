@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import type { PropertyData } from "@/types/imovel";
 import { Loader2 } from "lucide-react";
 
@@ -102,7 +103,6 @@ export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
           new window.google.maps.Marker({
             map,
             position: results[0].geometry.location,
-            animation: window.google.maps.Animation.DROP,
           });
         }
         setIsLoading(false);
