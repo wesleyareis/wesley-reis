@@ -38,51 +38,43 @@ export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
 
     const loadGoogleMaps = async () => {
       try {
-        // Carrega o script do Google Maps
         const script = document.createElement('script');
         script.src = `https://maps.googleapis.com/maps/api/js?key=${googleMapsKey}&libraries=places`;
         script.async = true;
         script.defer = true;
         
         script.onload = async () => {
-          // Inicializa o geocoder
           const geocoder = new google.maps.Geocoder();
           
-          // Geocodifica o endereço
-          const result = await new Promise((resolve, reject) => {
-            geocoder.geocode({ address }, (results, status) => {
-              if (status === 'OK' && results?.[0]) {
-                resolve(results[0]);
-              } else {
-                reject(new Error('Não foi possível encontrar o endereço'));
-              }
-            });
-          });
+          geocoder.geocode({ address }, (results, status) => {
+            if (status === google.maps.GeocoderStatus.OK && results?.[0]) {
+              const map = new google.maps.Map(mapRef.current!, {
+                zoom: 15,
+                center: results[0].geometry.location,
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: false,
+                styles: [
+                  {
+                    featureType: "poi",
+                    elementType: "labels",
+                    stylers: [{ visibility: "off" }],
+                  },
+                ],
+              });
 
-          // Cria o mapa
-          const map = new google.maps.Map(mapRef.current, {
-            zoom: 15,
-            center: (result as google.maps.GeocoderResult).geometry.location,
-            mapTypeControl: false,
-            streetViewControl: false,
-            fullscreenControl: false,
-            styles: [
-              {
-                featureType: "poi",
-                elementType: "labels",
-                stylers: [{ visibility: "off" }],
-              },
-            ],
-          });
+              new google.maps.Marker({
+                map,
+                position: results[0].geometry.location,
+                animation: google.maps.Animation.DROP,
+              });
 
-          // Adiciona o marcador
-          new google.maps.Marker({
-            map,
-            position: (result as google.maps.GeocoderResult).geometry.location,
-            animation: google.maps.Animation.DROP,
+              setIsLoading(false);
+            } else {
+              console.error('Erro ao geocodificar endereço:', status);
+              setIsLoading(false);
+            }
           });
-
-          setIsLoading(false);
         };
 
         document.head.appendChild(script);
@@ -95,7 +87,6 @@ export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
     loadGoogleMaps();
 
     return () => {
-      // Remove o script ao desmontar o componente
       const script = document.querySelector('script[src*="maps.googleapis.com"]');
       if (script) {
         script.remove();
