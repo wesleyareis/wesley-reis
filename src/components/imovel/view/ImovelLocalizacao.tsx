@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import type { PropertyData } from "@/types/imovel";
 import { Loader2 } from "lucide-react";
 
-// Definindo tipos para o Google Maps
 declare global {
   interface Window {
     google: {
