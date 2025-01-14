@@ -7,16 +7,19 @@ interface ImovelLocalizacaoProps {
   property: PropertyData;
 }
 
-// Definindo os tipos do Google Maps de forma não recursiva
 declare global {
   interface Window {
     google: {
       maps: {
-        Map: typeof google.maps.Map;
-        Marker: typeof google.maps.Marker;
-        Geocoder: typeof google.maps.Geocoder;
-        GeocoderStatus: typeof google.maps.GeocoderStatus;
-        Animation: typeof google.maps.Animation;
+        Map: new (element: HTMLElement, options: any) => any;
+        Marker: new (options: any) => any;
+        Geocoder: new () => any;
+        GeocoderStatus: {
+          OK: string;
+        };
+        Animation: {
+          DROP: number;
+        };
       };
     };
   }
@@ -81,7 +84,7 @@ export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
     const initializeMap = () => {
       const geocoder = new window.google.maps.Geocoder();
       
-      geocoder.geocode({ address }, (results, status) => {
+      geocoder.geocode({ address }, (results: any, status: any) => {
         if (status === window.google.maps.GeocoderStatus.OK && results?.[0] && mapRef.current) {
           const map = new window.google.maps.Map(mapRef.current, {
             zoom: 15,
