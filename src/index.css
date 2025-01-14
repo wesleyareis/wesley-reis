@@ -71,7 +71,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
   }
 }
 
@@ -81,6 +81,18 @@
   }
 
   .search-container {
-    @apply bg-gradient-to-r from-primary to-primary/80;
+    @apply bg-gradient-to-r from-primary to-primary/80 rounded-lg p-6 shadow-sm;
+  }
+
+  .form-container {
+    @apply max-w-7xl mx-auto px-4 py-8;
+  }
+
+  .page-title {
+    @apply text-2xl font-bold mb-6;
+  }
+
+  .card-hover {
+    @apply hover:shadow-lg transition-shadow duration-300;
   }
 }

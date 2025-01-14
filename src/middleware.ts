@@ -9,14 +9,20 @@ export const useAuthMiddleware = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        toast.error("Você precisa estar logado para acessar esta página");
-        navigate('/login', { 
-          replace: true,
-          state: { from: location.pathname }
-        });
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          toast.error("Você precisa estar logado para acessar esta página");
+          navigate('/login', { 
+            replace: true,
+            state: { from: location.pathname }
+          });
+        }
+      } catch (error) {
+        console.error('Erro ao verificar autenticação:', error);
+        toast.error("Erro ao verificar autenticação");
+        navigate('/login', { replace: true });
       }
     };
 

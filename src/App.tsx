@@ -37,6 +37,7 @@ const App = () => {
       queries: {
         retry: 1,
         refetchOnWindowFocus: false,
+        staleTime: 1000 * 60 * 5, // 5 minutos
       },
     },
   }));
@@ -47,7 +48,7 @@ const App = () => {
         <TooltipProvider>
           <RouterProvider router={router} />
           <Toaster />
-          <Sonner />
+          <Sonner position="top-right" />
         </TooltipProvider>
       </QueryClientProvider>
     </HelmetProvider>
