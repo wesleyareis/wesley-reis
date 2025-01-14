@@ -21,8 +21,8 @@ export function ImovelLocalizacao({ property }: ImovelLocalizacaoProps) {
 
         if (error) throw error;
 
-        if (data?.location && typeof google !== 'undefined' && mapRef.current) {
-          const map = new google.maps.Map(mapRef.current, {
+        if (data?.location && window.google && mapRef.current) {
+          const map = new window.google.maps.Map(mapRef.current, {
             center: data.location,
             zoom: 15,
             mapTypeControl: false,
@@ -30,7 +30,7 @@ export function ImovelLocalizacao({ property }: ImovelLocalizacaoProps) {
             fullscreenControl: false,
           });
           
-          new google.maps.Marker({
+          new window.google.maps.Marker({
             position: data.location,
             map,
             title: property.title
