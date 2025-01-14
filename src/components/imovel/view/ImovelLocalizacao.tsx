@@ -16,7 +16,6 @@ declare global {
 export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [googleMapsLoaded, setGoogleMapsLoaded] = useState(false);
 
   useEffect(() => {
     let mapInstance: google.maps.Map | null = null;
@@ -64,7 +63,7 @@ export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
       }
     };
 
-    const initializeMap = async () => {
+    const loadGoogleMaps = async () => {
       try {
         if (!address) {
           setIsLoading(false);
@@ -78,17 +77,14 @@ export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
           throw new Error('Erro ao carregar a chave da API do Google Maps');
         }
 
-        const apiKey = secrets;
-        
         if (!document.getElementById('google-maps-script')) {
           const script = document.createElement('script');
-          script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+          script.src = `https://maps.googleapis.com/maps/api/js?key=${secrets}&libraries=places`;
           script.async = true;
           script.defer = true;
           script.id = 'google-maps-script';
           
           script.onload = () => {
-            setGoogleMapsLoaded(true);
             initMap();
           };
 
@@ -108,7 +104,7 @@ export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
       }
     };
 
-    initializeMap();
+    loadGoogleMaps();
 
     return () => {
       if (marker) {
@@ -117,10 +113,6 @@ export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
       if (mapInstance) {
         // @ts-ignore
         mapInstance = null;
-      }
-      const script = document.getElementById('google-maps-script');
-      if (script) {
-        script.remove();
       }
     };
   }, [address]);
