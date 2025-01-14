@@ -7,6 +7,12 @@ interface ImovelLocalizacaoProps {
   property: PropertyData;
 }
 
+declare global {
+  interface Window {
+    google: typeof google;
+  }
+}
+
 export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
