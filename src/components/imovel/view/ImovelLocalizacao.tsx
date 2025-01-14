@@ -10,21 +10,14 @@ export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
 
-  const address = `${property.street_address || ''} - ${property.neighborhood}, ${property.city}`;
+  const address = property.street_address 
+    ? `${property.street_address} - ${property.neighborhood}, ${property.city}`
+    : `${property.neighborhood}, ${property.city}`;
 
   useEffect(() => {
     const loadMap = async () => {
       try {
-        const { data, error } = await supabase
-          .rpc('secrets', { secret_name: 'GOOGLE_MAPS_API_KEY' });
-
-        if (error) {
-          console.error("Erro ao carregar a chave da API:", error);
-          return;
-        }
-
         if (mapRef.current && !mapLoaded) {
-          // Exibe o endereço formatado em um container estilizado
           const addressElement = document.createElement('div');
           addressElement.className = 'p-4 bg-muted rounded-lg text-center';
           addressElement.innerHTML = `
@@ -56,7 +49,7 @@ export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
         className="w-full min-h-[200px] rounded-lg overflow-hidden shadow-sm bg-background flex items-center justify-center"
       />
       <p className="mt-4 text-sm text-muted-foreground text-center">
-        {property.street_address} - {property.neighborhood}, {property.city}
+        {address}
       </p>
     </div>
   );
