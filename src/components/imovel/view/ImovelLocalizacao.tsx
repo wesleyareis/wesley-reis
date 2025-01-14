@@ -13,7 +13,7 @@ declare global {
         Geocoder: typeof google.maps.Geocoder;
         GeocoderStatus: typeof google.maps.GeocoderStatus;
         Animation: typeof google.maps.Animation;
-        NavigationControl: typeof google.maps.NavigationControl;
+        ControlPosition: typeof google.maps.ControlPosition;
       };
     };
   }
