@@ -9,16 +9,7 @@ interface ImovelLocalizacaoProps {
 
 declare global {
   interface Window {
-    google: {
-      maps: {
-        Map: new (element: HTMLElement, options: google.maps.MapOptions) => google.maps.Map;
-        Marker: new (options: google.maps.MarkerOptions) => google.maps.Marker;
-        Geocoder: new () => google.maps.Geocoder;
-        GeocoderStatus: { OK: string };
-        MapTypeControlStyle: { HORIZONTAL_BAR: number };
-        ControlPosition: { TOP_RIGHT: number };
-      };
-    };
+    google: typeof google;
   }
 }
 
