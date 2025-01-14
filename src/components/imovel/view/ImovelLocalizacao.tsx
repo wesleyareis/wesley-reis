@@ -7,27 +7,38 @@ interface ImovelLocalizacaoProps {
   address: string;
 }
 
-declare global {
-  interface Window {
-    google: typeof google;
-  }
-}
-
 export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const defaultLocation = { lat: -16.6869, lng: -49.2648 }; // Goiânia
 
   useEffect(() => {
     let mapInstance: google.maps.Map | null = null;
-    let geocoder: google.maps.Geocoder | null = null;
     let marker: google.maps.Marker | null = null;
 
-    function initMap() {
-      if (!mapRef.current || !window.google) return;
+    const loadGoogleMapsScript = (apiKey: string): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        const existingScript = document.getElementById('google-maps-script');
+        if (existingScript) {
+          resolve();
+          return;
+        }
 
-      const defaultLocation = { lat: -16.6869, lng: -49.2648 }; // Goiânia
-      
-      mapInstance = new window.google.maps.Map(mapRef.current, {
+        const script = document.createElement('script');
+        script.id = 'google-maps-script';
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+        script.async = true;
+        script.defer = true;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error('Erro ao carregar o Google Maps'));
+        document.head.appendChild(script);
+      });
+    };
+
+    const initializeMap = () => {
+      if (!mapRef.current || typeof google === 'undefined') return;
+
+      mapInstance = new google.maps.Map(mapRef.current, {
         zoom: 15,
         center: defaultLocation,
         mapTypeControl: false,
@@ -35,7 +46,7 @@ export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
         fullscreenControl: false,
       });
 
-      geocoder = new window.google.maps.Geocoder();
+      const geocoder = new google.maps.Geocoder();
 
       if (address) {
         geocoder.geocode({ address }, (results, status) => {
@@ -47,10 +58,10 @@ export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
               marker.setMap(null);
             }
             
-            marker = new window.google.maps.Marker({
+            marker = new google.maps.Marker({
               map: mapInstance,
               position: location,
-              animation: window.google.maps.Animation.DROP,
+              animation: google.maps.Animation.DROP,
             });
           } else {
             console.warn('Não foi possível localizar o endereço:', address);
@@ -61,64 +72,39 @@ export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
       } else {
         setIsLoading(false);
       }
-    }
+    };
 
-    async function loadGoogleMaps() {
+    const setupMap = async () => {
       if (!address) {
         setIsLoading(false);
         return;
       }
 
       try {
-        const { data: secrets, error } = await supabase
-          .rpc('secrets', { secret_name: 'GOOGLE_MAPS_API_KEY' });
+        const { data: apiKey, error } = await supabase.rpc('secrets', { 
+          secret_name: 'GOOGLE_MAPS_API_KEY' 
+        });
 
-        if (error || !secrets) {
+        if (error || !apiKey) {
           throw new Error('Erro ao carregar a chave da API do Google Maps');
         }
 
-        const apiKey = secrets; // Verifique se a chave está correta
-        console.log('Chave da API do Google Maps:', apiKey);
-
-        if (!document.getElementById('google-maps-script')) {
-          const script = document.createElement('script');
-          script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
-          script.async = true;
-          script.defer = true;
-          script.id = 'google-maps-script';
-          
-          script.onload = () => {
-            console.log('Google Maps script loaded successfully');
-            initMap();
-          };
-
-          script.onerror = () => {
-            console.error('Erro ao carregar o Google Maps');
-            toast.error('Erro ao carregar o Google Maps');
-            setIsLoading(false);
-          };
-
-          document.head.appendChild(script);
-        } else if (window.google) {
-          initMap();
-        }
+        await loadGoogleMapsScript(apiKey);
+        initializeMap();
       } catch (error) {
         console.error('Erro ao inicializar o mapa:', error);
         toast.error('Erro ao carregar o mapa');
         setIsLoading(false);
       }
-    }
+    };
 
-    loadGoogleMaps();
+    setupMap();
 
     return () => {
       if (marker) {
         marker.setMap(null);
       }
-      if (mapInstance) {
-        // @ts-ignore
-        mapInstance = null;
-      }
+      mapInstance = null;
     };
   }, [address]);
 
