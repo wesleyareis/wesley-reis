@@ -22,13 +22,7 @@ const router = createBrowserRouter(
       <Route path="/dashboard" element={<Navigate to="/" replace />} />
       <Route path="*" element={<NotFound />} />
     </>
-  ),
-  {
-    future: {
-      v7_startTransition: true,
-      v7_relativeSplatPath: true
-    }
-  }
+  )
 );
 
 const App = () => {

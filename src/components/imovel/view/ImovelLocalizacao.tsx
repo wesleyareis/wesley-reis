@@ -12,7 +12,7 @@ export function ImovelLocalizacao({ property }: ImovelLocalizacaoProps) {
 
   useEffect(() => {
     const loadMap = async () => {
-      const address = `${property.street}, ${property.number}, ${property.neighborhood}, ${property.city}, ${property.state}`;
+      const address = `${property.street_address}, ${property.neighborhood}, ${property.city}`;
       
       try {
         const { data, error } = await supabase.functions.invoke('geocode', {
@@ -21,8 +21,8 @@ export function ImovelLocalizacao({ property }: ImovelLocalizacaoProps) {
 
         if (error) throw error;
 
-        if (data?.location) {
-          const map = new google.maps.Map(mapRef.current!, {
+        if (data?.location && typeof google !== 'undefined' && mapRef.current) {
+          const map = new google.maps.Map(mapRef.current, {
             center: data.location,
             zoom: 15,
             mapTypeControl: false,
@@ -48,7 +48,7 @@ export function ImovelLocalizacao({ property }: ImovelLocalizacaoProps) {
     }
   }, [property, mapLoaded]);
 
-  if (!property.street || !property.number || !property.neighborhood || !property.city || !property.state) {
+  if (!property.street_address || !property.neighborhood || !property.city) {
     return null;
   }
 
@@ -60,7 +60,7 @@ export function ImovelLocalizacao({ property }: ImovelLocalizacaoProps) {
         className="w-full h-[300px] rounded-lg overflow-hidden shadow-sm"
       />
       <p className="mt-2 text-sm text-muted-foreground">
-        {property.street}, {property.number} - {property.neighborhood}, {property.city} - {property.state}
+        {property.street_address} - {property.neighborhood}, {property.city}
       </p>
     </div>
   );
