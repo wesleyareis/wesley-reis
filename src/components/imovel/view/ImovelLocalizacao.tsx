@@ -7,24 +7,6 @@ interface ImovelLocalizacaoProps {
   property: PropertyData;
 }
 
-declare global {
-  interface Window {
-    google: {
-      maps: {
-        Map: new (element: HTMLElement, options: any) => any;
-        Marker: new (options: any) => any;
-        Geocoder: new () => any;
-        GeocoderStatus: {
-          OK: string;
-        };
-        Animation: {
-          DROP: number;
-        };
-      };
-    };
-  }
-}
-
 export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -63,7 +45,7 @@ export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
     if (!googleMapsKey || !mapRef.current) return;
 
     const loadGoogleMaps = () => {
-      if (window.google?.maps) {
+      if (typeof google !== 'undefined') {
         initializeMap();
         return;
       }
@@ -82,11 +64,11 @@ export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
     };
 
     const initializeMap = () => {
-      const geocoder = new window.google.maps.Geocoder();
+      const geocoder = new google.maps.Geocoder();
       
-      geocoder.geocode({ address }, (results: any, status: any) => {
-        if (status === window.google.maps.GeocoderStatus.OK && results?.[0] && mapRef.current) {
-          const map = new window.google.maps.Map(mapRef.current, {
+      geocoder.geocode({ address }, (results, status) => {
+        if (status === google.maps.GeocoderStatus.OK && results?.[0] && mapRef.current) {
+          const map = new google.maps.Map(mapRef.current, {
             zoom: 15,
             center: results[0].geometry.location,
             mapTypeControl: false,
@@ -101,10 +83,10 @@ export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
             ],
           });
 
-          new window.google.maps.Marker({
+          new google.maps.Marker({
             map,
             position: results[0].geometry.location,
-            animation: window.google.maps.Animation.DROP,
+            animation: google.maps.Animation.DROP,
           });
         }
         setIsLoading(false);
