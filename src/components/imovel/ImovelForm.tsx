@@ -1,13 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { PropertyFormData } from "@/types/property";
+import { PropertyFormData } from "@/types/imovel";
 import { BasicInfoFields } from "./form/BasicInfoFields";
 import { LocationFields } from "./form/LocationFields";
 import { DescriptionField } from "./form/DescriptionField";
 import { FeaturesField } from "./form/FeaturesField";
+import { ImageUploadField } from "./form/ImageUploadField";
 
-interface PropertyFormProps {
+interface ImovelFormProps {
   formData: PropertyFormData;
   isLoading: boolean;
   isGeneratingDescription: boolean;
@@ -16,14 +17,14 @@ interface PropertyFormProps {
   onSubmit: (e: React.FormEvent) => Promise<void>;
 }
 
-export const PropertyForm = ({
+export const ImovelForm = ({
   formData,
   isLoading,
   isGeneratingDescription,
   onInputChange,
   onGenerateDescription,
   onSubmit
-}: PropertyFormProps) => {
+}: ImovelFormProps) => {
   const navigate = useNavigate();
 
   const handleFeatureChange = (feature: string, checked: boolean) => {
@@ -41,10 +42,25 @@ export const PropertyForm = ({
     } as unknown as React.ChangeEvent<HTMLInputElement>);
   };
 
+  const handleImagesChange = (newImages: string[]) => {
+    onInputChange({
+      target: {
+        name: 'images',
+        value: newImages
+      }
+    } as unknown as React.ChangeEvent<HTMLInputElement>);
+  };
+
   return (
     <form onSubmit={onSubmit} className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <BasicInfoFields formData={formData} onInputChange={onInputChange} />
+        <div className="space-y-4">
+          <BasicInfoFields formData={formData} onInputChange={onInputChange} />
+          <ImageUploadField 
+            images={formData.images || []} 
+            onChange={handleImagesChange}
+          />
+        </div>
         <div className="space-y-4">
           <LocationFields formData={formData} onInputChange={onInputChange} />
           <DescriptionField

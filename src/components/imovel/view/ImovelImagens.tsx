@@ -1,4 +1,4 @@
-import { PropertyData } from "@/types/property";
+import { PropertyData } from "@/types/imovel";
 import { 
   Carousel, 
   CarouselContent, 
@@ -7,11 +7,11 @@ import {
   CarouselPrevious 
 } from "@/components/ui/carousel";
 
-interface PropertyImagesProps {
+interface ImovelImagensProps {
   property: PropertyData;
 }
 
-export const PropertyImages = ({ property }: PropertyImagesProps) => {
+export const ImovelImagens = ({ property }: ImovelImagensProps) => {
   if (!property.images || property.images.length === 0) return null;
 
   return (

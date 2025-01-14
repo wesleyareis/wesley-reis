@@ -1,80 +1,71 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { PropertyFormData } from "@/types/property";
+import { useToast } from "@/hooks/use-toast";
+import { PropertyFormData } from "@/types/imovel";
 
 export const usePropertyForm = (initialData: PropertyFormData) => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
+  const [formData, setFormData] = useState<PropertyFormData>(initialData);
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
-  const [formData, setFormData] = useState<PropertyFormData>(initialData);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    
-    // Tratamento especial para features
-    if (name === 'features') {
-      setFormData((prev) => ({
-        ...prev,
-        features: value as unknown as Record<string, boolean>
-      }));
-      return;
-    }
-
-    // Conversão para número quando necessário
-    const shouldBeNumber = [
-      "price",
-      "bedrooms",
-      "bathrooms",
-      "parking_spaces",
-      "total_area",
-      "condominium_fee",
-      "property_tax"
-    ].includes(name);
-
     setFormData((prev) => ({
       ...prev,
-      [name]: shouldBeNumber ? Number(value) : value,
+      [name]: value,
     }));
   };
 
   const generateDescription = async () => {
-    setIsGeneratingDescription(true);
     try {
-      const { data, error } = await supabase.functions.invoke(
-        "generate-property-description",
+      setIsGeneratingDescription(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error("Usuário não autenticado");
+      }
+
+      const response = await fetch(
+        "https://kjlipbbrbwdzqiwvrnpw.supabase.co/functions/v1/generate-property-description",
         {
-          body: {
-            propertyDetails: {
-              type: formData.property_type,
-              bedrooms: formData.bedrooms,
-              bathrooms: formData.bathrooms,
-              parkingSpaces: formData.parking_spaces,
-              area: formData.total_area,
-              location: `${formData.neighborhood}, ${formData.city}`,
-            },
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
           },
+          body: JSON.stringify({
+            property: {
+              ...formData,
+              agent_id: session.user.id,
+            },
+          }),
         }
       );
 
-      if (error) throw error;
-
-      if (data?.description) {
-        setFormData((prev) => ({ ...prev, description: data.description }));
-        toast({
-          title: "Sucesso!",
-          description: "A descrição do imóvel foi atualizada.",
-        });
+      if (!response.ok) {
+        throw new Error("Falha ao gerar descrição");
       }
+
+      const { description } = await response.json();
+      setFormData((prev) => ({
+        ...prev,
+        description,
+      }));
+
+      toast({
+        title: "Sucesso!",
+        description: "Descrição gerada com sucesso.",
+      });
     } catch (error) {
       console.error("Erro ao gerar descrição:", error);
       toast({
-        title: "Erro ao gerar descrição",
-        description: "Não foi possível gerar a descrição do imóvel.",
+        title: "Erro",
+        description: "Não foi possível gerar a descrição.",
         variant: "destructive",
       });
     } finally {
@@ -87,51 +78,48 @@ export const usePropertyForm = (initialData: PropertyFormData) => {
     setIsLoading(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast({
-          title: "Erro de autenticação",
-          description: "Você precisa estar logado para realizar esta operação.",
-          variant: "destructive",
-        });
-        navigate("/login", { replace: true });
-        return;
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error("Usuário não autenticado");
       }
 
       const propertyData = {
         ...formData,
-        agent_id: user.id,
-        features: formData.features || {},
+        agent_id: session.user.id,
       };
 
-      const { error } = !formData.id
-        ? await supabase
-            .from("properties")
-            .insert([propertyData])
-            .select()
-            .single()
-        : await supabase
-            .from("properties")
-            .update(propertyData)
-            .eq("id", formData.id)
-            .select()
-            .single();
+      let operation;
+      if (formData.property_code) {
+        // Atualização
+        operation = supabase
+          .from("properties")
+          .update(propertyData)
+          .eq("property_code", formData.property_code);
+      } else {
+        // Inserção
+        operation = supabase
+          .from("properties")
+          .insert(propertyData);
+      }
+
+      const { error } = await operation;
 
       if (error) throw error;
 
       toast({
         title: "Sucesso!",
-        description: formData.id
+        description: formData.property_code
           ? "Imóvel atualizado com sucesso!"
           : "Imóvel criado com sucesso!",
       });
 
-      navigate("/dashboard", { replace: true });
+      navigate("/dashboard");
     } catch (error) {
       console.error("Erro ao salvar imóvel:", error);
       toast({
         title: "Erro",
-        description: "Ocorreu um erro ao salvar o imóvel.",
+        description: "Não foi possível salvar o imóvel.",
         variant: "destructive",
       });
     } finally {

@@ -322,6 +322,7 @@ export type Database = {
           property_code: string | null
           property_tax: number | null
           property_type: string
+          revalidate_at: string | null
           status: string | null
           street_address: string | null
           title: string
@@ -346,6 +347,7 @@ export type Database = {
           property_code?: string | null
           property_tax?: number | null
           property_type: string
+          revalidate_at?: string | null
           status?: string | null
           street_address?: string | null
           title: string
@@ -370,6 +372,7 @@ export type Database = {
           property_code?: string | null
           property_tax?: number | null
           property_type?: string
+          revalidate_at?: string | null
           status?: string | null
           street_address?: string | null
           title?: string

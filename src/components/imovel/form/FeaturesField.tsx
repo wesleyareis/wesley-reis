@@ -1,5 +1,5 @@
 import { Checkbox } from "@/components/ui/checkbox";
-import { PropertyFormData } from "@/types/property";
+import { PropertyFormData } from "@/types/imovel";
 
 interface FeaturesFieldProps {
   formData: PropertyFormData;

@@ -1,12 +1,12 @@
-import { PropertyData } from "@/types/property";
+import { PropertyData } from "@/types/imovel";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
-interface PropertyLocationProps {
+interface ImovelLocalizacaoProps {
   property: PropertyData;
 }
 
-export const PropertyLocation = ({ property }: PropertyLocationProps) => {
+export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
   const [mapUrl, setMapUrl] = useState<string | null>(null);
   const [mapError, setMapError] = useState<boolean>(false);
   const { toast } = useToast();
@@ -14,10 +14,8 @@ export const PropertyLocation = ({ property }: PropertyLocationProps) => {
   useEffect(() => {
     const generateMapUrl = async () => {
       try {
-        // Resetar o estado de erro
         setMapError(false);
 
-        // Se não tiver endereço completo, não gere o mapa
         if (!property.street_address || !property.neighborhood || !property.city) {
           console.log('Endereço incompleto, não gerando mapa');
           return;
@@ -25,12 +23,10 @@ export const PropertyLocation = ({ property }: PropertyLocationProps) => {
 
         console.log('Iniciando processo de geração do mapa...');
         
-        // Gerar URL do mapa com o endereço completo
         const address = encodeURIComponent(
           `${property.street_address}, ${property.neighborhood}, ${property.city}`
         );
         
-        // Usar a chave da API diretamente do ambiente
         const API_KEY = 'AIzaSyD2YrShNdcMn4mCDeaB4MB4EtPYjRDsrXI';
         console.log('Usando chave da API para gerar URL do mapa');
         
@@ -52,7 +48,6 @@ export const PropertyLocation = ({ property }: PropertyLocationProps) => {
     generateMapUrl();
   }, [property, toast]);
 
-  // Se não houver endereço, não exiba nada
   if (!property.street_address && !property.neighborhood && !property.city) {
     return null;
   }

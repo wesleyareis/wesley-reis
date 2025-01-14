@@ -1,5 +1,5 @@
 import { Input } from "@/components/ui/input";
-import { PropertyFormData } from "@/types/property";
+import { PropertyFormData } from "@/types/imovel";
 
 interface LocationFieldsProps {
   formData: PropertyFormData;
