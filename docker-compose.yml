@@ -1,18 +1,16 @@
 version: '3.8'
-
 services:
-  imovel-nexus:
-    build:
+  frontend:
+    build: 
       context: .
       dockerfile: Dockerfile
-    image: imovel-nexus:latest
-    container_name: imovel-nexus
-    restart: unless-stopped
+    container_name: wesley-reis-app
     ports:
-      - "8080:80"  # Mapeia a porta 8080 do host para a porta 80 do container
+      - "8080:80"
+    restart: unless-stopped
     networks:
-      - imovel-network
+      - app-network
 
 networks:
-  imovel-network:
+  app-network:
     driver: bridge

@@ -33,7 +33,13 @@ export function ImovelCard({
   imageUrl,
   agent_id,
 }: ImovelCardProps) {
-  const { isAgent, isLoading, handleEditClick, handleCardClick } = useImovelCard({
+  const { 
+    isAgent, 
+    isAuthenticated, 
+    isLoading, 
+    handleEditClick, 
+    handleCardClick 
+  } = useImovelCard({
     id,
     property_code,
     agent_id,
@@ -60,6 +66,7 @@ export function ImovelCard({
         isAgent={isAgent}
         onEditClick={handleEditClick}
         isLoading={isLoading}
+        isAuthenticated={isAuthenticated}
       />
     </Card>
   )

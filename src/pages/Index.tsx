@@ -4,16 +4,28 @@ import { SearchFilters } from "@/components/SearchFilters";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import { LogIn, LogOut, Plus } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { toast } from "sonner";
 import type { PropertyData } from "@/types/imovel";
-import { useAuthMiddleware } from "@/middleware";
+import { useEffect, useState } from "react";
 
 const Index = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  useAuthMiddleware();
+  const [session, setSession] = useState(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      setSession(currentSession);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ["properties", Object.fromEntries(searchParams)],
@@ -66,7 +78,8 @@ const Index = () => {
     if (error) {
       toast.error("Erro ao fazer logout");
     } else {
-      navigate('/login');
+      toast.success("Logout realizado com sucesso");
+      navigate('/');
     }
   };
 
@@ -75,17 +88,37 @@ const Index = () => {
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <Link to="/" className="text-2xl font-black tracking-tight text-primary hover:text-primary/90 transition-colors">
-            WesleyReis
+            {session ? "Dashboard" : "WesleyReis"}
           </Link>
           <nav className="flex gap-4 items-center">
-            <Button
-              variant="outline"
-              onClick={handleLogout}
-              className="flex items-center gap-2"
-            >
-              <LogOut className="w-4 h-4" />
-              Sair
-            </Button>
+            {session ? (
+              <>
+                <Button
+                  onClick={() => navigate('/imovel/novo')}
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Novo Imóvel
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleLogout}
+                  className="flex items-center gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sair
+                </Button>
+              </>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={() => navigate('/login')}
+                className="flex items-center gap-2"
+              >
+                <LogIn className="w-4 h-4" />
+                Área do Corretor
+              </Button>
+            )}
           </nav>
         </div>
       </header>
