@@ -11,6 +11,7 @@ export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [googleMapsKey, setGoogleMapsKey] = useState<string | null>(null);
+  const scriptRef = useRef<HTMLScriptElement | null>(null);
 
   const address = property.street_address 
     ? `${property.street_address} - ${property.neighborhood}, ${property.city}`
@@ -27,71 +28,72 @@ export const ImovelLocalizacao = ({ property }: ImovelLocalizacaoProps) => {
         setGoogleMapsKey(data);
       } catch (error) {
         console.error('Erro ao carregar chave do Google Maps:', error);
+        setIsLoading(false);
       }
     };
 
     loadGoogleMapsKey();
+
+    return () => {
+      if (scriptRef.current) {
+        document.head.removeChild(scriptRef.current);
+      }
+    };
   }, []);
 
   useEffect(() => {
     if (!googleMapsKey || !mapRef.current) return;
 
-    const loadGoogleMaps = async () => {
-      try {
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${googleMapsKey}&libraries=places`;
-        script.async = true;
-        script.defer = true;
-        
-        script.onload = () => {
-          const geocoder = new google.maps.Geocoder();
-          
-          geocoder.geocode({ address }, (results, status) => {
-            if (status === google.maps.GeocoderStatus.OK && results?.[0]) {
-              const map = new google.maps.Map(mapRef.current!, {
-                zoom: 15,
-                center: results[0].geometry.location,
-                mapTypeControl: false,
-                streetViewControl: false,
-                fullscreenControl: false,
-                styles: [
-                  {
-                    featureType: "poi",
-                    elementType: "labels",
-                    stylers: [{ visibility: "off" }],
-                  },
-                ],
-              });
-
-              new google.maps.Marker({
-                map,
-                position: results[0].geometry.location,
-                animation: google.maps.Animation.DROP,
-              });
-
-              setIsLoading(false);
-            } else {
-              console.error('Erro ao geocodificar endereço:', status);
-              setIsLoading(false);
-            }
-          });
-        };
-
-        document.head.appendChild(script);
-      } catch (error) {
-        console.error('Erro ao carregar o mapa:', error);
-        setIsLoading(false);
+    const loadGoogleMaps = () => {
+      if (window.google) {
+        initializeMap();
+        return;
       }
+
+      scriptRef.current = document.createElement('script');
+      scriptRef.current.src = `https://maps.googleapis.com/maps/api/js?key=${googleMapsKey}&libraries=places`;
+      scriptRef.current.async = true;
+      scriptRef.current.defer = true;
+      scriptRef.current.onload = initializeMap;
+      scriptRef.current.onerror = () => {
+        console.error('Erro ao carregar o Google Maps');
+        setIsLoading(false);
+      };
+      
+      document.head.appendChild(scriptRef.current);
+    };
+
+    const initializeMap = () => {
+      const geocoder = new google.maps.Geocoder();
+      
+      geocoder.geocode({ address }, (results, status) => {
+        if (status === google.maps.GeocoderStatus.OK && results?.[0] && mapRef.current) {
+          const map = new google.maps.Map(mapRef.current, {
+            zoom: 15,
+            center: results[0].geometry.location,
+            mapTypeControl: false,
+            streetViewControl: false,
+            fullscreenControl: false,
+            styles: [
+              {
+                featureType: "poi",
+                elementType: "labels",
+                stylers: [{ visibility: "off" }],
+              },
+            ],
+          });
+
+          new google.maps.Marker({
+            map,
+            position: results[0].geometry.location,
+            animation: google.maps.Animation.DROP,
+          });
+        }
+        setIsLoading(false);
+      });
     };
 
     loadGoogleMaps();
-
-    return () => {
-      const script = document.querySelector('script[src*="maps.googleapis.com"]');
-      if (script) {
-        script.remove();
-      }
-    };
   }, [address, googleMapsKey]);
 
   return (
