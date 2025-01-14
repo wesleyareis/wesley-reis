@@ -103,6 +103,9 @@ const ImovelDetalhe = () => {
     );
   }
 
+  // Formata o endereço completo para o mapa
+  const fullAddress = `${imovel.street_address}, ${imovel.neighborhood}, ${imovel.city}`;
+
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-white shadow-sm">
@@ -218,7 +221,7 @@ const ImovelDetalhe = () => {
               </div>
             )}
 
-            <ImovelLocalizacao property={imovel} />
+            <ImovelLocalizacao address={fullAddress} />
           </div>
 
           <div className="space-y-6">
