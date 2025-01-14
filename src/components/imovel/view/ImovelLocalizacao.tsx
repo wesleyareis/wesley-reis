@@ -21,29 +21,24 @@ export function ImovelLocalizacao({ property }: ImovelLocalizacaoProps) {
 
         if (error) throw error;
 
-        if (data?.location && window.google && mapRef.current) {
-          const map = new window.google.maps.Map(mapRef.current, {
-            center: data.location,
-            zoom: 15,
-            mapTypeControl: false,
-            streetViewControl: false,
-            fullscreenControl: false,
-          });
+        if (data?.location && mapRef.current) {
+          // Aqui vamos apenas exibir o endereço formatado
+          const addressElement = document.createElement('div');
+          addressElement.className = 'p-4 bg-muted rounded-lg';
+          addressElement.textContent = address;
           
-          new window.google.maps.Marker({
-            position: data.location,
-            map,
-            title: property.title
-          });
-
+          if (mapRef.current.firstChild) {
+            mapRef.current.removeChild(mapRef.current.firstChild);
+          }
+          mapRef.current.appendChild(addressElement);
           setMapLoaded(true);
         }
       } catch (error) {
-        console.error("Erro ao carregar o mapa:", error);
+        console.error("Erro ao carregar a localização:", error);
       }
     };
 
-    if (window.google && mapRef.current && !mapLoaded) {
+    if (mapRef.current && !mapLoaded) {
       loadMap();
     }
   }, [property, mapLoaded]);
@@ -57,7 +52,7 @@ export function ImovelLocalizacao({ property }: ImovelLocalizacaoProps) {
       <h2 className="text-2xl font-semibold mb-4">Localização</h2>
       <div 
         ref={mapRef} 
-        className="w-full h-[300px] rounded-lg overflow-hidden shadow-sm"
+        className="w-full h-[300px] rounded-lg overflow-hidden shadow-sm bg-background"
       />
       <p className="mt-2 text-sm text-muted-foreground">
         {property.street_address} - {property.neighborhood}, {property.city}
