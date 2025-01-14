@@ -45,6 +45,9 @@ export function ImovelCard({
     agent_id,
   })
 
+  // Só mostra os botões de ação se o usuário for o agente do imóvel
+  const showActions = isAuthenticated && isAgent && !isLoading
+
   return (
     <Card 
       className="overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
@@ -61,13 +64,15 @@ export function ImovelCard({
           area={area}
         />
       </CardContent>
-      <ImovelCardActions
-        propertyCode={property_code}
-        isAgent={isAgent}
-        onEditClick={handleEditClick}
-        isLoading={isLoading}
-        isAuthenticated={isAuthenticated}
-      />
+      {showActions && (
+        <ImovelCardActions
+          propertyCode={property_code}
+          isAgent={isAgent}
+          onEditClick={handleEditClick}
+          isLoading={isLoading}
+          isAuthenticated={isAuthenticated}
+        />
+      )}
     </Card>
   )
 }
