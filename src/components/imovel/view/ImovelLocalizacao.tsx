@@ -22,7 +22,7 @@ export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
     let geocoder: google.maps.Geocoder | null = null;
     let marker: google.maps.Marker | null = null;
 
-    const initMap = () => {
+    function initMap() {
       if (!mapRef.current || !window.google) return;
 
       const defaultLocation = { lat: -16.6869, lng: -49.2648 }; // Goiânia
@@ -61,15 +61,15 @@ export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
       } else {
         setIsLoading(false);
       }
-    };
+    }
 
-    const loadGoogleMaps = async () => {
+    async function loadGoogleMaps() {
+      if (!address) {
+        setIsLoading(false);
+        return;
+      }
+
       try {
-        if (!address) {
-          setIsLoading(false);
-          return;
-        }
-
         const { data: secrets, error } = await supabase
           .rpc('secrets', { secret_name: 'GOOGLE_MAPS_API_KEY' });
 
@@ -102,7 +102,7 @@ export function ImovelLocalizacao({ address }: ImovelLocalizacaoProps) {
         toast.error('Erro ao carregar o mapa');
         setIsLoading(false);
       }
-    };
+    }
 
     loadGoogleMaps();
 
