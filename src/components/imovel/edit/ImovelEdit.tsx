@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Wand2 } from "lucide-react";
 import { toast } from 'sonner';
 import type { PropertyData } from '@/types/imovel';
@@ -11,6 +12,14 @@ import { usePropertyForm } from '@/hooks/usePropertyForm';
 import { useAuthCheck } from '@/hooks/useAuthCheck';
 import { FeaturesField } from './form/FeaturesField';
 import { ImageUploadField } from './form/ImageUploadField';
+
+const propertyTypes = [
+  { value: 'apartamento', label: 'Apartamento' },
+  { value: 'casa', label: 'Casa' },
+  { value: 'cobertura', label: 'Cobertura' },
+  { value: 'terreno', label: 'Terreno' },
+  { value: 'sala', label: 'Sala Comercial' }
+];
 
 const ImovelEdit = () => {
   const { id } = useParams();
@@ -37,7 +46,7 @@ const ImovelEdit = () => {
         return null;
       }
     },
-    enabled: !!id, // Só executa a query se houver um ID
+    enabled: !!id,
   });
 
   const {
@@ -51,7 +60,7 @@ const ImovelEdit = () => {
     title: "",
     price: 0,
     description: "",
-    property_type: "",
+    property_type: "apartamento", // Valor padrão
     bedrooms: 0,
     bathrooms: 0,
     parking_spaces: 0,
@@ -116,12 +125,26 @@ const ImovelEdit = () => {
 
                 <div>
                   <label className="block text-sm font-medium mb-1">Tipo do Imóvel</label>
-                  <Input
+                  <Select
                     name="property_type"
                     value={formData.property_type}
-                    onChange={handleInputChange}
-                    required
-                  />
+                    onValueChange={(value) => 
+                      handleInputChange({
+                        target: { name: 'property_type', value }
+                      } as React.ChangeEvent<HTMLSelectElement>)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo do imóvel" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {propertyTypes.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
