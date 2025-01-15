@@ -53,6 +53,19 @@ const Login = () => {
     return () => subscription.unsubscribe();
   }, [navigate, toast]);
 
+  const getAuthErrorMessage = (error: AuthError): string => {
+    switch (error.message) {
+      case 'Invalid login credentials':
+        return 'Email ou senha inválidos';
+      case 'Email not confirmed':
+        return 'Por favor, confirme seu email antes de fazer login';
+      case 'User not found':
+        return 'Usuário não encontrado';
+      default:
+        return 'Ocorreu um erro durante a autenticação';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-4">
@@ -86,19 +99,6 @@ const Login = () => {
       </div>
     </div>
   );
-};
-
-const getAuthErrorMessage = (error: AuthError): string => {
-  switch (error.message) {
-    case 'Invalid login credentials':
-      return 'Email ou senha inválidos';
-    case 'Email not confirmed':
-      return 'Por favor, confirme seu email antes de fazer login';
-    case 'User not found':
-      return 'Usuário não encontrado';
-    default:
-      return 'Ocorreu um erro durante a autenticação';
-  }
 };
 
 export default Login;
