@@ -30,12 +30,12 @@ const ImovelDetalhe = () => {
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
+      if (user && id) {
         const { data: property } = await supabase
           .from("properties")
           .select("agent_id")
           .eq("property_code", id)
-          .single();
+          .maybeSingle();
 
         setIsAgent(user.id === property?.agent_id);
       }
@@ -44,29 +44,36 @@ const ImovelDetalhe = () => {
     checkAuth();
   }, [id]);
 
-  const { data: imovel, isLoading } = useQuery({
+  const { data: imovel, isLoading, error } = useQuery({
     queryKey: ["imovel", id],
     queryFn: async () => {
+      if (!id) throw new Error("ID não fornecido");
+      
       const { data, error } = await supabase
         .from("properties")
         .select("*")
         .eq("property_code", id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error("Imóvel não encontrado");
+      
       return data;
     },
+    retry: false
   });
 
   const { data: agent } = useQuery({
     queryKey: ['agent', imovel?.agent_id],
     queryFn: async () => {
       if (!imovel?.agent_id) return null;
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('agent_profiles')
         .select('*')
         .eq('id', imovel.agent_id)
-        .single();
+        .maybeSingle();
+        
+      if (error) throw error;
       return data;
     },
     enabled: !!imovel?.agent_id
@@ -74,6 +81,8 @@ const ImovelDetalhe = () => {
 
   const handleDelete = async () => {
     try {
+      if (!id) throw new Error("ID não fornecido");
+
       const { error } = await supabase
         .from("properties")
         .update({ status: "inactive" })
@@ -97,10 +106,20 @@ const ImovelDetalhe = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="flex flex-col justify-center items-center min-h-screen gap-4">
+        <p className="text-lg text-muted-foreground">Imóvel não encontrado</p>
+        <Button onClick={() => navigate("/")}>Voltar para Início</Button>
+      </div>
+    );
+  }
+
   if (!imovel) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p>Imóvel não encontrado</p>
+      <div className="flex flex-col justify-center items-center min-h-screen gap-4">
+        <p className="text-lg text-muted-foreground">Imóvel não encontrado</p>
+        <Button onClick={() => navigate("/")}>Voltar para Início</Button>
       </div>
     );
   }
