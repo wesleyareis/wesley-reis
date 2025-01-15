@@ -25,6 +25,8 @@ const Login = () => {
         if (session) {
           console.log("Sessão encontrada, redirecionando...");
           navigate('/', { replace: true });
+        } else {
+          console.log("Nenhuma sessão encontrada, mostrando tela de login");
         }
       } catch (error) {
         console.error('Erro ao verificar sessão:', error);
