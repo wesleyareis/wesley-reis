@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -11,9 +12,22 @@ const Login = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN') {
         navigate('/');
+      } else if (event === 'USER_DELETED' || event === 'SIGNED_OUT') {
+        navigate('/login');
+      } else if (event === 'PASSWORD_RECOVERY') {
+        toast.info('Verifique seu email para redefinir sua senha');
       }
     });
 
+    // Verificar se já existe uma sessão ativa
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate('/');
+      }
+    };
+
+    checkSession();
     return () => subscription.unsubscribe();
   }, [navigate]);
 
@@ -37,9 +51,24 @@ const Login = () => {
                   },
                 },
               },
+              className: {
+                container: 'w-full',
+                button: 'w-full',
+                input: 'rounded-md',
+              },
             }}
             providers={[]}
             redirectTo={window.location.origin}
+            onError={(error) => {
+              console.error('Erro de autenticação:', error);
+              if (error.message.includes('Email not confirmed')) {
+                toast.error('Por favor, confirme seu email antes de fazer login');
+              } else if (error.message.includes('Invalid login credentials')) {
+                toast.error('Email ou senha inválidos');
+              } else {
+                toast.error('Erro ao fazer login. Tente novamente.');
+              }
+            }}
           />
         </div>
       </div>
