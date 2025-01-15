@@ -29,16 +29,32 @@ const Login = () => {
           navigate('/');
         }
       } catch (error) {
-        handleAuthError(error);
+        if (error instanceof Error) {
+          handleAuthError(error as AuthError);
+        }
       }
     };
 
     const handleAuthError = (error: AuthError) => {
-      if (error instanceof AuthApiError && error.status === 400) {
-        toast.error("Usuário ou senha inválida!");
+      console.error('Erro de autenticação:', error);
+      
+      if (error instanceof AuthApiError) {
+        switch (error.status) {
+          case 400:
+            if (error.message.includes('Invalid login credentials')) {
+              toast.error("Email ou senha inválidos");
+            } else {
+              toast.error("Erro de autenticação: dados inválidos");
+            }
+            break;
+          case 422:
+            toast.error("Email ou senha não fornecidos");
+            break;
+          default:
+            toast.error("Erro ao tentar fazer login");
+        }
       } else {
         toast.error("Erro ao verificar autenticação");
-        console.error('Erro de autenticação:', error);
       }
     };
 
