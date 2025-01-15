@@ -5,62 +5,63 @@ import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "sonner";
 import { AuthError, AuthApiError } from '@supabase/supabase-js';
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (session && !error) {
+        navigate('/');
+      }
+    };
+
+    checkSession();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN') {
         toast.success("Login realizado com sucesso");
         navigate('/');
       } else if (event === 'PASSWORD_RECOVERY') {
         navigate('/reset-password');
+      } else if (event === 'USER_UPDATED') {
+        const { error } = await supabase.auth.getSession();
+        if (error instanceof AuthApiError) {
+          handleAuthError(error);
+        }
       }
     });
 
-    // Verificar se já existe uma sessão ativa
-    const checkSession = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) {
-          handleAuthError(error);
-        } else if (session) {
-          navigate('/');
-        }
-      } catch (error) {
-        if (error instanceof Error) {
-          handleAuthError(error as AuthError);
-        }
-      }
-    };
-
-    const handleAuthError = (error: AuthError) => {
-      console.error('Erro de autenticação:', error);
-      
-      if (error instanceof AuthApiError) {
-        switch (error.status) {
-          case 400:
-            if (error.message.includes('Invalid login credentials')) {
-              toast.error("Email ou senha inválidos");
-            } else {
-              toast.error("Erro de autenticação: dados inválidos");
-            }
-            break;
-          case 422:
-            toast.error("Email ou senha não fornecidos");
-            break;
-          default:
-            toast.error("Erro ao tentar fazer login");
-        }
-      } else {
-        toast.error("Erro ao verificar autenticação");
-      }
-    };
-
-    checkSession();
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  const handleAuthError = (error: AuthError) => {
+    console.error('Erro de autenticação:', error);
+    
+    if (error instanceof AuthApiError) {
+      switch (error.status) {
+        case 400:
+          if (error.message.includes('Invalid login credentials')) {
+            toast.error("Email ou senha incorretos");
+          } else {
+            toast.error("Erro de autenticação: dados inválidos");
+          }
+          break;
+        case 422:
+          toast.error("Email ou senha não fornecidos");
+          break;
+        case 401:
+          toast.error("Não autorizado");
+          break;
+        default:
+          toast.error("Erro ao tentar fazer login");
+      }
+    } else {
+      toast.error("Erro ao verificar autenticação");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
