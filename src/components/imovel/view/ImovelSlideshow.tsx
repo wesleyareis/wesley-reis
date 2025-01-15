@@ -26,10 +26,10 @@ export function SlideShow({ images }: SlideShowProps) {
   }
 
   return (
-    <div className="relative w-full h-full group">
+    <div className="relative w-full aspect-video group">
       <div
         style={{ backgroundImage: `url(${images[currentIndex]})` }}
-        className="w-full h-full bg-center bg-cover duration-500"
+        className="w-full h-full bg-center bg-cover duration-500 rounded-lg"
       />
       
       {images.length > 1 && (
@@ -37,19 +37,19 @@ export function SlideShow({ images }: SlideShowProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="hidden group-hover:flex absolute top-1/2 -translate-y-1/2 left-2 bg-black/20 hover:bg-black/40 text-white"
+            className="absolute top-1/2 -translate-y-1/2 left-4 h-12 w-12 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20 hover:bg-black/40 text-white"
             onClick={goToPrevious}
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-8 w-8" />
           </Button>
 
           <Button
             variant="ghost"
             size="icon"
-            className="hidden group-hover:flex absolute top-1/2 -translate-y-1/2 right-2 bg-black/20 hover:bg-black/40 text-white"
+            className="absolute top-1/2 -translate-y-1/2 right-4 h-12 w-12 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20 hover:bg-black/40 text-white"
             onClick={goToNext}
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-8 w-8" />
           </Button>
 
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">

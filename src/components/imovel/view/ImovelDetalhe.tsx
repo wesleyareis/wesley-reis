@@ -19,6 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ImovelLocalizacao from "./ImovelLocalizacao";
 import { useEffect, useState } from "react";
 import { Footer } from "@/components/Footer";
+import { SlideShow } from "./ImovelSlideshow";
 
 const ImovelDetalhe = () => {
   const { id } = useParams();
@@ -162,13 +163,7 @@ const ImovelDetalhe = () => {
 
       <main className="max-w-7xl mx-auto px-4 py-8 flex-grow">
         {imovel.images && imovel.images.length > 0 && (
-          <div className="aspect-video w-full mb-8 rounded-lg overflow-hidden">
-            <img
-              src={imovel.images[0]}
-              alt={imovel.title}
-              className="w-full h-full object-cover"
-            />
-          </div>
+          <SlideShow images={imovel.images} />
         )}
 
         <div className="grid md:grid-cols-3 gap-8">
