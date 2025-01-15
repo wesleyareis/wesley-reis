@@ -27,7 +27,7 @@ const ImovelEdit = () => {
           .from('properties')
           .select('*')
           .eq('property_code', id)
-          .single();
+          .maybeSingle();
 
         if (error) throw error;
         return data;
@@ -37,6 +37,7 @@ const ImovelEdit = () => {
         return null;
       }
     },
+    enabled: !!id, // Só executa a query se houver um ID
   });
 
   const {
@@ -61,7 +62,8 @@ const ImovelEdit = () => {
     features: {},
   });
 
-  if (isLoadingImovel) {
+  // Só mostra loading se estivermos editando um imóvel existente
+  if (id && isLoadingImovel) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
