@@ -6,7 +6,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogIn, LogOut, Plus } from "lucide-react";
 import { Footer } from "@/components/Footer";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import type { PropertyData } from "@/types/imovel";
 import { useEffect, useState } from "react";
 
@@ -61,14 +61,22 @@ const Index = () => {
 
         if (error) {
           console.error("Erro ao buscar propriedades:", error);
-          toast.error("Erro ao carregar imóveis");
+          toast({
+            variant: "destructive",
+            title: "Erro",
+            description: "Erro ao carregar imóveis"
+          });
           return [];
         }
 
         return data as PropertyData[];
       } catch (error) {
         console.error("Erro inesperado:", error);
-        toast.error("Erro ao carregar imóveis");
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: "Erro ao carregar imóveis"
+        });
         return [];
       }
     },
