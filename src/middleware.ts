@@ -18,8 +18,14 @@ export const useAuthMiddleware = () => {
           handleError(error);
           return;
         }
+
+        // Se estiver na página de login e já tiver sessão, redireciona para home
+        if (session && location.pathname === '/login') {
+          navigate('/', { replace: true });
+          return;
+        }
         
-        // Não redireciona se já estiver na página de login
+        // Se não tiver sessão e não estiver na página de login, redireciona para login
         if (!session && location.pathname !== '/login') {
           navigate('/login', { 
             replace: true,
@@ -62,7 +68,10 @@ export const useAuthMiddleware = () => {
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_OUT' && location.pathname !== '/login') {
+      if (event === 'SIGNED_IN') {
+        toast.success("Login realizado com sucesso");
+        navigate('/', { replace: true });
+      } else if (event === 'SIGNED_OUT' && location.pathname !== '/login') {
         toast.success("Logout realizado com sucesso");
         navigate('/login', { replace: true });
       }
