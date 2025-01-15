@@ -13,24 +13,13 @@ const Login = () => {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN') {
+        toast({
+          title: "Sucesso",
+          description: "Login realizado com sucesso",
+        });
         navigate('/');
       } else if (event === 'SIGNED_OUT') {
         navigate('/login');
-      } else if (event === 'PASSWORD_RECOVERY') {
-        toast({
-          title: "Recuperação de senha",
-          description: "Verifique seu email para redefinir sua senha"
-        });
-      } else if (event === 'USER_UPDATED') {
-        const { error } = await supabase.auth.getSession();
-        if (error) {
-          const errorMessage = getAuthErrorMessage(error);
-          toast({
-            variant: "destructive",
-            title: "Erro de autenticação",
-            description: errorMessage
-          });
-        }
       }
     });
 
@@ -38,11 +27,10 @@ const Login = () => {
     const checkSession = async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
       if (error) {
-        const errorMessage = getAuthErrorMessage(error);
         toast({
           variant: "destructive",
-          title: "Erro de autenticação",
-          description: errorMessage
+          title: "Erro",
+          description: getAuthErrorMessage(error),
         });
       } else if (session) {
         navigate('/');
@@ -56,7 +44,7 @@ const Login = () => {
   const getAuthErrorMessage = (error: AuthError): string => {
     switch (error.message) {
       case 'Invalid login credentials':
-        return 'Email ou senha inválidos';
+        return 'Usuário ou senha inválida!';
       case 'Email not confirmed':
         return 'Por favor, confirme seu email antes de fazer login';
       case 'User not found':

@@ -14,6 +14,7 @@ const Index = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [session, setSession] = useState(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
@@ -76,9 +77,16 @@ const Index = () => {
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
-      toast.error("Erro ao fazer logout");
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro ao fazer logout"
+      });
     } else {
-      toast.success("Logout realizado com sucesso");
+      toast({
+        title: "Sucesso",
+        description: "Logout realizado com sucesso"
+      });
       navigate('/');
     }
   };
