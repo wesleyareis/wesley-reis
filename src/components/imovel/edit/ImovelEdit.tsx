@@ -19,7 +19,9 @@ const propertyTypes = [
   { value: 'cobertura', label: 'Cobertura' },
   { value: 'terreno', label: 'Terreno' },
   { value: 'sala', label: 'Sala Comercial' }
-];
+] as const;
+
+type PropertyType = typeof propertyTypes[number]['value'];
 
 const ImovelEdit = () => {
   const { id } = useParams();
@@ -60,7 +62,7 @@ const ImovelEdit = () => {
     title: "",
     price: 0,
     description: "",
-    property_type: "apartamento", // Valor padrão
+    property_type: "apartamento" as PropertyType,
     bedrooms: 0,
     bathrooms: 0,
     parking_spaces: 0,
@@ -128,11 +130,11 @@ const ImovelEdit = () => {
                   <Select
                     name="property_type"
                     value={formData.property_type}
-                    onValueChange={(value) => 
+                    onValueChange={(value: PropertyType) => {
                       handleInputChange({
                         target: { name: 'property_type', value }
-                      } as React.ChangeEvent<HTMLSelectElement>)
-                    }
+                      } as any)
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione o tipo do imóvel" />
