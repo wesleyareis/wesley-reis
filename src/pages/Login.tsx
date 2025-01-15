@@ -4,7 +4,6 @@ import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "sonner";
-import { AuthError } from '@supabase/supabase-js';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -17,11 +16,12 @@ const Login = () => {
       } else if (event === 'SIGNED_OUT') {
         navigate('/login');
       } else if (event === 'USER_UPDATED') {
-        // Atualização do usuário
         if (session) navigate('/');
       } else if (event === 'PASSWORD_RECOVERY') {
-        // Recuperação de senha
         navigate('/reset-password');
+      } else if (event === 'USER_DELETED') {
+        toast.error("Usuário ou senha inválida!");
+        navigate('/login');
       }
     });
 
@@ -73,10 +73,6 @@ const Login = () => {
             }}
             providers={[]}
             redirectTo={window.location.origin}
-            onError={(error) => {
-              console.error('Erro de autenticação:', error);
-              toast.error("Usuário ou senha inválida!");
-            }}
           />
         </div>
       </div>
