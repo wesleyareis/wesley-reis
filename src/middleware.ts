@@ -20,7 +20,6 @@ export const useAuthMiddleware = () => {
         }
         
         if (!session && location.pathname !== '/login') {
-          toast.error("Você precisa estar logado para acessar esta página");
           navigate('/login', { 
             replace: true,
             state: { from: location.pathname }
