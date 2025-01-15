@@ -28,6 +28,7 @@ export const useAuthMiddleware = () => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT') {
+        toast.success("Logout realizado com sucesso");
         navigate('/login', { replace: true });
       }
     });

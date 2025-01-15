@@ -3,20 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from "sonner";
 import { AuthError } from '@supabase/supabase-js';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN') {
-        toast({
-          title: "Sucesso",
-          description: "Login realizado com sucesso",
-        });
+        toast.success("Login realizado com sucesso");
         navigate('/');
       } else if (event === 'SIGNED_OUT') {
         navigate('/login');
@@ -27,11 +23,7 @@ const Login = () => {
     const checkSession = async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
       if (error) {
-        toast({
-          variant: "destructive",
-          title: "Erro",
-          description: getAuthErrorMessage(error),
-        });
+        toast.error(getAuthErrorMessage(error));
       } else if (session) {
         navigate('/');
       }
@@ -39,7 +31,7 @@ const Login = () => {
 
     checkSession();
     return () => subscription.unsubscribe();
-  }, [navigate, toast]);
+  }, [navigate]);
 
   const getAuthErrorMessage = (error: AuthError): string => {
     switch (error.message) {
