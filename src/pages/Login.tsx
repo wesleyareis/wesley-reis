@@ -4,6 +4,7 @@ import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "sonner";
+import { AuthError, AuthApiError } from '@supabase/supabase-js';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -13,10 +14,6 @@ const Login = () => {
       if (event === 'SIGNED_IN') {
         toast.success("Login realizado com sucesso");
         navigate('/');
-      } else if (event === 'SIGNED_OUT') {
-        navigate('/login');
-      } else if (event === 'USER_UPDATED') {
-        if (session) navigate('/');
       } else if (event === 'PASSWORD_RECOVERY') {
         navigate('/reset-password');
       }
@@ -27,14 +24,21 @@ const Login = () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) {
-          console.error('Erro ao verificar sessão:', error);
-          toast.error("Usuário ou senha inválida!");
+          handleAuthError(error);
         } else if (session) {
           navigate('/');
         }
       } catch (error) {
-        console.error('Erro ao verificar sessão:', error);
+        handleAuthError(error);
+      }
+    };
+
+    const handleAuthError = (error: AuthError) => {
+      if (error instanceof AuthApiError && error.status === 400) {
         toast.error("Usuário ou senha inválida!");
+      } else {
+        toast.error("Erro ao verificar autenticação");
+        console.error('Erro de autenticação:', error);
       }
     };
 
