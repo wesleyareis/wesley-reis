@@ -15,12 +15,8 @@ const Login = () => {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
-          if (error.message === "Failed to fetch") {
-            toast.error("Erro de conexão. Verifique sua internet e tente novamente.");
-            console.error("Erro de conexão:", error);
-          } else {
-            handleError(error);
-          }
+          console.error("Erro ao verificar sessão:", error);
+          handleError(error);
           return;
         }
 

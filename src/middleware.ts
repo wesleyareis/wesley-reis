@@ -14,15 +14,8 @@ export const useAuthMiddleware = () => {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
-          if (error instanceof AuthApiError) {
-            handleAuthError(error);
-          } else if (error.message === "Failed to fetch") {
-            toast.error("Erro de conexão. Verifique sua internet e tente novamente.");
-            console.error("Erro de conexão:", error);
-          } else {
-            toast.error("Erro ao verificar autenticação");
-            console.error("Erro desconhecido:", error);
-          }
+          console.error("Erro ao verificar sessão:", error);
+          handleError(error);
           return;
         }
         
@@ -39,34 +32,33 @@ export const useAuthMiddleware = () => {
       }
     };
 
-    const handleAuthError = (error: AuthApiError) => {
-      switch (error.status) {
-        case 400:
-          toast.error("Credenciais inválidas");
-          break;
-        case 401:
-          toast.error("Não autorizado");
-          break;
-        case 422:
-          toast.error("Dados inválidos");
-          break;
-        case 429:
-          toast.error("Muitas tentativas. Tente novamente mais tarde.");
-          break;
-        default:
-          toast.error("Erro ao fazer login");
-      }
-    };
-
     const handleError = (error: any) => {
       if (error instanceof AuthApiError) {
-        handleAuthError(error);
+        switch (error.status) {
+          case 400:
+            if (error.message.includes('Invalid login credentials')) {
+              toast.error("Email ou senha incorretos");
+            } else {
+              toast.error("Erro de autenticação: dados inválidos");
+            }
+            break;
+          case 422:
+            toast.error("Email ou senha não fornecidos");
+            break;
+          case 429:
+            toast.error("Muitas tentativas. Tente novamente mais tarde.");
+            break;
+          case 401:
+            toast.error("Não autorizado");
+            break;
+          default:
+            toast.error("Erro ao fazer login");
+        }
       } else if (error.message === "Failed to fetch") {
         toast.error("Erro de conexão. Verifique sua internet e tente novamente.");
       } else {
         toast.error("Erro ao verificar autenticação");
       }
-      navigate('/login', { replace: true });
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
