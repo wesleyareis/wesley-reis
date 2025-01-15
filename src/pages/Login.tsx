@@ -3,19 +3,29 @@ import { useNavigate } from 'react-router-dom';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN') {
         navigate('/');
-      } else if (event === 'USER_DELETED' || event === 'SIGNED_OUT') {
+      } else if (event === 'SIGNED_OUT') {
         navigate('/login');
       } else if (event === 'PASSWORD_RECOVERY') {
-        toast.info('Verifique seu email para redefinir sua senha');
+        toast({
+          title: "Recuperação de senha",
+          description: "Verifique seu email para redefinir sua senha"
+        });
+      } else if (event === 'USER_UPDATED' && !session) {
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: "Email ou senha inválidos"
+        });
       }
     });
 
@@ -29,7 +39,7 @@ const Login = () => {
 
     checkSession();
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, toast]);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -59,16 +69,6 @@ const Login = () => {
             }}
             providers={[]}
             redirectTo={window.location.origin}
-            onError={(error) => {
-              console.error('Erro de autenticação:', error);
-              if (error.message.includes('Email not confirmed')) {
-                toast.error('Por favor, confirme seu email antes de fazer login');
-              } else if (error.message.includes('Invalid login credentials')) {
-                toast.error('Email ou senha inválidos');
-              } else {
-                toast.error('Erro ao fazer login. Tente novamente.');
-              }
-            }}
           />
         </div>
       </div>
