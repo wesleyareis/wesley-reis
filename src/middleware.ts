@@ -19,6 +19,7 @@ export const useAuthMiddleware = () => {
           return;
         }
         
+        // Não redireciona se já estiver na página de login
         if (!session && location.pathname !== '/login') {
           navigate('/login', { 
             replace: true,
