@@ -16,35 +16,34 @@ const Login = () => {
         navigate('/');
       } else if (event === 'SIGNED_OUT') {
         navigate('/login');
+      } else if (event === 'USER_UPDATED') {
+        // Atualização do usuário
+        if (session) navigate('/');
+      } else if (event === 'PASSWORD_RECOVERY') {
+        // Recuperação de senha
+        navigate('/reset-password');
       }
     });
 
     // Verificar se já existe uma sessão ativa
     const checkSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) {
-        toast.error(getAuthErrorMessage(error));
-      } else if (session) {
-        navigate('/');
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Erro ao verificar sessão:', error);
+          toast.error("Usuário ou senha inválida!");
+        } else if (session) {
+          navigate('/');
+        }
+      } catch (error) {
+        console.error('Erro ao verificar sessão:', error);
+        toast.error("Usuário ou senha inválida!");
       }
     };
 
     checkSession();
     return () => subscription.unsubscribe();
   }, [navigate]);
-
-  const getAuthErrorMessage = (error: AuthError): string => {
-    switch (error.message) {
-      case 'Invalid login credentials':
-        return 'Usuário ou senha inválida!';
-      case 'Email not confirmed':
-        return 'Por favor, confirme seu email antes de fazer login';
-      case 'User not found':
-        return 'Usuário não encontrado';
-      default:
-        return 'Ocorreu um erro durante a autenticação';
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -74,6 +73,10 @@ const Login = () => {
             }}
             providers={[]}
             redirectTo={window.location.origin}
+            onError={(error) => {
+              console.error('Erro de autenticação:', error);
+              toast.error("Usuário ou senha inválida!");
+            }}
           />
         </div>
       </div>
