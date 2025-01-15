@@ -36,8 +36,15 @@ const Login = () => {
 
     // Verificar se já existe uma sessão ativa
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) {
+        const errorMessage = getAuthErrorMessage(error);
+        toast({
+          variant: "destructive",
+          title: "Erro de autenticação",
+          description: errorMessage
+        });
+      } else if (session) {
         navigate('/');
       }
     };
