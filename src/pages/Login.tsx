@@ -19,9 +19,6 @@ const Login = () => {
         if (session) navigate('/');
       } else if (event === 'PASSWORD_RECOVERY') {
         navigate('/reset-password');
-      } else if (event === 'USER_DELETED') {
-        toast.error("Usuário ou senha inválida!");
-        navigate('/login');
       }
     });
 
