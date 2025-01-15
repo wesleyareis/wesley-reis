@@ -138,4 +138,4 @@ export const usePropertyForm = (initialData: Partial<PropertyData>) => {
     generateDescription,
     handleSubmit,
   };
-}; 
+};
