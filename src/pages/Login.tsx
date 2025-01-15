@@ -35,7 +35,12 @@ const Login = () => {
     };
 
     const handleError = (error: any) => {
-      console.error('Detalhes do erro de autenticação:', error);
+      console.error('Detalhes do erro de autenticação:', {
+        message: error.message,
+        code: error.code,
+        status: error.status,
+        details: error
+      });
       
       if (error instanceof AuthApiError) {
         switch (error.status) {
@@ -65,7 +70,10 @@ const Login = () => {
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Evento de autenticação:", event);
+      console.log("Evento de autenticação:", event, {
+        hasSession: !!session,
+        timestamp: new Date().toISOString()
+      });
       
       if (event === 'SIGNED_IN') {
         console.log("Login bem-sucedido, redirecionando...");

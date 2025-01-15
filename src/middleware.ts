@@ -21,6 +21,7 @@ export const useAuthMiddleware = () => {
         }
 
         console.log("Status da sessão:", session ? "Autenticado" : "Não autenticado");
+        console.log("Localização atual:", location.pathname);
 
         // Se estiver na página de login e já tiver sessão, redireciona para home
         if (session && location.pathname === '/login') {
@@ -44,13 +45,20 @@ export const useAuthMiddleware = () => {
     };
 
     const handleError = (error: any) => {
-      console.error("Detalhes do erro:", error);
+      console.error("Detalhes completos do erro:", {
+        message: error.message,
+        code: error.code,
+        status: error.status,
+        details: error
+      });
       
       if (error instanceof AuthApiError) {
         switch (error.status) {
           case 400:
             if (error.message.includes('Invalid login credentials')) {
               toast.error("Email ou senha incorretos. Por favor, verifique suas credenciais.");
+            } else if (error.message.includes('Email not confirmed')) {
+              toast.error("Por favor, confirme seu email antes de fazer login.");
             } else {
               toast.error("Erro de autenticação: dados inválidos");
             }
@@ -75,12 +83,17 @@ export const useAuthMiddleware = () => {
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Mudança no estado de autenticação:", event);
+      console.log("Mudança no estado de autenticação:", event, {
+        hasSession: !!session,
+        currentPath: location.pathname
+      });
       
       if (event === 'SIGNED_IN') {
+        console.log("Login bem-sucedido, redirecionando para home");
         toast.success("Login realizado com sucesso!");
         navigate('/', { replace: true });
       } else if (event === 'SIGNED_OUT' && location.pathname !== '/login') {
+        console.log("Logout detectado, redirecionando para login");
         toast.success("Logout realizado com sucesso!");
         navigate('/login', { replace: true });
       }
