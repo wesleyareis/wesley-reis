@@ -104,7 +104,29 @@ const Index = () => {
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <Link to="/" className="text-2xl font-black tracking-tight text-primary hover:text-primary/90 transition-colors">
-            {session ? "Dashboard" : "WesleyReis"}
+            {session ? "Dashboard" : (
+              <svg viewBox="0 0 800 120" xmlns="http://www.w3.org/2000/svg" className="h-8">
+                <defs>
+                  <linearGradient id="instagram-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style={{stopColor:"#833AB4"}}/>
+                    <stop offset="50%" style={{stopColor:"#FD1D1D"}}/>
+                    <stop offset="100%" style={{stopColor:"#FCB045"}}/>
+                  </linearGradient>
+                  <linearGradient id="inner-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style={{stopColor:"#833AB4"}}/>
+                    <stop offset="50%" style={{stopColor:"#FD1D1D"}}/>
+                    <stop offset="100%" style={{stopColor:"#FCB045"}}/>
+                  </linearGradient>
+                </defs>
+                <g transform="translate(20, 10)">
+                  <rect x="0" y="0" width="80" height="80" rx="20" fill="url(#instagram-gradient)"/>
+                  <circle cx="40" cy="40" r="19" fill="none" stroke="white" strokeWidth="6"/>
+                  <circle cx="61" cy="19" r="5" fill="white"/>
+                </g>
+                <text x="120" y="65" fontFamily="Eczar" fontWeight="600" fontSize="42" fill="#1a1a1a">WESLEY</text>
+                <text x="305" y="65" fontFamily="Eczar" fontWeight="600" fontSize="54" fill="#1a1a1a">REIS</text>
+              </svg>
+            )}
           </Link>
           <nav className="flex gap-4 items-center">
             {session ? (
