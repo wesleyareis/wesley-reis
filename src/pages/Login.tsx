@@ -20,12 +20,14 @@ const Login = () => {
           title: "Recuperação de senha",
           description: "Verifique seu email para redefinir sua senha"
         });
-      } else if (event === 'USER_UPDATED' && !session) {
-        toast({
-          variant: "destructive",
-          title: "Erro",
-          description: "Email ou senha inválidos"
-        });
+      } else if (event === 'USER_UPDATED') {
+        if (!session) {
+          toast({
+            variant: "destructive",
+            title: "Erro",
+            description: "Email ou senha inválidos"
+          });
+        }
       }
     });
 
