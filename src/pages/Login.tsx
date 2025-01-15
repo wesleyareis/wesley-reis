@@ -5,7 +5,6 @@ import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "sonner";
 import { AuthError, AuthApiError } from '@supabase/supabase-js';
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Login = () => {
   const navigate = useNavigate();
