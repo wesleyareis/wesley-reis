@@ -13,6 +13,7 @@ const Login = () => {
   useEffect(() => {
     const checkSession = async () => {
       try {
+        console.log("Verificando sessão existente...");
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -22,6 +23,7 @@ const Login = () => {
         }
 
         if (session) {
+          console.log("Sessão encontrada, redirecionando...");
           navigate('/', { replace: true });
         }
       } catch (error) {
@@ -31,41 +33,41 @@ const Login = () => {
     };
 
     const handleError = (error: any) => {
-      console.error('Erro de autenticação:', error);
+      console.error('Detalhes do erro de autenticação:', error);
       
       if (error instanceof AuthApiError) {
         switch (error.status) {
           case 400:
-            if (error.message.includes('Invalid login credentials')) {
-              toast.error("Email ou senha incorretos");
+            if (error.message.includes('Email not confirmed')) {
+              toast.error("Por favor, confirme seu email antes de fazer login");
+            } else if (error.message.includes('Invalid login credentials')) {
+              toast.error("Email ou senha incorretos. Verifique suas credenciais.");
             } else {
-              toast.error("Erro de autenticação: dados inválidos");
+              toast.error(`Erro de autenticação: ${error.message}`);
             }
             break;
           case 422:
-            toast.error("Email ou senha não fornecidos");
+            toast.error("Por favor, preencha todos os campos corretamente");
             break;
           case 429:
-            toast.error("Muitas tentativas. Tente novamente mais tarde.");
-            break;
-          case 401:
-            toast.error("Não autorizado");
+            toast.error("Muitas tentativas. Aguarde alguns minutos e tente novamente.");
             break;
           default:
-            toast.error("Erro ao tentar fazer login");
+            toast.error(`Erro ao tentar fazer login: ${error.message}`);
         }
       } else if (error.message === "Failed to fetch") {
         toast.error("Erro de conexão. Verifique sua internet e tente novamente.");
       } else {
-        toast.error("Erro ao verificar autenticação");
+        toast.error(`Erro inesperado: ${error.message}`);
       }
     };
 
-    checkSession();
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Evento de autenticação:", event);
+      
       if (event === 'SIGNED_IN') {
-        toast.success("Login realizado com sucesso");
+        console.log("Login bem-sucedido, redirecionando...");
+        toast.success("Login realizado com sucesso!");
         navigate('/');
       } else if (event === 'PASSWORD_RECOVERY') {
         navigate('/reset-password');
@@ -78,6 +80,8 @@ const Login = () => {
         }
       }
     });
+
+    checkSession();
 
     return () => subscription.unsubscribe();
   }, [navigate]);
