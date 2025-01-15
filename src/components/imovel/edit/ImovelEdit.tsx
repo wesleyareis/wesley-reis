@@ -27,7 +27,6 @@ const ImovelEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   
-  // Verifica se o usuário está autenticado
   useAuthCheck(true);
 
   const { data: imovel, isLoading: isLoadingImovel } = useQuery<PropertyData>({
@@ -71,9 +70,10 @@ const ImovelEdit = () => {
     neighborhood: "",
     street_address: "",
     features: {},
+    condominium_fee: 0,
+    property_tax: 0,
   });
 
-  // Só mostra loading se estivermos editando um imóvel existente
   if (id && isLoadingImovel) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -122,6 +122,28 @@ const ImovelEdit = () => {
                     value={formData.price}
                     onChange={handleInputChange}
                     required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Taxa de Condomínio</label>
+                  <Input
+                    type="number"
+                    name="condominium_fee"
+                    value={formData.condominium_fee}
+                    onChange={handleInputChange}
+                    placeholder="Valor mensal do condomínio"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">IPTU</label>
+                  <Input
+                    type="number"
+                    name="property_tax"
+                    value={formData.property_tax}
+                    onChange={handleInputChange}
+                    placeholder="Valor mensal do IPTU"
                   />
                 </div>
 
