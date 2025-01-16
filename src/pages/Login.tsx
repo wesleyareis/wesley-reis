@@ -1,99 +1,87 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Auth } from '@supabase/auth-ui-react';
-import { ThemeSupa } from '@supabase/auth-ui-shared';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { AuthError, AuthApiError } from '@supabase/supabase-js';
 
-const Login = () => {
+export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const checkSession = async () => {
       try {
-        console.log("Verificando sessão existente...");
         const { data: { session }, error } = await supabase.auth.getSession();
         
-        if (error) {
-          console.error("Erro ao verificar sessão:", error);
-          handleError(error);
-          return;
-        }
+        if (error) throw error;
 
         if (session) {
-          console.log("Sessão encontrada, redirecionando...");
-          navigate('/', { replace: true });
-        } else {
-          console.log("Nenhuma sessão encontrada, mostrando tela de login");
+          const { data: agentProfile, error: profileError } = await supabase
+            .from('agent_profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+          if (profileError || !agentProfile) {
+            await supabase.auth.signOut();
+            throw new Error('Acesso não autorizado. Entre em contato com o administrador.');
+          }
+
+          navigate('/');
+          toast.success("Login realizado com sucesso");
         }
-      } catch (error) {
-        console.error('Erro ao verificar sessão:', error);
-        handleError(error);
+      } catch (error: any) {
+        toast.error(error.message);
       }
     };
-
-    const handleError = (error: any) => {
-      console.error('Detalhes do erro de autenticação:', {
-        message: error.message,
-        code: error.code,
-        status: error.status,
-        details: error
-      });
-      
-      if (error instanceof AuthApiError) {
-        switch (error.status) {
-          case 400:
-            if (error.message.includes('Email not confirmed')) {
-              toast.error("Por favor, confirme seu email antes de fazer login");
-            } else if (error.message.includes('Invalid login credentials')) {
-              toast.error("Email ou senha incorretos. Verifique suas credenciais.");
-            } else {
-              toast.error(`Erro de autenticação: ${error.message}`);
-            }
-            break;
-          case 422:
-            toast.error("Por favor, preencha todos os campos corretamente");
-            break;
-          case 429:
-            toast.error("Muitas tentativas. Aguarde alguns minutos e tente novamente.");
-            break;
-          default:
-            toast.error(`Erro ao tentar fazer login: ${error.message}`);
-        }
-      } else if (error.message === "Failed to fetch") {
-        toast.error("Erro de conexão. Verifique sua internet e tente novamente.");
-      } else {
-        toast.error(`Erro inesperado: ${error.message}`);
-      }
-    };
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Evento de autenticação:", event, {
-        hasSession: !!session,
-        timestamp: new Date().toISOString()
-      });
-      
-      if (event === 'SIGNED_IN') {
-        console.log("Login bem-sucedido, redirecionando...");
-        toast.success("Login realizado com sucesso!");
-        navigate('/');
-      } else if (event === 'PASSWORD_RECOVERY') {
-        navigate('/reset-password');
-      } else if (event === 'USER_UPDATED') {
-        try {
-          const { error } = await supabase.auth.getSession();
-          if (error) handleError(error);
-        } catch (error) {
-          handleError(error);
-        }
-      }
-    });
 
     checkSession();
-
-    return () => subscription.unsubscribe();
   }, [navigate]);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      // 1. Autenticação básica
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (authError) throw authError;
+
+      // 2. Verificar se existe perfil de agente
+      const { data: agentProfile, error: profileError } = await supabase
+        .from('agent_profiles')
+        .select('*')
+        .eq('id', authData.user.id)
+        .single();
+
+      if (profileError || !agentProfile) {
+        // Se não tem perfil, faz logout e retorna erro
+        await supabase.auth.signOut();
+        throw new Error('Acesso não autorizado. Entre em contato com o administrador.');
+      }
+
+      // 3. Login bem sucedido
+      toast.success("Login realizado com sucesso");
+      navigate("/");
+
+    } catch (error: any) {
+      console.error('Erro no login:', error);
+      toast.error(
+        error.message === "Invalid login credentials"
+          ? "Usuário ou senha inválida!"
+          : error.message
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -103,31 +91,43 @@ const Login = () => {
           <p className="text-muted-foreground">Faça login para continuar</p>
         </div>
         <div className="bg-card p-6 rounded-lg shadow-lg">
-          <Auth
-            supabaseClient={supabase}
-            appearance={{
-              theme: ThemeSupa,
-              variables: {
-                default: {
-                  colors: {
-                    brand: 'hsl(var(--primary))',
-                    brandAccent: 'hsl(var(--primary))',
-                  },
-                },
-              },
-              className: {
-                container: 'w-full',
-                button: 'w-full',
-                input: 'rounded-md',
-              },
-            }}
-            providers={[]}
-            redirectTo={window.location.origin}
-          />
+          <form className="space-y-6" onSubmit={handleLogin}>
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium">
+                Email
+              </label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium">
+                Senha
+              </label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading}
+            >
+              {loading ? "Entrando..." : "Entrar"}
+            </Button>
+          </form>
         </div>
       </div>
     </div>
   );
-};
-
-export default Login;
+}

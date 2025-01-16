@@ -1,35 +1,22 @@
 import { createContext, useContext, ReactNode } from 'react';
-import { useLoadScript } from '@react-google-maps/api';
-import { useGoogleMapsKey } from './useGoogleMapsKey';
-import { GOOGLE_MAPS_LIBRARIES } from './config';
+import { useGoogleMapsKey } from '@/hooks/useGoogleMapsKey';
 
 interface GoogleMapsContextType {
-  isLoaded: boolean;
-  loadError: Error | undefined;
+  apiKey: string | null;
+  error: string | null;
 }
 
-const GoogleMapsContext = createContext<GoogleMapsContextType | null>(null);
+const GoogleMapsContext = createContext<GoogleMapsContextType>({ apiKey: null, error: null });
 
 interface GoogleMapsProviderProps {
   children: ReactNode;
 }
 
 export function GoogleMapsProvider({ children }: GoogleMapsProviderProps) {
-  const { apiKey, error: keyError, isLoading: keyLoading } = useGoogleMapsKey();
-  const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: apiKey || '',
-    libraries: GOOGLE_MAPS_LIBRARIES,
-  });
-
-  if (keyError) {
-    console.error('Erro ao carregar chave da API:', keyError);
-  }
+  const { key: apiKey, error } = useGoogleMapsKey();
 
   return (
-    <GoogleMapsContext.Provider value={{ 
-      isLoaded: isLoaded && !keyLoading, 
-      loadError: loadError || (keyError ? new Error(keyError) : undefined) 
-    }}>
+    <GoogleMapsContext.Provider value={{ apiKey, error }}>
       {children}
     </GoogleMapsContext.Provider>
   );
@@ -37,8 +24,8 @@ export function GoogleMapsProvider({ children }: GoogleMapsProviderProps) {
 
 export function useGoogleMaps() {
   const context = useContext(GoogleMapsContext);
-  if (!context) {
-    throw new Error('useGoogleMaps deve ser usado dentro de GoogleMapsProvider');
+  if (context === undefined) {
+    throw new Error('useGoogleMaps must be used within a GoogleMapsProvider');
   }
   return context;
 }

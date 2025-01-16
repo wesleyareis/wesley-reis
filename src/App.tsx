@@ -3,7 +3,7 @@ import { createBrowserRouter, RouterProvider, createRoutesFromElements, Route, N
 import { HelmetProvider } from 'react-helmet-async';
 import { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster as Sonner } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { GoogleMapsProvider } from "@/components/Maps/GoogleMapsProvider";
 import Index from "@/pages/Index";
@@ -42,9 +42,21 @@ const App = () => {
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <GoogleMapsProvider>
-            <RouterProvider router={router} />
+            <RouterProvider 
+              router={router}
+              future={{
+                v7_startTransition: true,
+                v7_relativeSplatPath: true
+              }}
+            />
             <Toaster />
-            <Sonner position="top-right" />
+            <Sonner 
+              position="bottom-right"
+              closeButton
+              richColors
+              expand
+              theme="light"
+            />
           </GoogleMapsProvider>
         </TooltipProvider>
       </QueryClientProvider>

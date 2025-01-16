@@ -101,67 +101,73 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link to="/" className="text-2xl font-black tracking-tight text-primary hover:text-primary/90 transition-colors">
-            {session ? "Dashboard" : (
-              <svg viewBox="0 0 800 120" xmlns="http://www.w3.org/2000/svg" className="h-16 w-auto"> {/* Mudei de h-12 para h-16 */}
-                <defs>
-                  <linearGradient id="instagram-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style={{stopColor:"#833AB4"}}/>
-                    <stop offset="50%" style={{stopColor:"#FD1D1D"}}/>
-                    <stop offset="100%" style={{stopColor:"#FCB045"}}/>
-                  </linearGradient>
-                  <linearGradient id="inner-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style={{stopColor:"#833AB4"}}/>
-                    <stop offset="50%" style={{stopColor:"#FD1D1D"}}/>
-                    <stop offset="100%" style={{stopColor:"#FCB045"}}/>
-                  </linearGradient>
-                </defs>
-                <g transform="translate(20, 10)">
-                  <rect x="0" y="0" width="80" height="80" rx="20" fill="url(#instagram-gradient)"/>
-                  <circle cx="40" cy="40" r="19" fill="none" stroke="white" strokeWidth="6"/>
-                  <circle cx="61" cy="19" r="5" fill="white"/>
-                </g>
-                <text x="120" y="65" fontFamily="Eczar" fontWeight="600" fontSize="42" fill="#1a1a1a">WESLEY</text>
-                <text x="305" y="65" fontFamily="Eczar" fontWeight="600" fontSize="54" fill="#1a1a1a">REIS</text>
-              </svg>
-            )}
-          </Link>
-          <nav className="flex gap-4 items-center">
-            {session ? (
-              <div className="flex flex-col md:flex-row items-center gap-4">
-                <Button
-                  onClick={() => navigate('/imovel/novo')}
-                  className="flex items-center gap-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  Novo Imóvel
-                </Button>
+      <header className="bg-white shadow-sm w-full">
+        <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 py-2 sm:py-4">
+          <div className="flex items-center justify-between">
+            <Link to="/" className="text-2xl font-black tracking-tight text-primary hover:text-primary/90 transition-colors">
+              {session ? (
+                "Dashboard"
+              ) : (
+                <svg viewBox="0 0 800 120" xmlns="http://www.w3.org/2000/svg" className="h-16 w-auto">
+                  <defs>
+                    <linearGradient id="instagram-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style={{stopColor:"#833AB4"}}/>
+                      <stop offset="50%" style={{stopColor:"#FD1D1D"}}/>
+                      <stop offset="100%" style={{stopColor:"#FCB045"}}/>
+                    </linearGradient>
+                    <linearGradient id="inner-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style={{stopColor:"#833AB4"}}/>
+                      <stop offset="50%" style={{stopColor:"#FD1D1D"}}/>
+                      <stop offset="100%" style={{stopColor:"#FCB045"}}/>
+                    </linearGradient>
+                  </defs>
+                  <g transform="translate(20, 10)">
+                    <rect x="0" y="0" width="80" height="80" rx="20" fill="url(#instagram-gradient)"/>
+                    <circle cx="40" cy="40" r="19" fill="none" stroke="white" strokeWidth="6"/>
+                    <circle cx="61" cy="19" r="5" fill="white"/>
+                  </g>
+                  <text x="120" y="65" fontFamily="Eczar" fontWeight="600" fontSize="42" fill="#1a1a1a">WESLEY</text>
+                  <text x="305" y="65" fontFamily="Eczar" fontWeight="600" fontSize="54" fill="#1a1a1a">REIS</text>
+                </svg>
+              )}
+            </Link>
+
+            <div className="flex items-center ml-1 sm:ml-4">
+              {session ? (
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <Button
+                    onClick={() => navigate('/imovel/novo')}
+                    className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span className="hidden sm:inline">Novo Imóvel</span>
+                    <span className="sm:hidden">Novo</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleLogout}
+                    className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span className="hidden sm:inline">Sair</span>
+                  </Button>
+                </div>
+              ) : (
                 <Button
                   variant="outline"
-                  onClick={handleLogout}
-                  className="flex items-center gap-2"
+                  onClick={() => navigate('/login')}
+                  className="flex items-center justify-center w-9 h-9 sm:w-auto sm:h-auto sm:px-4"
                 >
-                  <LogOut className="w-4 h-4" />
-                  Sair
+                  <LogIn className="w-4 h-4" />
+                  <span className="hidden sm:inline sm:ml-2">Área do Corretor</span>
                 </Button>
-              </div>
-            ) : (
-              <Button
-                variant="outline"
-                onClick={() => navigate('/login')}
-                className="flex items-center gap-2"
-              >
-                <LogIn className="w-4 h-4" />
-                Área do Corretor
-              </Button>
-            )}
-          </nav>
+              )}
+            </div>
+          </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-8 flex-grow">
+      <main className="max-w-7xl mx-auto px-2 sm:px-4 py-8 flex-grow">
         <SearchFilters />
         
         <div className="mt-12">
@@ -171,7 +177,7 @@ const Index = () => {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {properties.map((property) => (
                 <ImovelCard
                   key={property.id}

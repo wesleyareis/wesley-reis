@@ -16,7 +16,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import ImovelLocalizacao from "./ImovelLocalizacao";
+import { ImovelLocalizacao } from "./ImovelLocalizacao";
 import { useEffect, useState } from "react";
 import { Footer } from "@/components/Footer";
 import { SlideShow } from "./ImovelSlideshow";
@@ -241,7 +241,13 @@ const ImovelDetalhe = () => {
               </div>
             )}
 
-            {fullAddress && <ImovelLocalizacao address={fullAddress} />}
+            {imovel && imovel.street_address && imovel.neighborhood && imovel.city && (
+              <ImovelLocalizacao 
+                address={imovel.street_address}
+                neighborhood={imovel.neighborhood}
+                city={imovel.city}
+              />
+            )}
           </div>
 
           <div className="space-y-6">
