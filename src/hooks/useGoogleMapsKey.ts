@@ -17,25 +17,23 @@ export function useGoogleMapsKey() {
           return;
         }
 
-        // Pega a sessão atual
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.access_token) {
-          throw new Error('Não autenticado');
+        console.log('Tentando carregar a chave da API do Google Maps...');
+        
+        const { data: apiKey, error } = await supabase
+          .rpc('get_setting', { setting_key: 'GOOGLE_MAPS_API_KEY' });
+
+        console.log('Resposta do Supabase:', { apiKey, error });
+
+        if (error) {
+          throw error;
         }
 
-        // Busca a chave usando a Edge Function
-        const { data, error } = await supabase.functions.invoke('get-maps-key', {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${session.access_token}`
-          }
-        });
-
-        if (error) throw error;
-        
-        if (data?.key) {
-          sessionStorage.setItem('google_maps_key', data.key);
-          setKey(data.key);
+        if (apiKey) {
+          sessionStorage.setItem('google_maps_key', apiKey);
+          setKey(apiKey);
+          console.log('Chave da API carregada com sucesso');
+        } else {
+          throw new Error('Chave da API não encontrada');
         }
       } catch (error) {
         console.error('Erro ao buscar chave do Google Maps:', error);
