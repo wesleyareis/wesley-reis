@@ -1,63 +1,70 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGoogleMapsKey } from './useGoogleMapsKey';
+
+const SCRIPT_ID = 'google-maps-script';
 
 interface GoogleMapsState {
   isLoaded: boolean;
-  loadError: Error | null;
+  isScriptLoading: boolean;
+  loadError: string | null;
 }
 
-const SCRIPT_ID = 'google-maps-script';
-let isScriptLoading = false;
-
-export function useGoogleMaps(): GoogleMapsState {
+export function useGoogleMaps() {
+  const [isScriptLoading, setIsScriptLoading] = useState(false);
   const [state, setState] = useState<GoogleMapsState>({
-    isLoaded: !!window.google?.maps,
+    isLoaded: false,
+    isScriptLoading: false,
     loadError: null,
   });
   
-  const { key, isLoading: isKeyLoading } = useGoogleMapsKey();
+  const { key: apiKey, isLoading: isKeyLoading } = useGoogleMapsKey();
 
   useEffect(() => {
     if (window.google?.maps) {
-      setState({ isLoaded: true, loadError: null });
+      setState({ isLoaded: true, isScriptLoading: false, loadError: null });
       return;
     }
 
-    if (isKeyLoading || !key || isScriptLoading) return;
+    if (isKeyLoading || !apiKey || isScriptLoading) return;
 
-    // Remove qualquer script existente do Google Maps
+    setIsScriptLoading(true);
+
     const existingScript = document.getElementById(SCRIPT_ID);
     if (existingScript) {
       existingScript.remove();
     }
 
-    isScriptLoading = true;
     const script = document.createElement('script');
     script.id = SCRIPT_ID;
     script.type = 'text/javascript';
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places,marker`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,marker`;
     
     script.onload = () => {
       console.log('Script do Google Maps carregado com sucesso');
-      isScriptLoading = false;
-      setState({ isLoaded: true, loadError: null });
-    };
-
-    script.onerror = (error) => {
-      console.error('Erro ao carregar script do Google Maps:', error);
-      isScriptLoading = false;
-      setState({ 
-        isLoaded: false, 
-        loadError: new Error('Falha ao carregar Google Maps script') 
+      setState({
+        isLoaded: true,
+        isScriptLoading: false,
+        loadError: null,
       });
+      setIsScriptLoading(false);
     };
 
-    document.head.appendChild(script);
+    script.onerror = () => {
+      console.error('Erro ao carregar o script do Google Maps');
+      setState({
+        isLoaded: false,
+        isScriptLoading: false,
+        loadError: 'Erro ao carregar o Google Maps',
+      });
+      setIsScriptLoading(false);
+    };
+
+    document.body.appendChild(script);
 
     return () => {
       // Não remove o script no cleanup para evitar problemas de carregamento
     };
-  }, [key, isKeyLoading]);
+  }, [apiKey, isKeyLoading]);
 
   return state;
 }

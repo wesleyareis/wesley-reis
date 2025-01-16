@@ -1,4 +1,4 @@
-import { createContext, useContext, ReactNode } from 'react';
+import { createContext, ReactNode, useContext } from 'react';
 import { useGoogleMapsKey } from '@/hooks/useGoogleMapsKey';
 
 interface GoogleMapsContextType {
@@ -22,10 +22,10 @@ export function GoogleMapsProvider({ children }: GoogleMapsProviderProps) {
   );
 }
 
-export function useGoogleMaps() {
+export function useGoogleMapsContext() {
   const context = useContext(GoogleMapsContext);
-  if (context === undefined) {
-    throw new Error('useGoogleMaps must be used within a GoogleMapsProvider');
+  if (!context) {
+    throw new Error('useGoogleMapsContext must be used within a GoogleMapsProvider');
   }
   return context;
 }
