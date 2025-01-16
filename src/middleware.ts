@@ -17,6 +17,8 @@ export const useAuthMiddleware = () => {
         if (error) {
           console.error("Erro ao verificar sessão:", error);
           handleError(error);
+          // Limpa a sessão local em caso de erro
+          await supabase.auth.signOut();
           return;
         }
 
@@ -59,6 +61,9 @@ export const useAuthMiddleware = () => {
               toast.error("Email ou senha incorretos. Por favor, verifique suas credenciais.");
             } else if (error.message.includes('Email not confirmed')) {
               toast.error("Por favor, confirme seu email antes de fazer login.");
+            } else if (error.message.includes('refresh_token_not_found')) {
+              toast.error("Sessão expirada. Por favor, faça login novamente.");
+              supabase.auth.signOut();
             } else {
               toast.error("Erro de autenticação: dados inválidos");
             }
@@ -70,7 +75,9 @@ export const useAuthMiddleware = () => {
             toast.error("Muitas tentativas. Por favor, aguarde alguns minutos e tente novamente.");
             break;
           case 401:
+          case 403:
             toast.error("Sessão expirada. Por favor, faça login novamente.");
+            supabase.auth.signOut();
             break;
           default:
             toast.error(`Erro ao fazer login: ${error.message}`);
@@ -82,6 +89,7 @@ export const useAuthMiddleware = () => {
       }
     };
 
+    // Configura o listener de mudança de estado de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("Mudança no estado de autenticação:", event, {
         hasSession: !!session,
@@ -92,15 +100,21 @@ export const useAuthMiddleware = () => {
         console.log("Login bem-sucedido, redirecionando para home");
         toast.success("Login realizado com sucesso!");
         navigate('/', { replace: true });
-      } else if (event === 'SIGNED_OUT' && location.pathname !== '/login') {
+      } else if (event === 'SIGNED_OUT') {
         console.log("Logout detectado, redirecionando para login");
         toast.success("Logout realizado com sucesso!");
         navigate('/login', { replace: true });
+      } else if (event === 'TOKEN_REFRESHED') {
+        console.log("Token atualizado com sucesso");
       }
     });
 
+    // Verifica a autenticação inicial
     checkAuth();
 
-    return () => subscription.unsubscribe();
+    // Limpa o listener quando o componente é desmontado
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [navigate, location]);
 };
