@@ -3,20 +3,20 @@ import { useGoogleMapsKey } from '@/hooks/useGoogleMapsKey';
 
 interface GoogleMapsContextType {
   apiKey: string | null;
-  error: string | null;
+  isLoading: boolean;
 }
 
-const GoogleMapsContext = createContext<GoogleMapsContextType>({ apiKey: null, error: null });
+const GoogleMapsContext = createContext<GoogleMapsContextType>({ apiKey: null, isLoading: false });
 
 interface GoogleMapsProviderProps {
   children: ReactNode;
 }
 
 export function GoogleMapsProvider({ children }: GoogleMapsProviderProps) {
-  const { key: apiKey, error } = useGoogleMapsKey();
+  const { key: apiKey, isLoading } = useGoogleMapsKey();
 
   return (
-    <GoogleMapsContext.Provider value={{ apiKey, error }}>
+    <GoogleMapsContext.Provider value={{ apiKey, isLoading }}>
       {children}
     </GoogleMapsContext.Provider>
   );

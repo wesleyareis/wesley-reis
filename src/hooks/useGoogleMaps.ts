@@ -15,7 +15,7 @@ export function useGoogleMaps(): GoogleMapsState {
     loadError: null,
   });
   
-  const { apiKey, isLoading: isKeyLoading, error: keyError } = useGoogleMapsKey();
+  const { key, isLoading: isKeyLoading } = useGoogleMapsKey();
 
   useEffect(() => {
     if (window.google?.maps) {
@@ -23,12 +23,7 @@ export function useGoogleMaps(): GoogleMapsState {
       return;
     }
 
-    if (isKeyLoading || !apiKey || isScriptLoading) return;
-
-    if (keyError) {
-      setState({ isLoaded: false, loadError: keyError });
-      return;
-    }
+    if (isKeyLoading || !key || isScriptLoading) return;
 
     // Remove qualquer script existente do Google Maps
     const existingScript = document.getElementById(SCRIPT_ID);
@@ -40,7 +35,7 @@ export function useGoogleMaps(): GoogleMapsState {
     const script = document.createElement('script');
     script.id = SCRIPT_ID;
     script.type = 'text/javascript';
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,marker`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places,marker`;
     
     script.onload = () => {
       console.log('Script do Google Maps carregado com sucesso');
@@ -62,7 +57,7 @@ export function useGoogleMaps(): GoogleMapsState {
     return () => {
       // Não remove o script no cleanup para evitar problemas de carregamento
     };
-  }, [apiKey, isKeyLoading, keyError]);
+  }, [key, isKeyLoading]);
 
   return state;
-} 
+}
